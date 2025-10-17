@@ -1,7 +1,7 @@
 #include "addressUtilsShelley.h"
 #include "addressUtilsByron.h"
 #include "settings.h"
-#include "bip44.h"
+#include "addressUtils/bip44.h"
 #include "cardano.h"
 #include "txHashBuilder.h"
 #include "transaction/tx_utils.h"
@@ -184,8 +184,6 @@ security_policy_t policyForGetExtendedPublicKey(const bip44_path_t* path) {
 
     DENY();  // should not be reached
 }
-
-/*
 
 // common policy for DENY and WARN cases in returnDeriveAddress and showDeriveAddress
 // successPolicy is returned if no DENY or WARN applies
@@ -910,6 +908,8 @@ security_policy_t policyForSignTxTtl(uint32_t ttl MARK_UNUSED) {
     SHOW_IF(is_expert_mode());
     ALLOW();
 }
+
+/*
 
 // a generic policy for all certificates
 // does not evaluate aspects of specific certificates

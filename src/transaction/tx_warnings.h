@@ -7,6 +7,7 @@
 typedef enum {
     TX_WARNING_NETWORK_UNUSUAL = 1,          // Network ID or protocol magic is unusual
     TX_WARNING_NETWORK_ID_UNVERIFIABLE = 2,  // Cannot verify network ID from tx elements
+    TX_WARNING_HIGH_FEE = 3,                 // Fee is above threshold (5 ADA)
 } tx_warning_type_t;
 
 // Warning list item with flist node

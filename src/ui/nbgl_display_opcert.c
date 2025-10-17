@@ -22,7 +22,7 @@
 #include "glyphs.h"
 #include "nbgl_use_case.h"
 #include "io.h"
-#include "bip44.h"
+#include "addressUtils/bip44.h"
 #include "format.h"
 
 #include "display.h"
@@ -136,6 +136,7 @@ int ui_display_opcert(security_policy_t securityPolicy) {
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
 
+    // TODO this needs to be dynamic, static buffers decrease mem_buffer
     // Setup data to display
     pairs[0].item = "Pool cold key path";
     pairs[0].value = poolColdKeyPathStr;

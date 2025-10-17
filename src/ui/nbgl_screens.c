@@ -1,5 +1,5 @@
 #include "nbgl_screens.h"
-#include "bech32.h"
+#include "addressUtils/bech32.h"
 #include "cardano.h"
 #include "hexUtils.h"
 #include "utils/ipUtils.h"

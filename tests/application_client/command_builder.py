@@ -1565,7 +1565,7 @@ class CommandBuilder:
         # if address type == BYRON
         #     protocol magic 4B
         # else
-        #     network id 1B
+        #     (networkId comes only from transaction init, not serialized here)
         # payment public key derivation path (1B for length + [0-10] x 4B) or script hash 28B
         # staking choice 1B
         #     if NO_STAKING:
@@ -1580,13 +1580,15 @@ class CommandBuilder:
         data += testCase.addrType.to_bytes(1, "big")
         if testCase.addrType == AddressType.BYRON:
             data += testCase.netDesc.protocol.to_bytes(4, "big")
-        else:
-            data += testCase.netDesc.networkId.to_bytes(1, "big")
+        # For Shelley addresses, networkId comes only from transaction init
 
         if not testCase.spendingValue.startswith("m/"):
+            # Script hash: fixed 28 bytes (no length prefix, it's a constant)
             data += bytes.fromhex(testCase.spendingValue)
         elif testCase.spendingValue:
-            data += pack_derivation_path(testCase.spendingValue)
+            # BIP32 path: include length byte before path
+            path_data = pack_derivation_path(testCase.spendingValue)
+            data += path_data  # pack_derivation_path already includes length byte
 
         if testCase.addrType in (AddressType.BYRON, AddressType.ENTERPRISE_KEY,
                         AddressType.ENTERPRISE_SCRIPT):
@@ -1643,7 +1645,7 @@ class CommandBuilder:
     def serialize_transaction_unpacked(self, tx, include_ttl=False, ttl=0) -> bytes:
         """Serialize transaction to unpacked binary format for handler_sign_tx.
 
-        NEW Format (after adding TTL):
+        NEW Format (after adding tokens, datums, reference scripts):
         Transaction data buffer (sent after INIT APDU):
         - For each input:
             - tx_hash (32 bytes)
@@ -1655,9 +1657,25 @@ class CommandBuilder:
                 - address_size (uint16, BE)
                 - address_bytes
             - If DEVICE_OWNED:
-                - path_length (uint8)
-                - bip32_path
+                - address_type (uint8)
+                - bip32_path or script hash
+                - staking_choice (uint8)
+                - staking_credential (if applicable)
             - ada_amount (uint64, BE)
+            - output_format (uint8): 0=ARRAY_LEGACY, 1=MAP_BABBAGE
+            - num_asset_groups (uint16, BE)
+            - For each asset group:
+                - policy_id (28 bytes)
+                - num_tokens (uint16, BE)
+                - For each token:
+                    - asset_name_len (uint8)
+                    - asset_name (variable)
+                    - amount (int64, BE, signed)
+            - datum_type (uint8): 0=NONE, 1=HASH, 2=INLINE
+            - If HASH: datum_hash (32 bytes)
+            - If INLINE: datum_size (uint16, BE) + datum_data
+            - has_ref_script (uint8): 0 or 1
+            - If has_ref_script: ref_script_size (uint16, BE) + ref_script_data
         - fee (uint64, BE)
         - ttl (uint64, BE) - only if include_ttl is True
 
@@ -1691,13 +1709,49 @@ class CommandBuilder:
                 output_data.extend(len(addr_bytes).to_bytes(2, 'big'))
                 output_data.extend(addr_bytes)
             elif tx_output.destination.type == TxOutputDestinationType.DEVICE_OWNED:
-                # Assuming params is a DeriveAddressTestCase with spendingValue as path
-                path_bytes = pack_derivation_path(tx_output.destination.params.spendingValue)
-                output_data.append(len(path_bytes) // 4)  # path length in components
-                output_data.extend(path_bytes)
+                # Use _serializeAddressParams to properly serialize device-owned output
+                output_data.extend(self._serializeAddressParams(tx_output.destination.params))
 
             # ADA amount
             output_data.extend(tx_output.amount.to_bytes(8, 'big'))
+
+            # Output format (0=ARRAY_LEGACY, 1=MAP_BABBAGE)
+            output_data.append(tx_output.format)
+
+            # Token bundle
+            output_data.extend(len(tx_output.tokenBundle).to_bytes(2, 'big'))
+            for asset_group in tx_output.tokenBundle:
+                # Policy ID (28 bytes)
+                output_data.extend(bytes.fromhex(asset_group.policyIdHex))
+                # Number of tokens
+                output_data.extend(len(asset_group.tokens).to_bytes(2, 'big'))
+                # Each token
+                for token in asset_group.tokens:
+                    asset_name_bytes = bytes.fromhex(token.assetNameHex)
+                    output_data.append(len(asset_name_bytes))
+                    output_data.extend(asset_name_bytes)
+                    output_data.extend(token.amount.to_bytes(8, 'big', signed=True))
+
+            # Datum
+            if tx_output.datum is None:
+                output_data.append(0)  # DATUM_NONE
+            elif tx_output.datum.type == DatumType.HASH:
+                output_data.append(1)  # DATUM_HASH
+                output_data.extend(bytes.fromhex(tx_output.datum.datumHex))
+            elif tx_output.datum.type == DatumType.INLINE:
+                output_data.append(2)  # DATUM_INLINE
+                datum_bytes = bytes.fromhex(tx_output.datum.datumHex)
+                output_data.extend(len(datum_bytes).to_bytes(2, 'big'))
+                output_data.extend(datum_bytes)
+
+            # Reference script
+            if isinstance(tx_output, TxOutputBabbage) and tx_output.referenceScriptHex is not None:
+                output_data.append(1)  # hasRefScript = yes
+                ref_script_bytes = bytes.fromhex(tx_output.referenceScriptHex)
+                output_data.extend(len(ref_script_bytes).to_bytes(2, 'big'))
+                output_data.extend(ref_script_bytes)
+            else:
+                output_data.append(0)  # hasRefScript = no
 
             # Add output with length prefix
             data.extend(len(output_data).to_bytes(2, 'big'))

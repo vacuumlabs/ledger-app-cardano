@@ -58,3 +58,8 @@ enum { ITEM_INCLUDED_NO = 1, ITEM_INCLUDED_YES = 2 };
 enum {
     TX_OPTIONS_TAG_CBOR_SETS = 1,  // Whether to tag CBOR sets in transaction hash
 };
+
+/**
+ * Fee threshold for high fee warning (5 ADA = 5,000,000 lovelace).
+ */
+#define HIGH_FEE_WARNING_THRESHOLD 5000000

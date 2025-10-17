@@ -1,7 +1,7 @@
 #pragma once
 
 #include "addressUtilsShelley.h"
-#include "bip44.h"
+#include "addressUtils/bip44.h"
 #include "cardano.h"
 #include "securityPolicyType.h"
 /*

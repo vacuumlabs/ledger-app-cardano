@@ -51,7 +51,7 @@ from standalone.utils import idTestFunc, verify_signature
     poolRegistrationOwnerTestCases + poolRegistrationOperatorTestCases,
     ids=idTestFunc
 )
-def test_signTx(device: Device,
+def test_signTx_old(device: Device,
                 backend: BackendInterface,
                 navigator: Navigator,
                 scenario_navigator: NavigateWithScenario,
@@ -1197,7 +1197,7 @@ def _gatherWitnessPaths(testCase: SignTxTestCase) -> List[str]:
     stakePoolRegistrationPoolIdRejectTestCases + stakePoolRegistrationOwnerRejectTestCases + outputRejectTestCases,
     ids=idTestFunc
 )
-def test_signTx_reject(device: Device,
+def test_signTx_reject_old(device: Device,
                 backend: BackendInterface,
                 navigator: Navigator,
                 scenario_navigator: NavigateWithScenario,
@@ -1210,5 +1210,5 @@ def test_signTx_reject(device: Device,
 
     with pytest.raises(ExceptionRAPDU) as err:
         # Send the APDU
-        test_signTx(firmware, backend, navigator, scenario_navigator, testCase)
+        test_signTx_old(firmware, backend, navigator, scenario_navigator, testCase)
     assert err.value.status == testCase.expected_sw

@@ -30,3 +30,12 @@ typedef enum {
  *
  */
 parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx);
+
+/**
+ * Clean up dynamically allocated memory in transaction outputs.
+ *
+ * @param[in] tx
+ *   Pointer to transaction structure.
+ *
+ */
+void transaction_free_outputs(transaction_t *tx);

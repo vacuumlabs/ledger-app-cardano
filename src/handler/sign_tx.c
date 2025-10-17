@@ -38,8 +38,11 @@
 #include "txHashBuilder/txHashBuilder.h"
 #include "cardano.h"
 #include "messageSigning.h"
-#include "securityPolicy.h"
+#include "securityPolicy/securityPolicy.h"
 #include "dispatcher.h"
+#include "addressUtils/bip44.h"
+#include "addressUtils/addressUtilsShelley.h"
+#include "transaction/tx_utils.h"
 
 int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
     // Special chunk type for INIT APDU (contains description, not tx data)
@@ -101,6 +104,34 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
                G_context.tx_info.transaction.num_inputs,
                G_context.tx_info.transaction.num_outputs,
                G_context.tx_info.transaction.includeTtl);
+
+        // Check security policy for transaction initialization
+        security_policy_t init_policy = policyForSignTxInit(
+            G_context.tx_info.transaction.txSigningMode,
+            G_context.tx_info.transaction.networkId,
+            G_context.tx_info.transaction.protocolMagic,
+            G_context.tx_info.transaction.num_outputs,
+            0,      // numCertificates - not implemented yet
+            0,      // numWithdrawals - not implemented yet
+            false,  // includeMint - not implemented yet
+            false,  // includeScriptDataHash - not implemented yet
+            0,      // numCollateralInputs - not implemented yet
+            0,      // numRequiredSigners - not implemented yet
+            false,  // includeNetworkId - not implemented yet
+            false,  // includeCollateralOutput - not implemented yet
+            false,  // includeTotalCollateral - not implemented yet
+            0,      // numReferenceInputs - not implemented yet
+            0,      // numVotingProcedures - not implemented yet
+            false,  // includeTreasury - not implemented yet
+            false); // includeDonation - not implemented yet
+
+        TRACE("Transaction init security policy: %d", (int) init_policy);
+
+        // Handle DENY policy
+        if (init_policy == POLICY_DENY) {
+            TRACE("Security policy DENY - rejecting transaction init");
+            return io_send_sw(ERR_REJECTED_BY_POLICY);
+        }
 
         return io_send_sw(SW_OK);
 
@@ -173,13 +204,14 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
 
             G_context.state = STATE_PARSED;
 
-            // Fill in network params for DEVICE_OWNED outputs
+            // Fill in Byron protocol magic for DEVICE_OWNED outputs
+            // (Shelley networkId is already set from transaction init during deserialization)
             s_flist_node *output_node = G_context.tx_info.transaction.outputs;
             while (output_node != NULL) {
                 tx_output_list_item_t *output_item = (tx_output_list_item_t *) output_node;
-                if (output_item->output_data.destination.type == DESTINATION_DEVICE_OWNED) {
-                    output_item->output_data.destination.params.networkId =
-                        G_context.tx_info.transaction.networkId;
+                if (output_item->output_data.destination.type == DESTINATION_DEVICE_OWNED &&
+                    output_item->output_data.destination.params.type == BYRON) {
+                    // For Byron addresses, ensure protocol magic matches transaction
                     output_item->output_data.destination.params.protocolMagic =
                         G_context.tx_info.transaction.protocolMagic;
                 }
@@ -189,6 +221,16 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
             // Collect warnings based on network parameters
             // For now, skip warning collection - will be implemented when needed
             // Network validation functions are in securityPolicy.c which has complex dependencies
+
+            // Check for high fee warning
+            if (G_context.tx_info.transaction.fee > HIGH_FEE_WARNING_THRESHOLD) {
+                TRACE("High fee detected: %llu lovelace (threshold: %u lovelace)",
+                      G_context.tx_info.transaction.fee, HIGH_FEE_WARNING_THRESHOLD);
+                tx_warning_add((tx_warning_list_item_t **)&G_context.tx_info.warning_list,
+                              TX_WARNING_HIGH_FEE,
+                              G_context.tx_info.transaction.networkId,
+                              G_context.tx_info.transaction.protocolMagic);
+            }
 
             // Build transaction hash using txHashBuilder (local variable to avoid includes in types.h)
             tx_hash_builder_t txHashBuilder;
@@ -234,16 +276,122 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
 
                 // Prepare output description for hash builder
                 tx_output_description_t output_desc;
-                output_desc.format = ARRAY_LEGACY;  // Simple format for now
-                output_desc.destination.type = output_item->output_data.destination.type;
-                output_desc.destination.address.buffer = output_item->output_data.destination.address.buffer;
-                output_desc.destination.address.size = output_item->output_data.destination.address.size;
+                output_desc.format = output_item->output_data.format;  // Use actual format from output
                 output_desc.amount = output_item->output_data.adaAmount;
-                output_desc.numAssetGroups = 0;  // No tokens yet
-                output_desc.includeDatum = false;
-                output_desc.includeRefScript = false;
+                output_desc.numAssetGroups = output_item->output_data.numAssetGroups;  // Use actual token count
+                output_desc.includeDatum = (output_item->output_data.datum.type != 0xFF);  // 0xFF is DATUM_NONE
+                output_desc.includeRefScript = output_item->output_data.hasRefScript;
 
-                txHashBuilder_addOutput_topLevelData(&txHashBuilder, &output_desc);
+                if (output_item->output_data.destination.type == DESTINATION_THIRD_PARTY) {
+                    // For third-party, use address directly
+                    output_desc.destination.type = DESTINATION_THIRD_PARTY;
+                    output_desc.destination.address.buffer = output_item->output_data.destination.address.buffer;
+                    output_desc.destination.address.size = output_item->output_data.destination.address.size;
+                    txHashBuilder_addOutput_topLevelData(&txHashBuilder, &output_desc);
+                } else if (output_item->output_data.destination.type == DESTINATION_DEVICE_OWNED) {
+                    // For device-owned, we need to derive the address first
+                    // Allocate memory for the derived address
+                    uint8_t *address_bytes = (uint8_t *) app_mem_alloc(MAX_ADDRESS_SIZE);
+                    if (address_bytes == NULL) {
+                        return io_send_sw(SW_TX_PARSING_FAIL);
+                    }
+
+                    TRACE("sign_tx: Deriving device-owned address for output");
+                    TRACE("sign_tx: Address type=%d, networkId=%u",
+                          output_item->output_data.destination.params.type,
+                          output_item->output_data.destination.params.networkId);
+                    TRACE("sign_tx: Payment path length=%u, Staking source=%d",
+                          output_item->output_data.destination.params.paymentKeyPath.length,
+                          output_item->output_data.destination.params.stakingDataSource);
+
+                    size_t address_size = deriveAddress(
+                        &output_item->output_data.destination.params,
+                        address_bytes,
+                        MAX_ADDRESS_SIZE
+                    );
+
+                    TRACE("sign_tx: Derived address size=%u", address_size);
+                    if (address_size > 0) {
+                        TRACE("sign_tx: Derived address: %.*H", address_size, address_bytes);
+                    }
+
+                    if (address_size == 0) {
+                        app_mem_free(address_bytes);
+                        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
+                    }
+
+                    // Enforce single-account security model for device-owned outputs
+                    // Check payment key path if payment is derived from path
+                    payment_choice_t payment_choice = determinePaymentChoice(output_item->output_data.destination.params.type);
+                    if (payment_choice == PAYMENT_PATH) {
+                        TRACE("sign_tx: Checking single-account for payment key path");
+                        if (violatesSingleAccountOrStoreIt(&output_item->output_data.destination.params.paymentKeyPath)) {
+                            TRACE("sign_tx: Single-account violation for payment key path");
+                            app_mem_free(address_bytes);
+                            return io_send_sw(ERR_REJECTED_BY_POLICY);
+                        }
+                    }
+
+                    // Check staking key path if staking is derived from path
+                    if (output_item->output_data.destination.params.stakingDataSource == STAKING_KEY_PATH) {
+                        TRACE("sign_tx: Checking single-account for staking key path");
+                        if (violatesSingleAccountOrStoreIt(&output_item->output_data.destination.params.stakingKeyPath)) {
+                            TRACE("sign_tx: Single-account violation for staking key path");
+                            app_mem_free(address_bytes);
+                            return io_send_sw(ERR_REJECTED_BY_POLICY);
+                        }
+                    }
+
+                    // Convert to third-party for hash builder
+                    output_desc.destination.type = DESTINATION_THIRD_PARTY;
+                    output_desc.destination.address.buffer = address_bytes;
+                    output_desc.destination.address.size = address_size;
+                    txHashBuilder_addOutput_topLevelData(&txHashBuilder, &output_desc);
+                    app_mem_free(address_bytes);
+                } else {
+                    return io_send_sw(SW_TX_PARSING_FAIL);
+                }
+
+                // Add asset groups (tokens) to hash builder
+                for (uint16_t ag = 0; ag < output_item->output_data.numAssetGroups; ag++) {
+                    asset_group_t *group = &output_item->output_data.assetGroups[ag];
+
+                    // Add asset group header
+                    txHashBuilder_addOutput_tokenGroup(&txHashBuilder,
+                                                       group->policyId,
+                                                       28,
+                                                       group->numTokens);
+
+                    // Add each token in group
+                    for (uint16_t tk = 0; tk < group->numTokens; tk++) {
+                        output_token_t *token = &group->tokens[tk];
+                        txHashBuilder_addOutput_token(&txHashBuilder,
+                                                      token->assetName,
+                                                      token->assetNameLen,
+                                                      token->amount);
+                    }
+                }
+
+                // Add datum to hash builder
+                if (output_desc.includeDatum) {
+                    txHashBuilder_addOutput_datum(&txHashBuilder,
+                                                  output_item->output_data.datum.type,
+                                                  output_item->output_data.datum.type == DATUM_HASH ?
+                                                      output_item->output_data.datum.hash :
+                                                      output_item->output_data.datum.inline_data.data,
+                                                  output_item->output_data.datum.type == DATUM_HASH ?
+                                                      32 :
+                                                      output_item->output_data.datum.inline_data.size);
+                }
+
+                // Add reference script to hash builder
+                if (output_desc.includeRefScript) {
+                    txHashBuilder_addOutput_referenceScript(&txHashBuilder,
+                                                            output_item->output_data.refScript.size);
+                    txHashBuilder_addOutput_referenceScript_dataChunk(&txHashBuilder,
+                                                                      output_item->output_data.refScript.data,
+                                                                      output_item->output_data.refScript.size);
+                }
 
                 node = node->next;
             }
@@ -261,9 +409,12 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
                                   G_context.tx_info.tx_hash,
                                   sizeof(G_context.tx_info.tx_hash));
 
-            PRINTF("Hash: %.*H\n", sizeof(G_context.tx_info.tx_hash), G_context.tx_info.tx_hash);
+            TRACE("Hash: %.*H", sizeof(G_context.tx_info.tx_hash), G_context.tx_info.tx_hash);
 
-            return ui_display_transaction();
+            TRACE("handler_sign_tx: calling ui_display_transaction");
+            int result = ui_display_transaction();
+            TRACE("handler_sign_tx: returned from ui_display_transaction with result=%d", result);
+            return result;
         }
     }
     return 0;
@@ -275,19 +426,14 @@ int handler_sign_tx_witness(buffer_t *cdata) {
         return io_send_sw(SW_BAD_STATE);
     }
 
-    // Parse witness path from APDU data
-    uint8_t path_len;
-    if (!buffer_read_u8(cdata, &path_len) ||
-        !buffer_read_bip32_path(cdata,
-                                G_context.tx_info.witness_path.path,
-                                (size_t) path_len)) {
+    // Parse witness path from APDU data (wire format: [1 byte length][path elements])
+    if (!buffer_read_bip44_path(cdata, &G_context.tx_info.witness_path)) {
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
-    G_context.tx_info.witness_path.length = path_len;
 
     PRINTF("Witness %d: path length=%d\n",
            G_context.tx_info.current_witness,
-           path_len);
+           G_context.tx_info.witness_path.length);
 
     // Check security policy for witness signing
     // Determine if mint is present in the transaction
