@@ -117,7 +117,8 @@ class CommandSender:
             yield
 
     def sign_tx_init_simple(self, options: int, tx_signing_mode: int, network_id: int,
-                           protocol_magic: int, num_inputs: int, num_outputs: int, include_ttl: bool) -> RAPDU:
+                           protocol_magic: int, num_inputs: int, num_outputs: int, num_withdrawals: int,
+                           include_ttl: bool, include_validity_interval_start: bool = False) -> RAPDU:
         """APDU Sign TX Init (simple chunked mode)
 
         Args:
@@ -127,7 +128,9 @@ class CommandSender:
             protocol_magic (int): Protocol magic number
             num_inputs (int): Number of inputs
             num_outputs (int): Number of outputs
+            num_withdrawals (int): Number of withdrawals
             include_ttl (bool): Whether TTL is included
+            include_validity_interval_start (bool): Whether validity interval start is included
 
         Returns:
             Response APDU
@@ -139,7 +142,9 @@ class CommandSender:
         data.extend(protocol_magic.to_bytes(4, 'big'))
         data.extend(num_inputs.to_bytes(2, 'big'))
         data.extend(num_outputs.to_bytes(2, 'big'))
+        data.extend(num_withdrawals.to_bytes(2, 'big'))
         data.append(0x02 if include_ttl else 0x01)  # ITEM_INCLUDED_YES or ITEM_INCLUDED_NO
+        data.append(0x02 if include_validity_interval_start else 0x01)  # VIS flag
 
         from application_client.command_builder import P1Type
         # P1 = P1_TX_INIT for INIT APDU, P2 = P2_UNUSED
@@ -191,7 +196,9 @@ class CommandSender:
         """
         include_ttl = tx.ttl is not None
         ttl_value = tx.ttl if include_ttl else 0
-        tx_bytes = self._cmd_builder.serialize_transaction_unpacked(tx, include_ttl, ttl_value)
+        include_vis = hasattr(tx, 'validityIntervalStart') and tx.validityIntervalStart is not None
+        vis_value = tx.validityIntervalStart if include_vis else 0
+        tx_bytes = self._cmd_builder.serialize_transaction_unpacked(tx, include_ttl, ttl_value, include_vis, vis_value)
         with self.sign_tx_chunk_async(tx_bytes, more=False):
             yield
 

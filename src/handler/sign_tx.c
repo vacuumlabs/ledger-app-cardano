@@ -30,11 +30,13 @@
 #include "display.h"
 #include "tx_types.h"
 #include "tx_output_types.h"
+#include "tx_withdrawal_types.h"
 #include "tx_warnings.h"
 #include "deserialize.h"
 #include "mem.h"
 #include "constants.h"
 #include "utils/utils.h"
+#include "utils/cbor.h"
 #include "txHashBuilder/txHashBuilder.h"
 #include "cardano.h"
 #include "messageSigning.h"
@@ -84,7 +86,8 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
 
         // Read transaction structure counts
         if (!buffer_read_u16(cdata, &G_context.tx_info.transaction.num_inputs, BE) ||
-            !buffer_read_u16(cdata, &G_context.tx_info.transaction.num_outputs, BE)) {
+            !buffer_read_u16(cdata, &G_context.tx_info.transaction.num_outputs, BE) ||
+            !buffer_read_u16(cdata, &G_context.tx_info.transaction.num_withdrawals, BE)) {
             return io_send_sw(SW_WRONG_DATA_LENGTH);
         }
 
@@ -97,13 +100,24 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
             return io_send_sw(SW_TX_PARSING_FAIL_INCLUSION_FLAG);  // Invalid inclusion flag value
         }
 
-        PRINTF("TX Mode=%d, Network: ID=%d, Magic=%d, Inputs=%d, Outputs=%d, TTL=%d\n",
+        // Read validity interval start flag
+        uint8_t includeValidityIntervalStartByte;
+        if (!buffer_read_u8(cdata, &includeValidityIntervalStartByte)) {
+            return io_send_sw(SW_WRONG_DATA_LENGTH);
+        }
+        if (!parseIncluded(includeValidityIntervalStartByte, &G_context.tx_info.transaction.includeValidityIntervalStart)) {
+            return io_send_sw(SW_TX_PARSING_FAIL_INCLUSION_FLAG);  // Invalid inclusion flag value
+        }
+
+        PRINTF("TX Mode=%d, Network: ID=%d, Magic=%d, Inputs=%d, Outputs=%d, Withdrawals=%d, TTL=%d, VIS=%d\n",
                G_context.tx_info.transaction.txSigningMode,
                G_context.tx_info.transaction.networkId,
                G_context.tx_info.transaction.protocolMagic,
                G_context.tx_info.transaction.num_inputs,
                G_context.tx_info.transaction.num_outputs,
-               G_context.tx_info.transaction.includeTtl);
+               G_context.tx_info.transaction.num_withdrawals,
+               G_context.tx_info.transaction.includeTtl,
+               G_context.tx_info.transaction.includeValidityIntervalStart);
 
         // Check security policy for transaction initialization
         security_policy_t init_policy = policyForSignTxInit(
@@ -112,7 +126,7 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
             G_context.tx_info.transaction.protocolMagic,
             G_context.tx_info.transaction.num_outputs,
             0,      // numCertificates - not implemented yet
-            0,      // numWithdrawals - not implemented yet
+            G_context.tx_info.transaction.num_withdrawals,  // numWithdrawals
             false,  // includeMint - not implemented yet
             false,  // includeScriptDataHash - not implemented yet
             0,      // numCollateralInputs - not implemented yet
@@ -236,16 +250,16 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
             tx_hash_builder_t txHashBuilder;
             explicit_bzero(&txHashBuilder, sizeof(txHashBuilder));
 
-            // Initialize txHashBuilder with inputs, outputs, fee, and optionally TTL
+            // Initialize txHashBuilder with inputs, outputs, withdrawals, fee, and optionally TTL and VIS
             txHashBuilder_init(&txHashBuilder,
                               G_context.tx_info.transaction.tagCborSets,  // tagCborSets
                               G_context.tx_info.transaction.num_inputs,   // numInputs
                               G_context.tx_info.transaction.num_outputs,  // numOutputs
                               G_context.tx_info.transaction.includeTtl,   // includeTtl
                               0,      // numCertificates
-                              0,      // numWithdrawals
+                              G_context.tx_info.transaction.num_withdrawals,  // numWithdrawals
                               false,  // includeAuxData
-                              false,  // includeValidityIntervalStart
+                              G_context.tx_info.transaction.includeValidityIntervalStart,  // includeValidityIntervalStart
                               false,  // includeMint
                               false,  // includeScriptDataHash
                               0,      // numCollateralInputs
@@ -396,12 +410,114 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk_type, bool more) {
                 node = node->next;
             }
 
+            // Add withdrawals to hash builder (CBOR key 5, before fee)
+            if (G_context.tx_info.transaction.num_withdrawals > 0) {
+                txHashBuilder_enterWithdrawals(&txHashBuilder);
+
+                node = G_context.tx_info.transaction.withdrawals;
+                uint8_t previousRewardAccount[REWARD_ACCOUNT_SIZE];
+                explicit_bzero(previousRewardAccount, REWARD_ACCOUNT_SIZE);
+                bool isFirstWithdrawal = true;
+
+                while (node != NULL) {
+                    tx_withdrawal_list_item_t *withdrawal_item = (tx_withdrawal_list_item_t *) node;
+                    uint8_t rewardAccount[REWARD_ACCOUNT_SIZE];
+                    size_t rewardAccountSize = 0;
+
+                    // Construct reward account based on credential type
+                    switch (withdrawal_item->withdrawal_data.credential.type) {
+                        case STAKING_KEY_PATH: {
+                            rewardAccountSize = constructRewardAddressFromKeyPath(
+                                &withdrawal_item->withdrawal_data.credential.keyPath,
+                                G_context.tx_info.transaction.networkId,
+                                rewardAccount,
+                                REWARD_ACCOUNT_SIZE
+                            );
+                            TRACE("Withdrawal: Constructed reward account from key path, size=%u", rewardAccountSize);
+                            break;
+                        }
+                        case STAKING_KEY_HASH: {
+                            rewardAccountSize = constructRewardAddressFromHash(
+                                G_context.tx_info.transaction.networkId,
+                                REWARD_HASH_SOURCE_KEY,
+                                withdrawal_item->withdrawal_data.credential.keyHash,
+                                ADDRESS_KEY_HASH_LENGTH,
+                                rewardAccount,
+                                REWARD_ACCOUNT_SIZE
+                            );
+                            TRACE("Withdrawal: Constructed reward account from key hash, size=%u", rewardAccountSize);
+                            break;
+                        }
+                        case STAKING_SCRIPT_HASH: {
+                            rewardAccountSize = constructRewardAddressFromHash(
+                                G_context.tx_info.transaction.networkId,
+                                REWARD_HASH_SOURCE_SCRIPT,
+                                withdrawal_item->withdrawal_data.credential.scriptHash,
+                                ADDRESS_KEY_HASH_LENGTH,
+                                rewardAccount,
+                                REWARD_ACCOUNT_SIZE
+                            );
+                            TRACE("Withdrawal: Constructed reward account from script hash, size=%u", rewardAccountSize);
+                            break;
+                        }
+                        default:
+                            return io_send_sw(SW_TX_PARSING_FAIL);
+                    }
+
+                    // Validate reward account was constructed
+                    if (rewardAccountSize != REWARD_ACCOUNT_SIZE) {
+                        TRACE("Withdrawal: Invalid reward account size %u", rewardAccountSize);
+                        return io_send_sw(SW_TX_PARSING_FAIL);
+                    }
+
+                    // Check security policy for withdrawal
+                    security_policy_t withdrawal_policy = policyForSignTxWithdrawal(
+                        G_context.tx_info.transaction.txSigningMode,
+                        withdrawal_item->withdrawal_data.credential.type,
+                        (withdrawal_item->withdrawal_data.credential.type == STAKING_KEY_PATH) ?
+                            &withdrawal_item->withdrawal_data.credential.keyPath : NULL
+                    );
+                    TRACE("Withdrawal security policy: %d", (int) withdrawal_policy);
+                    if (withdrawal_policy == POLICY_DENY) {
+                        TRACE("Withdrawal denied by security policy");
+                        return io_send_sw(ERR_REJECTED_BY_POLICY);
+                    }
+
+                    // Validate CBOR canonical ordering (withdrawals must be sorted by reward account)
+                    if (!isFirstWithdrawal) {
+                        if (!cbor_mapKeyFulfillsCanonicalOrdering(
+                                previousRewardAccount, REWARD_ACCOUNT_SIZE,
+                                rewardAccount, REWARD_ACCOUNT_SIZE)) {
+                            TRACE("Withdrawal: CBOR canonical ordering violation");
+                            return io_send_sw(SW_TX_PARSING_FAIL);
+                        }
+                    }
+
+                    // Add withdrawal to tx hash
+                    txHashBuilder_addWithdrawal(&txHashBuilder,
+                                               rewardAccount,
+                                               REWARD_ACCOUNT_SIZE,
+                                               withdrawal_item->withdrawal_data.amount);
+
+                    // Store current reward account for next canonical ordering check
+                    memmove(previousRewardAccount, rewardAccount, REWARD_ACCOUNT_SIZE);
+                    isFirstWithdrawal = false;
+
+                    node = node->next;
+                }
+            }
+
             // Add fee to hash builder
             txHashBuilder_addFee(&txHashBuilder, G_context.tx_info.transaction.fee);
 
             // Add TTL to hash builder if included
             if (G_context.tx_info.transaction.includeTtl) {
                 txHashBuilder_addTtl(&txHashBuilder, G_context.tx_info.transaction.ttl);
+            }
+
+            // Add validity interval start to hash builder if included
+            if (G_context.tx_info.transaction.includeValidityIntervalStart) {
+                txHashBuilder_addValidityIntervalStart(&txHashBuilder, G_context.tx_info.transaction.validityIntervalStart);
             }
 
             // Finalize the hash

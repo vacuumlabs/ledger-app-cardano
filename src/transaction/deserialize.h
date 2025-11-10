@@ -15,7 +15,8 @@ typedef enum {
     OUTPUTS_COUNT_PARSING_ERROR = -11,
     OUTPUTS_PARSING_ERROR = -12,
     OUTPUT_DESTINATION_TYPE_ERROR = -13,
-    OUTPUT_ADDRESS_SIZE_ERROR = -14
+    OUTPUT_ADDRESS_SIZE_ERROR = -14,
+    WITHDRAWALS_PARSING_ERROR = -15
 } parser_status_e;
 
 /**
@@ -39,3 +40,12 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx);
  *
  */
 void transaction_free_outputs(transaction_t *tx);
+
+/**
+ * Clean up dynamically allocated memory in transaction withdrawals.
+ *
+ * @param[in] tx
+ *   Pointer to transaction structure.
+ *
+ */
+void transaction_free_withdrawals(transaction_t *tx);

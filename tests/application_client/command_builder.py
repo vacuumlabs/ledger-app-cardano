@@ -1642,7 +1642,7 @@ class CommandBuilder:
         data += token.amount.to_bytes(8, "big", signed=True)
         return data
 
-    def serialize_transaction_unpacked(self, tx, include_ttl=False, ttl=0) -> bytes:
+    def serialize_transaction_unpacked(self, tx, include_ttl=False, ttl=0, include_vis=False, vis=0) -> bytes:
         """Serialize transaction to unpacked binary format for handler_sign_tx.
 
         NEW Format (after adding tokens, datums, reference scripts):
@@ -1678,6 +1678,7 @@ class CommandBuilder:
             - If has_ref_script: ref_script_size (uint16, BE) + ref_script_data
         - fee (uint64, BE)
         - ttl (uint64, BE) - only if include_ttl is True
+        - validity_interval_start (uint64, BE) - only if include_vis is True
 
         Note: num_inputs and num_outputs are now sent in the INIT APDU, not in the tx buffer
 
@@ -1685,6 +1686,8 @@ class CommandBuilder:
             tx: Transaction from signTx.py test data
             include_ttl: Whether to include TTL field
             ttl: TTL value (only used if include_ttl is True)
+            include_vis: Whether to include validity interval start field
+            vis: Validity interval start value (only used if include_vis is True)
 
         Returns:
             bytes: Serialized transaction
@@ -1757,11 +1760,35 @@ class CommandBuilder:
             data.extend(len(output_data).to_bytes(2, 'big'))
             data.extend(output_data)
 
+        # Withdrawals (no count prefix - sent in INIT APDU)
+        if hasattr(tx, 'withdrawals') and tx.withdrawals:
+            for withdrawal in tx.withdrawals:
+                # Amount (uint64, big-endian)
+                data.extend(withdrawal.amount.to_bytes(8, 'big'))
+
+                # Credential type (uint8)
+                data.append(withdrawal.stakeCredential.type)
+
+                # Credential data based on type
+                if withdrawal.stakeCredential.type == 0x22:  # STAKING_KEY_PATH
+                    # Serialize BIP44 path
+                    data.extend(pack_derivation_path(withdrawal.stakeCredential.path))
+                elif withdrawal.stakeCredential.type == 0x33:  # STAKING_KEY_HASH
+                    # Key hash (28 bytes, no length prefix)
+                    data.extend(bytes.fromhex(withdrawal.stakeCredential.keyHash))
+                elif withdrawal.stakeCredential.type == 0x55:  # STAKING_SCRIPT_HASH
+                    # Script hash (28 bytes, no length prefix)
+                    data.extend(bytes.fromhex(withdrawal.stakeCredential.scriptHash))
+
         # Fee
         data.extend(tx.fee.to_bytes(8, 'big'))
 
         # TTL (optional)
         if include_ttl:
             data.extend(ttl.to_bytes(8, 'big'))
+
+        # Validity interval start (optional)
+        if include_vis:
+            data.extend(vis.to_bytes(8, 'big'))
 
         return bytes(data)

@@ -39,7 +39,7 @@ def test_opCert(device: Device,
     with client.sign_opCert(testCase):
         if device.is_nano:
             # TODO warning not shown ???
-            navigator.navigate_until_text(NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Sign certificate")
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Sign certificate", path=f"snapshots")
         else:
             if testCase.warning:
                 scenario_navigator.review_approve_with_warning()

@@ -909,6 +909,76 @@ security_policy_t policyForSignTxTtl(uint32_t ttl MARK_UNUSED) {
     ALLOW();
 }
 
+// For transaction withdrawals
+security_policy_t policyForSignTxWithdrawal(sign_tx_signingmode_t txSigningMode,
+                                            staking_data_source_t credentialType,
+                                            const bip44_path_t* stakingPath) {
+    switch (credentialType) {
+        case STAKING_KEY_PATH:
+            // Must be ordinary staking key path
+            DENY_IF(!bip44_isOrdinaryStakingKeyPath(stakingPath));
+
+            // Must not violate single account
+            DENY_IF(violatesSingleAccountOrStoreIt(stakingPath));
+
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_ORDINARY_TX:
+                case SIGN_TX_SIGNINGMODE_PLUTUS_TX:
+                    SHOW_IF(is_expert_mode());
+                    ALLOW();
+
+                case SIGN_TX_SIGNINGMODE_MULTISIG_TX:
+                    // Multisig transactions should use script hash, not key path
+                    DENY();
+
+                case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
+                case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+                    // Withdrawals not allowed in pool registration transactions
+                    DENY();
+
+                default:
+                    DENY();
+            }
+
+        case STAKING_KEY_HASH:
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_PLUTUS_TX:
+                    // Plutus transactions may withdraw from 3rd party key hash
+                    SHOW_IF(is_expert_mode());
+                    ALLOW();
+
+                case SIGN_TX_SIGNINGMODE_ORDINARY_TX:
+                    // No known use case for 3rd party withdrawals in ordinary tx
+                    DENY();
+
+                case SIGN_TX_SIGNINGMODE_MULTISIG_TX:
+                    // Multisig should use script hash
+                    DENY();
+
+                default:
+                    DENY();
+            }
+
+        case STAKING_SCRIPT_HASH:
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_MULTISIG_TX:
+                case SIGN_TX_SIGNINGMODE_PLUTUS_TX:
+                    SHOW_IF(is_expert_mode());
+                    ALLOW();
+
+                case SIGN_TX_SIGNINGMODE_ORDINARY_TX:
+                    // Ordinary transactions should use key path
+                    DENY();
+
+                default:
+                    DENY();
+            }
+
+        default:
+            DENY();
+    }
+}
+
 /*
 
 // a generic policy for all certificates

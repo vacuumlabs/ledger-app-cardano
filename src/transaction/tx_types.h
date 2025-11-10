@@ -42,11 +42,15 @@ typedef struct {
     // Transaction structure counts (from INIT APDU)
     uint16_t num_inputs;    /// number of inputs
     uint16_t num_outputs;   /// number of outputs
+    uint16_t num_withdrawals;  /// number of withdrawals
     bool includeTtl;        /// whether TTL is included
+    bool includeValidityIntervalStart;  /// whether validity interval start is included
 
     // Transaction data (parsed from raw tx buffer)
     s_flist_node *inputs;   /// linked list of inputs (tx_input_list_item_t)
     s_flist_node *outputs;  /// linked list of outputs (tx_output_list_item_t)
+    s_flist_node *withdrawals;  /// linked list of withdrawals (tx_withdrawal_list_item_t)
     uint64_t fee;           /// fee (8 bytes)
     uint64_t ttl;           /// time-to-live (optional, only if includeTtl is true)
+    uint64_t validityIntervalStart;  /// validity interval start (optional, slot 8)
 } transaction_t;

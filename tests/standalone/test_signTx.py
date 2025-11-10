@@ -45,6 +45,8 @@ def test_signTx_new(device: Device,
     print(f"Expected tx hash: {expected_hash.hex()}")
 
     # Step 1: Send INIT APDU with transaction description
+    include_vis = hasattr(tx, 'validityIntervalStart') and tx.validityIntervalStart is not None
+    num_withdrawals = len(tx.withdrawals) if hasattr(tx, 'withdrawals') and tx.withdrawals else 0
     response = client.sign_tx_init_simple(
         options=testCase.options,
         tx_signing_mode=testCase.signingMode,
@@ -52,7 +54,9 @@ def test_signTx_new(device: Device,
         protocol_magic=tx.network.protocol,
         num_inputs=len(tx.inputs),
         num_outputs=len(tx.outputs),
-        include_ttl=tx.ttl is not None
+        num_withdrawals=num_withdrawals,
+        include_ttl=tx.ttl is not None,
+        include_validity_interval_start=include_vis
     )
     assert response.status == Errors.SW_SUCCESS, f"Init failed: {hex(response.status)}"
 
@@ -62,11 +66,11 @@ def test_signTx_new(device: Device,
     with client.sign_tx_serialize_and_send_chunk_async(tx):
         if device.is_nano:
             # TODO: Add proper navigation for nano devices
-            navigator.navigate_until_text(NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Sign transaction")
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK, [NavInsID.BOTH_CLICK], "Sign transaction")
         else:
             # Check if test case expects warnings (for now we don't have warnings in simple tests)
             # scenario_navigator.review_approve(do_comparison=False)
-            scenario_navigator.review_approve(do_comparison=False)
+            scenario_navigator.review_approve()
             # TODO if unusual witness, navigation fails: stax-Sign_tx_with_non-reasonable_account_and_address
 
     # Get the response from the last chunk (should contain tx hash)

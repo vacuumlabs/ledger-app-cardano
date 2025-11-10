@@ -23,7 +23,6 @@
 #include "nbgl_use_case.h"
 #include "io.h"
 #include "addressUtils/bip44.h"
-#include "format.h"
 
 #include "display.h"
 #include "constants.h"
@@ -34,21 +33,11 @@
 #include "securityPolicy.h"
 #include "nbgl_screens.h"
 #include "sign_opcert.h"
+#include "mem.h"
 
-static char poolColdKeyPathStr[BIP44_PATH_STRING_SIZE_MAX + 1];
-static char poolKeyHashStr[BECH32_STRING_SIZE_MAX];
-static char kesKeyStr[BECH32_STRING_SIZE_MAX];
-static char kesPeriodString[MAX_UINT64_STRING_SIZE];
-static char issueCounterString[MAX_UINT64_STRING_SIZE];
-
-// Items:
-// pool cold key
-// pool id
-// KES public key
-// KES period
-// issue counter
-static nbgl_contentTagValue_t pairs[5];
-static nbgl_contentTagValueList_t pairList;
+// Dynamic display structures
+static nbgl_contentTagValue_t *g_pairs = NULL;
+static nbgl_contentTagValueList_t *g_pairsList = NULL;
 
 // Centered info for the main warning screen.
 static const nbgl_contentCenter_t warningInfo = {
@@ -68,10 +57,36 @@ static const nbgl_warningDetails_t warningDetails = {
 
 static nbgl_warning_t warning = {0};
 
+/**
+ * Cleanup dynamically allocated opcert display structures
+ */
+static void opcert_display_cleanup(void) {
+    if (g_pairs != NULL) {
+        // Free individual strings in pairs
+        for (size_t i = 0; i < 5; i++) {
+            if (g_pairs[i].item != NULL) {
+                app_mem_free((void*)g_pairs[i].item);
+            }
+            if (g_pairs[i].value != NULL) {
+                app_mem_free((void*)g_pairs[i].value);
+            }
+        }
+        app_mem_free(g_pairs);
+        g_pairs = NULL;
+    }
+    if (g_pairsList != NULL) {
+        app_mem_free(g_pairsList);
+        g_pairsList = NULL;
+    }
+}
+
 // called when long press button on 3rd page is long-touched or when reject footer is touched
 static void review_choice(bool confirm) {
     TRACE("=== review_choice called ===");
     TRACE("confirm: %s", confirm ? "true" : "false");
+
+    // Cleanup display structures
+    opcert_display_cleanup();
 
     // Answer, display a status page and go back to main
     finalize_sign_opcert(confirm);
@@ -86,11 +101,25 @@ static void review_choice(bool confirm) {
     TRACE("=== review_choice end ===");
 }
 
-// Public function to start the transaction review
-// - Check if the app is in the right state for transaction review
-// - Format the amount and address strings in g_amount and g_address buffers
-// - Display the first screen of the transaction review
-// - Display a warning if the transaction is blind-signed
+/**
+ * Helper to allocate and copy a string for display
+ * @return Allocated string or NULL on failure
+ */
+static char* opcert_strdup(const char* src, size_t len) {
+    char* dst = (char*) app_mem_alloc(len + 1);
+    if (dst == NULL) {
+        TRACE("ERROR: opcert_strdup failed to allocate %u bytes", (unsigned)(len + 1));
+        return NULL;
+    }
+    memcpy(dst, src, len);
+    dst[len] = '\0';
+    return dst;
+}
+
+// Public function to start the operational certificate review
+// - Check if the app is in the right state for opcert review
+// - Format and dynamically allocate display strings
+// - Display the review screen with optional warning
 int ui_display_opcert(security_policy_t securityPolicy) {
     TRACE("=== ui_display_opcert START ===");
     TRACE("securityPolicy: %d", securityPolicy);
@@ -103,56 +132,105 @@ int ui_display_opcert(security_policy_t securityPolicy) {
 
     const parsed_opcert_t* opcert = &G_context.opcert_info.opcert;
 
-    // pool cold key
-    ui_getPathScreen(poolColdKeyPathStr, SIZEOF(poolColdKeyPathStr), &opcert->poolColdKeyPath);
+    // Cleanup any previous display structures
+    opcert_display_cleanup();
 
-    // pool id
+    // Allocate pair array (5 items)
+    g_pairs = (nbgl_contentTagValue_t*) app_mem_alloc(5 * sizeof(nbgl_contentTagValue_t));
+    if (g_pairs == NULL) {
+        TRACE("ERROR: Failed to allocate pairs array");
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
+    explicit_bzero(g_pairs, 5 * sizeof(nbgl_contentTagValue_t));
+
+    // Allocate pairsList structure
+    g_pairsList = (nbgl_contentTagValueList_t*) app_mem_alloc(sizeof(nbgl_contentTagValueList_t));
+    if (g_pairsList == NULL) {
+        TRACE("ERROR: Failed to allocate pairsList");
+        opcert_display_cleanup();
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
+
+    // Temporary buffer for formatting (will be allocated once and reused)
+    char* tempBuffer = (char*) app_mem_alloc(BECH32_STRING_SIZE_MAX);
+    if (tempBuffer == NULL) {
+        TRACE("ERROR: Failed to allocate temporary buffer");
+        opcert_display_cleanup();
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
+
+    // Build pair 0: pool cold key path
+    explicit_bzero(tempBuffer, BECH32_STRING_SIZE_MAX);
+    ui_getPathScreen(tempBuffer, BECH32_STRING_SIZE_MAX, &opcert->poolColdKeyPath);
+    g_pairs[0].item = opcert_strdup("Pool cold key path", 18);
+    g_pairs[0].value = opcert_strdup(tempBuffer, strlen(tempBuffer));
+    if (g_pairs[0].item == NULL || g_pairs[0].value == NULL) {
+        app_mem_free(tempBuffer);
+        opcert_display_cleanup();
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
+
+    // Build pair 1: pool id (derived from path)
     uint8_t poolKeyHash[POOL_KEY_HASH_LENGTH] = {0};
     bip44_pathToKeyHash(&opcert->poolColdKeyPath, poolKeyHash, SIZEOF(poolKeyHash));
-    ui_getBech32Screen(poolKeyHashStr,
-                        SIZEOF(poolKeyHashStr),
-                        "pool",
-                        poolKeyHash,
-                        SIZEOF(poolKeyHash));
-
-    // KES public key
-    ui_getBech32Screen(kesKeyStr,
-                        SIZEOF(kesKeyStr),
-                        "kes_vk",
-                        opcert->kesPublicKey,
-                        KES_PUBLIC_KEY_LENGTH);
-
-    // KES period
-    explicit_bzero(kesPeriodString, SIZEOF(kesPeriodString));
-    if (!format_u64(kesPeriodString, SIZEOF(kesPeriodString), opcert->kesPeriod)) {
-        // TODO perhaps just assert since this is a bug of not enough memory allocated
+    explicit_bzero(tempBuffer, BECH32_STRING_SIZE_MAX);
+    ui_getBech32Screen(tempBuffer,
+                       BECH32_STRING_SIZE_MAX,
+                       "pool",
+                       poolKeyHash,
+                       SIZEOF(poolKeyHash));
+    g_pairs[1].item = opcert_strdup("Pool ID", 7);
+    g_pairs[1].value = opcert_strdup(tempBuffer, strlen(tempBuffer));
+    if (g_pairs[1].item == NULL || g_pairs[1].value == NULL) {
+        app_mem_free(tempBuffer);
+        opcert_display_cleanup();
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
 
-    // issue counter
-    explicit_bzero(issueCounterString, SIZEOF(issueCounterString));
-    if (!format_u64(issueCounterString, SIZEOF(issueCounterString), opcert->issueCounter)) {
-        // TODO perhaps just assert since this is a bug of not enough memory allocated
+    // Build pair 2: KES public key
+    explicit_bzero(tempBuffer, BECH32_STRING_SIZE_MAX);
+    ui_getBech32Screen(tempBuffer,
+                       BECH32_STRING_SIZE_MAX,
+                       "kes_vk",
+                       opcert->kesPublicKey,
+                       KES_PUBLIC_KEY_LENGTH);
+    g_pairs[2].item = opcert_strdup("KES public key", 14);
+    g_pairs[2].value = opcert_strdup(tempBuffer, strlen(tempBuffer));
+    if (g_pairs[2].item == NULL || g_pairs[2].value == NULL) {
+        app_mem_free(tempBuffer);
+        opcert_display_cleanup();
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
 
-    // TODO this needs to be dynamic, static buffers decrease mem_buffer
-    // Setup data to display
-    pairs[0].item = "Pool cold key path";
-    pairs[0].value = poolColdKeyPathStr;
-    pairs[1].item = "Pool ID";
-    pairs[1].value = poolKeyHashStr;
-    pairs[2].item = "KES public key";
-    pairs[2].value = kesKeyStr;
-    pairs[3].item = "KES period";
-    pairs[3].value = kesPeriodString;
-    pairs[4].item = "Issue counter";
-    pairs[4].value = issueCounterString;
+    // Build pair 3: KES period
+    explicit_bzero(tempBuffer, BECH32_STRING_SIZE_MAX);
+    ui_getUint64Screen(tempBuffer, BECH32_STRING_SIZE_MAX, opcert->kesPeriod);
+    g_pairs[3].item = opcert_strdup("KES period", 10);
+    g_pairs[3].value = opcert_strdup(tempBuffer, strlen(tempBuffer));
+    if (g_pairs[3].item == NULL || g_pairs[3].value == NULL) {
+        app_mem_free(tempBuffer);
+        opcert_display_cleanup();
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
 
-    // Setup list
-    pairList.nbMaxLinesForValue = 0;
-    pairList.nbPairs = 5;
-    pairList.pairs = pairs;
+    // Build pair 4: issue counter
+    explicit_bzero(tempBuffer, BECH32_STRING_SIZE_MAX);
+    ui_getUint64Screen(tempBuffer, BECH32_STRING_SIZE_MAX, opcert->issueCounter);
+    g_pairs[4].item = opcert_strdup("Issue counter", 13);
+    g_pairs[4].value = opcert_strdup(tempBuffer, strlen(tempBuffer));
+    if (g_pairs[4].item == NULL || g_pairs[4].value == NULL) {
+        app_mem_free(tempBuffer);
+        opcert_display_cleanup();
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
+
+    // Free temporary buffer
+    app_mem_free(tempBuffer);
+
+    // Setup pairsList structure
+    g_pairsList->nbMaxLinesForValue = 0;
+    g_pairsList->nbPairs = 5;
+    g_pairsList->pairs = g_pairs;
 
     // set warning if needed
     const nbgl_warning_t* warningPtr = NULL;
@@ -182,7 +260,7 @@ int ui_display_opcert(security_policy_t securityPolicy) {
     }
 
     nbgl_useCaseAdvancedReview(TYPE_OPERATION,
-                        &pairList,
+                        g_pairsList,
                         &ICON_APP_CARDANO,
                         "Sign operational\ncertificate",
                         NULL,
@@ -192,5 +270,6 @@ int ui_display_opcert(security_policy_t securityPolicy) {
                         review_choice
     );
 
+    TRACE("=== ui_display_opcert END ===");
     return 0;
 }

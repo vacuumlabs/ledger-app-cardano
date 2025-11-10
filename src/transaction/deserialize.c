@@ -21,6 +21,7 @@
 #include "utils.h"
 #include "types.h"
 #include "tx_output_types.h"
+#include "tx_withdrawal_types.h"
 #include "addressUtils/addressUtilsShelley.h"
 
 #if defined(TEST) || defined(FUZZ)
@@ -41,7 +42,10 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
     // Initialize inputs list
     tx->inputs = NULL;
 
-    // Note: num_inputs and num_outputs are already set from INIT APDU, not read from buffer
+    // Initialize withdrawals list
+    tx->withdrawals = NULL;
+
+    // Note: num_inputs, num_outputs, and num_withdrawals are already set from INIT APDU, not read from buffer
 
     // Parse each input and add to linked list
     for (uint16_t i = 0; i < tx->num_inputs; i++) {
@@ -443,6 +447,75 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
         }
     }
 
+    // Validity interval start value (optional, only if includeValidityIntervalStart is true)
+    if (tx->includeValidityIntervalStart) {
+        if (!buffer_read_u64(buf, &tx->validityIntervalStart, BE)) {
+            return TO_PARSING_ERROR;  // Reuse TO_PARSING_ERROR for VIS
+        }
+    }
+
+    // Parse each withdrawal and add to linked list
+    for (uint16_t i = 0; i < tx->num_withdrawals; i++) {
+        // Allocate memory for the withdrawal list item
+        tx_withdrawal_list_item_t *item = (tx_withdrawal_list_item_t *) app_mem_alloc(sizeof(tx_withdrawal_list_item_t));
+        if (item == NULL) {
+            return WITHDRAWALS_PARSING_ERROR;
+        }
+
+        // Read withdrawal amount (uint64, big-endian)
+        if (!buffer_read_u64(buf, &item->withdrawal_data.amount, BE)) {
+            return WITHDRAWALS_PARSING_ERROR;
+        }
+
+        // Read withdrawal credential type (uint8)
+        uint8_t cred_type;
+        if (!buffer_read_u8(buf, &cred_type)) {
+            return WITHDRAWALS_PARSING_ERROR;
+        }
+        item->withdrawal_data.credential.type = (staking_data_source_t) cred_type;
+
+        // Read withdrawal credential based on type
+        switch (cred_type) {
+            case STAKING_KEY_PATH: {
+                // Read withdrawal key path using bip44 wire format
+                if (!buffer_read_bip44_path(buf, &item->withdrawal_data.credential.keyPath)) {
+                    return WITHDRAWALS_PARSING_ERROR;
+                }
+                TRACE("Deserialize: Withdrawal %u key path, length=%u", i, item->withdrawal_data.credential.keyPath.length);
+                break;
+            }
+            case STAKING_KEY_HASH: {
+                // Read withdrawal key hash (fixed 28 bytes, no length prefix)
+                uint8_t *hash_ptr = (uint8_t *) (buf->ptr + buf->offset);
+                if (!buffer_seek_cur(buf, ADDRESS_KEY_HASH_LENGTH)) {
+                    return WITHDRAWALS_PARSING_ERROR;
+                }
+                memmove(item->withdrawal_data.credential.keyHash, hash_ptr, ADDRESS_KEY_HASH_LENGTH);
+                TRACE("Deserialize: Withdrawal %u key hash", i);
+                break;
+            }
+            case STAKING_SCRIPT_HASH: {
+                // Read withdrawal script hash (fixed 28 bytes, no length prefix)
+                uint8_t *hash_ptr = (uint8_t *) (buf->ptr + buf->offset);
+                if (!buffer_seek_cur(buf, SCRIPT_HASH_LENGTH)) {
+                    return WITHDRAWALS_PARSING_ERROR;
+                }
+                memmove(item->withdrawal_data.credential.scriptHash, hash_ptr, SCRIPT_HASH_LENGTH);
+                TRACE("Deserialize: Withdrawal %u script hash", i);
+                break;
+            }
+            default:
+                return WITHDRAWALS_PARSING_ERROR;
+        }
+
+        // Initialize previousRewardAccount to zeros (will be filled during hash building)
+        explicit_bzero(item->withdrawal_data.previousRewardAccount, REWARD_ACCOUNT_SIZE);
+
+        // Add to linked list
+        item->node.next = NULL;
+        flist_push_back(&tx->withdrawals, (s_flist_node *) item);
+    }
+
     return (buf->offset == buf->size) ? PARSING_OK : WRONG_LENGTH_ERROR;
 }
 
@@ -475,6 +548,18 @@ void transaction_free_outputs(transaction_t *tx) {
             app_mem_free(item->output_data.refScript.data);
         }
 
+        node = node->next;
+    }
+}
+
+/// Clean up dynamically allocated memory in transaction withdrawals
+void transaction_free_withdrawals(transaction_t *tx) {
+    LEDGER_ASSERT(tx != NULL, "NULL tx");
+
+    s_flist_node *node = tx->withdrawals;
+    while (node != NULL) {
+        // Withdrawal items don't have additional allocated memory
+        // (credential data is stored inline in the union)
         node = node->next;
     }
 }

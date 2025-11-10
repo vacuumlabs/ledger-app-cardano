@@ -29,6 +29,7 @@ bool needsMissingCollateralWarning(sign_tx_signingmode_t signingMode, uint32_t n
 bool needsUnknownCollateralWarning(sign_tx_signingmode_t signingMode, bool includesTotalCollateral);
 bool needsMissingScriptDataHashWarning(sign_tx_signingmode_t signingMode,
                                        bool includesScriptDataHash);
+*/
 
 security_policy_t policyForSignTxInit(sign_tx_signingmode_t txSigningMode,
                                       uint32_t networkId,
@@ -48,6 +49,7 @@ security_policy_t policyForSignTxInit(sign_tx_signingmode_t txSigningMode,
                                       bool includeTreasury,
                                       bool includeDonation);
 
+/*
 security_policy_t policyForSignTxInput(sign_tx_signingmode_t txSigningMode);
 
 bool needsMissingDatumWarning(const tx_output_destination_t* destination, bool includeDatum);
@@ -89,7 +91,13 @@ security_policy_t policyForSignTxCollateralOutputConfirm(security_policy_t outpu
 security_policy_t policyForSignTxFee(sign_tx_signingmode_t txSigningMode, uint64_t fee);
 
 security_policy_t policyForSignTxTtl(uint32_t ttl);
+*/
 
+security_policy_t policyForSignTxWithdrawal(sign_tx_signingmode_t txSigningMode,
+                                            staking_data_source_t credentialType,
+                                            const bip44_path_t* stakingPath);
+
+/*
 security_policy_t policyForSignTxCertificate(sign_tx_signingmode_t txSigningMode,
                                              const certificate_type_t certificateType);
 security_policy_t policyForSignTxCertificateStaking(sign_tx_signingmode_t txSigningMode,
