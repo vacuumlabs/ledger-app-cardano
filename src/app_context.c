@@ -1,8 +1,8 @@
 /* SPDX-FileCopyrightText: 2025-2026 Vacuumlabs */
 /* SPDX-License-Identifier: Apache-2.0 */
 
-#include <string.h>  // explicit_bzero
 #include <stdbool.h>
+#include <string.h>  // explicit_bzero
 
 #include "globals.h"
 #include "app_context.h"
@@ -27,52 +27,6 @@ static void apdu_response_state_reset(void) {
 
 void apdu_response_state_force_reset(void) {
     apdu_response_state_reset();
-}
-
-static void free_request_owned_buffers(void) {
-    switch (G_context.req_type) {
-        case REQUEST_SIGN_TRANSACTION:
-            switch (G_context.state.tx_state) {
-                case TX_STATE_AUX_DATA:
-                    APP_MEM_FREE_AND_NULL(
-                        (void **) &G_context.tx_info.aux_data.raw_cvote_init_data);
-                    break;
-                case TX_STATE_CHUNKS:
-                case TX_STATE_RECEIVED:
-                case TX_STATE_HASHED:
-                case TX_STATE_UI_REVIEW:
-                    APP_MEM_FREE_AND_NULL((void **) &G_context.tx_info.body.raw_tx);
-                    break;
-                case TX_STATE_NONE:
-                case TX_STATE_APPROVED:
-                    break;
-                // LCOV_EXCL_START
-                default:
-                    LEDGER_ASSERT(false, "bad state");
-                    break;
-                    // LCOV_EXCL_STOP
-            }
-            break;
-
-        case REQUEST_SIGN_MSG:
-            APP_MEM_FREE_AND_NULL((void **) &G_context.sign_msg_info.msgBuffer);
-            APP_MEM_FREE_AND_NULL((void **) &G_context.sign_msg_info.sigStructureBuffer);
-            break;
-
-        case REQUEST_NONE:
-        case REQUEST_EXPORT_PUBKEY:
-        case REQUEST_SIGN_OPCERT:
-        case REQUEST_DERIVE_ADDRESS:
-        case REQUEST_DERIVE_NATIVE_SCRIPT_HASH:
-        case REQUEST_CVOTE:
-            break;
-
-        // LCOV_EXCL_START
-        default:
-            ASSERT(false);
-            break;
-            // LCOV_EXCL_STOP
-    }
 }
 
 void apdu_response_begin(command_e instruction) {
@@ -133,11 +87,14 @@ void apdu_response_send_data(const uint8_t *buffer, size_t bufferLength, uint16_
     LEDGER_ASSERT(io_send_result >= 0, "io_send_response_pointer failed");
 }
 
+bool apdu_response_was_sent(void) {
+    return G_apdu_response_state.response_sent;
+}
+
 void reset_app_context(void) {
     TRACE("reset_app_context");
 
     ui_all_cleanup();
-    free_request_owned_buffers();
 
     // Reset the SDK allocator to wipe all transient memory
     LEDGER_ASSERT(mem_utils_reset_app_heap(), "Failed to reset memory allocator");

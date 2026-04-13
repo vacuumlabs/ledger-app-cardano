@@ -102,7 +102,12 @@ void app_main(void) {
                 CLOSE_TRY;
                 uint16_t swo =
                     ((exception & 0xF000) == 0x6000) ? (uint16_t) exception : SWO_UNKNOWN;
-                send_swo_and_reset(swo);
+                if (apdu_response_was_sent()) {
+                    apdu_response_state_force_reset();
+                    reset_app_context();
+                } else {
+                    send_swo_and_reset(swo);
+                }
             }
             FINALLY {
             }

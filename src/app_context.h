@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -48,6 +49,11 @@ void apdu_response_assert_sent_or_deferred(void);
  */
 void apdu_response_send_sw(uint16_t swo);
 void apdu_response_send_data(const uint8_t *buffer, size_t bufferLength, uint16_t swo);
+
+/**
+ * Query whether the current APDU already sent a response.
+ */
+bool apdu_response_was_sent(void);
 
 /**
  * Reset APDU response tracking state.
