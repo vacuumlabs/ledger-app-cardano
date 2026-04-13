@@ -19,22 +19,70 @@
 #include "mem.h"
 #include "utils.h"
 #include "app_context.h"
+#include "app_main.h"
 #ifdef HAVE_SWAP
 #include "swap.h"
 #endif
 
+#ifndef APP_MAIN_EXTERNAL_GLOBALS
 global_ctx_t G_context;
 
 const internal_storage_t N_storage_real;
+#endif
+
+void app_main_process_one_apdu(void) {
+    int input_len = 0;
+    command_t cmd = {0};
+
+    BEGIN_TRY {
+        TRY {
+            // Receive command bytes in G_io_apdu_buffer
+            input_len = io_recv_command();
+            if (input_len < 0) {
+                TRACE("io_recv_command failure: %d", input_len);
+                THROW(EXCEPTION_IO_RESET);
+            }
+
+            // Parse APDU command from G_io_apdu_buffer
+            if (!apdu_parser(&cmd, G_io_apdu_buffer, input_len)) {
+                TRACE("BAD LENGTH:");
+                TRACE_BUFFER(G_io_apdu_buffer, input_len);
+                apdu_response_begin(INS_NONE);
+                send_swo_and_reset(SWO_WRONG_DATA_LENGTH);
+                apdu_response_assert_sent_or_deferred();
+            } else {
+                TRACE("CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=",
+                      cmd.cla,
+                      cmd.ins,
+                      cmd.p1,
+                      cmd.p2,
+                      cmd.lc);
+                TRACE_BUFFER(cmd.data, cmd.lc);
+
+                // Dispatch structured APDU command to handler
+                apdu_dispatcher(&cmd);
+            }
+        }
+        CATCH(EXCEPTION_IO_RESET) {
+            TRACE("EXCEPTION_IO_RESET");
+            CLOSE_TRY;
+            app_exit();
+        }
+        CATCH_OTHER(exception) {
+            CLOSE_TRY;
+            app_main_handle_unexpected_exception((uint16_t) exception);
+        }
+        FINALLY {
+        }
+    }
+    END_TRY;
+}
 
 /**
  * Handle APDU command received and send back APDU response using handlers.
  */
 void app_main(void) {
-    // Length of APDU command received in G_io_apdu_buffer
-    int input_len = 0;
     // Structured APDU command
-    command_t cmd = {0};
 
     // Initialize SDK memory allocator
     LEDGER_ASSERT(mem_utils_reset_app_heap(), "Failed to initialize memory allocator");
@@ -62,56 +110,6 @@ void app_main(void) {
     }
 
     for (;;) {
-        BEGIN_TRY {
-            TRY {
-                // Receive command bytes in G_io_apdu_buffer
-                input_len = io_recv_command();
-                if (input_len < 0) {
-                    TRACE("io_recv_command failure: %d", input_len);
-                    THROW(EXCEPTION_IO_RESET);
-                }
-
-                // Parse APDU command from G_io_apdu_buffer
-                if (!apdu_parser(&cmd, G_io_apdu_buffer, input_len)) {
-                    TRACE("BAD LENGTH:");
-                    TRACE_BUFFER(G_io_apdu_buffer, input_len);
-                    apdu_response_begin(INS_NONE);
-                    send_swo_and_reset(SWO_WRONG_DATA_LENGTH);
-                    apdu_response_assert_sent_or_deferred();
-                    continue;
-                }
-
-                TRACE("CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=",
-                      cmd.cla,
-                      cmd.ins,
-                      cmd.p1,
-                      cmd.p2,
-                      cmd.lc);
-                TRACE_BUFFER(cmd.data, cmd.lc);
-
-                // Dispatch structured APDU command to handler
-                apdu_dispatcher(&cmd);
-            }
-            CATCH(EXCEPTION_IO_RESET) {
-                TRACE("EXCEPTION_IO_RESET");
-                CLOSE_TRY;
-                app_exit();
-            }
-            CATCH_OTHER(exception) {
-                TRACE("Unhandled exception in app_main loop: 0x%04X", exception);
-                CLOSE_TRY;
-                uint16_t swo =
-                    ((exception & 0xF000) == 0x6000) ? (uint16_t) exception : SWO_UNKNOWN;
-                if (apdu_response_was_sent()) {
-                    apdu_response_state_force_reset();
-                    reset_app_context();
-                } else {
-                    send_swo_and_reset(swo);
-                }
-            }
-            FINALLY {
-            }
-        }
-        END_TRY;
+        app_main_process_one_apdu();
     }
 }
