@@ -615,7 +615,6 @@ bool tx_process_certificates(buffer_t *buf, tx_processing_state_t *state) {
 
         if (parsed_certificate_data->type == CERTIFICATE_STAKE_POOL_REGISTRATION) {
             if (!process_pool_registration_certificate(buf, state, parsed_certificate_data)) {
-                APP_MEM_FREE_AND_NULL((void **) &parsed_certificate_data);
                 return false;
             }
             continue;

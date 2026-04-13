@@ -11,8 +11,11 @@
 
 void app_main_handle_unexpected_exception(uint16_t exception) {
     TRACE("Unhandled exception in app_main loop: 0x%04X", exception);
-    uint16_t swo = ((exception & 0xF000) == 0x6000) ? exception : SWO_UNKNOWN;
+    uint16_t swo = ((exception & 0xF000) == 0x6000) ? (uint16_t) exception : SWO_UNKNOWN;
     if (apdu_response_was_sent()) {
+        // A response was already delivered to the host. Swallow the follow-up exception, reset
+        // local APDU state, and recover the app context without attempting a second response.
+        TRACE("APDU response already sent; resetting state after exception 0x%04X", exception);
         apdu_response_state_force_reset();
         reset_app_context();
     } else {

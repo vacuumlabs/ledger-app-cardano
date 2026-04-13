@@ -463,6 +463,8 @@ void finalize_sign_tx_aux_data(void) {
     tx_aux_data_ctx()->raw_cvote_init_data_len = 0;
 
     // Single point of transition: aux_data slot -> body slot.
+    // Clear the body view before reusing the union.
+    explicit_bzero(&G_context.tx_info.body, sizeof(G_context.tx_info.body));
     G_context.state.tx_state = TX_STATE_CHUNKS;
 
     apdu_response_send_data((const uint8_t *) &wireResponse, sizeof(wireResponse), SWO_SUCCESS);

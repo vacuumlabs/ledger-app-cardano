@@ -14,6 +14,11 @@
 #include "app_main.h"
 #include "app_context.h"
 #include "cardano_swo.h"
+
+enum {
+    TEST_UNHANDLED_EXCEPTION = 0x1234,
+};
+
 static uint16_t g_last_response_swo = 0;
 
 void ui_all_cleanup(void) {
@@ -41,7 +46,7 @@ static void test_app_main_handle_unexpected_exception_without_response_sends_unk
     (void) state;
     reset_test_state();
 
-    app_main_handle_unexpected_exception(EXCEPTION);
+    app_main_handle_unexpected_exception(TEST_UNHANDLED_EXCEPTION);
     assert_int_equal(g_last_response_swo, SWO_UNKNOWN);
 }
 
@@ -51,7 +56,7 @@ static void test_app_main_handle_unexpected_exception_after_response_does_not_do
 
     apdu_response_begin(INS_SIGN_TX);
     apdu_response_send_sw(SWO_SECURITY_CONDITION_NOT_SATISFIED);
-    app_main_handle_unexpected_exception(EXCEPTION);
+    app_main_handle_unexpected_exception(TEST_UNHANDLED_EXCEPTION);
 
     assert_int_equal(g_last_response_swo, SWO_SECURITY_CONDITION_NOT_SATISFIED);
     assert_int_equal(G_context.req_type, REQUEST_NONE);

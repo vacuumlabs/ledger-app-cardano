@@ -118,10 +118,11 @@ void ui_free_pairs(void) {
     g_pending_force_page_start = false;
     if (g_pairs != NULL) {
         // g_pairs[i].item points to static labels (UI_STATIC_LABEL), so only values are owned/freed
-        // here.
-        for (uint16_t i = 0; i < g_next_pair_index; i++) {
-            if (g_pairs[i].value != NULL) {
-                APP_MEM_FREE((void *) g_pairs[i].value);
+        // here. Free values in reverse insertion order to keep teardown aligned with typical
+        // append-only allocation patterns used during UI rendering.
+        for (uint16_t i = g_next_pair_index; i > 0; i--) {
+            if (g_pairs[i - 1].value != NULL) {
+                APP_MEM_FREE((void *) g_pairs[i - 1].value);
             }
         }
         APP_MEM_FREE_AND_NULL((void **) &g_pairs);
@@ -133,8 +134,8 @@ void ui_free_pairs(void) {
 }
 
 void ui_all_cleanup(void) {
-    ui_free_pairs();
     ui_free_warnings();
+    ui_free_pairs();
 }
 
 uint16_t ui_pairs_get_count(void) {
@@ -193,15 +194,14 @@ __noinline_due_to_stack__ bool ui_pairs_add_static_label_impl(const char *label,
 
     if (shrink) {
         size_t len = strlen(tmp_buf);
-        char *shrinked = NULL;
-        if (!allocate_zeroed((void **) &shrinked, len + 1)) {
+        // APP_MEM_REALLOC keeps tmp_buf valid on failure, so the explicit free below remains safe.
+        char *shrinked = APP_MEM_REALLOC(tmp_buf, len + 1);
+        if (shrinked == NULL) {
             TRACE("Failed to allocate shrunk string");     // LCOV_EXCL_LINE
             ui_set_error_status(UI_STATUS_OUT_OF_MEMORY);  // LCOV_EXCL_LINE
             APP_MEM_FREE(tmp_buf);                         // LCOV_EXCL_LINE
             return false;                                  // LCOV_EXCL_LINE
         }
-        memcpy(shrinked, tmp_buf, len + 1);
-        APP_MEM_FREE(tmp_buf);
         value_ptr = shrinked;
     }
 
