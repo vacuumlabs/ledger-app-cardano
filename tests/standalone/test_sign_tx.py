@@ -26,6 +26,7 @@ from tests.standalone.utils import (
     choice_reject,
     nano_navigate_until_text_relaxed,
     NavContext,
+    assert_expected_deny_and_app_alive,
 )
 from tests.standalone.settings import SettingID, SettingValue, settings_set
 from tests.standalone.input_files.signTx import (
@@ -639,7 +640,7 @@ def test_sign_tx_deny(
                 do_comparison=False,
             )
 
-    # Phase 1: try to observe expected failure during init/chunk/review.
+    # Phase 1: try to observe the expected deny during init/chunk/review.
     try:
         client.sign_tx(
             tx=deny_tx,
@@ -649,7 +650,7 @@ def test_sign_tx_deny(
             on_review=review_tx,
         )
     except ExceptionRAPDU as err:
-        assert err.status == testCase.expected_swo
+        assert_expected_deny_and_app_alive(backend, err, testCase.expected_swo)
         return
 
     # Phase 2: tx body passed; expected denial must happen in witness phase.
@@ -675,6 +676,7 @@ def test_sign_tx_deny(
             client.sign_tx_witness(witness_path)
         except ExceptionRAPDU as err:
             if err.status == testCase.expected_swo:
+                assert_expected_deny_and_app_alive(backend, err, testCase.expected_swo)
                 deny_observed = True
                 break
             raise

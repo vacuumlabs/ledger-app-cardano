@@ -36,6 +36,7 @@ from tests.standalone.utils import (
     get_device_pubkey,
     choice_approve,
     NavContext,
+    assert_expected_deny_and_app_alive,
 )
 from tests.standalone.settings import SettingID, SettingValue, settings_set
 
@@ -170,7 +171,9 @@ def test_pubkey_deny(backend: BackendInterface, testCase: PubKeyTestCase) -> Non
     with pytest.raises(ExceptionRAPDU) as err:
         with client.get_pubkey_async(testCase.path):
             pass
-    assert err.value.status == StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED
+    assert_expected_deny_and_app_alive(
+        backend, err.value, StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED
+    )
 
 
 def _check_ragger_expect_pubkey(

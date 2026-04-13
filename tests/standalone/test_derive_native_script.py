@@ -43,6 +43,7 @@ from tests.standalone.utils import (
     idTestFunc,
     get_device_pubkey,
     nano_navigate_without_waits,
+    assert_expected_deny_and_app_alive,
 )
 
 
@@ -178,8 +179,10 @@ def test_derive_native_script_hash(
 def _deriveNativeScriptHash_init(
     nav_ctx: NavContext, client: CommandSender, test_name: str, step_counter: list[int]
 ) -> None:
-    with client.derive_script_init_async():
-        if nav_ctx.is_nano:
+    with client.derive_script_init_async() as has_data_available:
+        if has_data_available:
+            pass
+        elif nav_ctx.is_nano:
             snap_name = f"{test_name}/step_{step_counter[0]:02d}_init"
             step_counter[0] += 1
             nav_ctx.navigator.navigate_until_text_and_compare(
@@ -256,8 +259,10 @@ def _deriveNativeScriptHash_addSimpleScript(
         step_counter (list[int]): Mutable step counter for unique snapshot names
     """
 
-    with client.derive_script_add_simple_async(script):
-        if nav_ctx.is_nano:
+    with client.derive_script_add_simple_async(script) as has_data_available:
+        if has_data_available:
+            pass
+        elif nav_ctx.is_nano:
             snap_name = f"{test_name}/step_{step_counter[0]:02d}_simple"
             step_counter[0] += 1
             step_right_clicks = _native_script_step_right_clicks(script)
@@ -310,8 +315,10 @@ def _deriveScriptHash_startComplexScript(
         step_counter (list[int]): Mutable step counter for unique snapshot names
     """
 
-    with client.derive_script_add_complex_async(script):
-        if nav_ctx.is_nano:
+    with client.derive_script_add_complex_async(script) as has_data_available:
+        if has_data_available:
+            pass
+        elif nav_ctx.is_nano:
             snap_name = f"{test_name}/step_{step_counter[0]:02d}_complex"
             step_counter[0] += 1
             nav_ctx.navigator.navigate_until_text_and_compare(
@@ -351,8 +358,12 @@ def _deriveNativeScriptHash_finishWholeNativeScript(
     """
 
     assert testCase.displayFormat is not None
-    with client.derive_script_finish_async(testCase.displayFormat):
-        if nav_ctx.is_nano:
+    with client.derive_script_finish_async(
+        testCase.displayFormat
+    ) as has_data_available:
+        if has_data_available:
+            pass
+        elif nav_ctx.is_nano:
             snap_name = f"{testCase.name}/step_{step_counter[0]:02d}_finish"
             step_counter[0] += 1
             nav_ctx.navigator.navigate_until_text_and_compare(
@@ -419,4 +430,6 @@ def test_derive_native_script_hash_deny(
         )
 
     assert testCase.unit_test_expect is not None
-    assert err.value.status == testCase.unit_test_expect.swo
+    assert_expected_deny_and_app_alive(
+        backend, err.value, testCase.unit_test_expect.swo
+    )

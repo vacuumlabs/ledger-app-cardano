@@ -403,7 +403,7 @@ class CommandSender:
     @contextmanager
     def derive_script_add_simple_async(
         self, script: NativeScript
-    ) -> Generator[None, None, None]:
+    ) -> Generator[bool, None, None]:
         """APDU NATIVE SCRIPT HASH - SIMPLE SCRIPT step
 
         Args:
@@ -413,19 +413,23 @@ class CommandSender:
             Generator
         """
 
-        with self._exchange_async(self._cmd_builder.derive_script_add_simple(script)):
-            yield
+        with self._exchange_async(
+            self._cmd_builder.derive_script_add_simple(script)
+        ) as has_data_available:
+            yield has_data_available
 
     @contextmanager
-    def derive_script_init_async(self) -> Generator[None, None, None]:
+    def derive_script_init_async(self) -> Generator[bool, None, None]:
         """APDU NATIVE SCRIPT HASH - INIT step"""
-        with self._exchange_async(self._cmd_builder.derive_script_init()):
-            yield
+        with self._exchange_async(
+            self._cmd_builder.derive_script_init()
+        ) as has_data_available:
+            yield has_data_available
 
     @contextmanager
     def derive_script_add_complex_async(
         self, script: NativeScript
-    ) -> Generator[None, None, None]:
+    ) -> Generator[bool, None, None]:
         """APDU NATIVE SCRIPT HASH - COMPLEX SCRIPT step
 
         Args:
@@ -435,13 +439,15 @@ class CommandSender:
             Generator
         """
 
-        with self._exchange_async(self._cmd_builder.derive_script_add_complex(script)):
-            yield
+        with self._exchange_async(
+            self._cmd_builder.derive_script_add_complex(script)
+        ) as has_data_available:
+            yield has_data_available
 
     @contextmanager
     def derive_script_finish_async(
         self, display_format: NativeScriptHashDisplayFormat
-    ) -> Generator[None, None, None]:
+    ) -> Generator[bool, None, None]:
         """APDU NATIVE SCRIPT HASH - FINISH step
 
         Args:
@@ -453,8 +459,8 @@ class CommandSender:
 
         with self._exchange_async(
             self._cmd_builder.derive_script_finish(display_format)
-        ):
-            yield
+        ) as has_data_available:
+            yield has_data_available
 
     @contextmanager
     def sign_cip36_init_async(

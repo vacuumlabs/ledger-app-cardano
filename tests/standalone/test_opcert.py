@@ -32,6 +32,7 @@ from tests.standalone.utils import (
     review_approve,
     verify_signature,
     NavContext,
+    assert_expected_deny_and_app_alive,
 )
 
 
@@ -94,4 +95,4 @@ def test_opcert_deny(backend: BackendInterface, testCase: OpCertDenyTestCase) ->
     ) + bytes.fromhex(testCase.payload_hex)
     with pytest.raises(ExceptionRAPDU) as err:
         backend.exchange_raw(apdu)
-    assert err.value.status == testCase.expected_swo
+    assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)

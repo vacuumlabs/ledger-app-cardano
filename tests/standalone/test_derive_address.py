@@ -24,7 +24,11 @@ from tests.standalone.input_files.derive_address import (
     shelleyTestCasesWithConfirm,
     denyTestCases,
 )
-from tests.standalone.utils import idTestFunc, derive_address
+from tests.standalone.utils import (
+    idTestFunc,
+    derive_address,
+    assert_expected_deny_and_app_alive,
+)
 
 
 @pytest.mark.parametrize("mode", ["return", "display"], ids=["return", "display"])
@@ -97,4 +101,4 @@ def test_derive_address_deny(
         pytest.fail(
             f"MISSING_EXPECTED_SWO [{testCase.name}] expected_swo must be set for deny fixtures"
         )
-    assert err.value.status == testCase.expected_swo
+    assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)

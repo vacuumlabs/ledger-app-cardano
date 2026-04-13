@@ -25,8 +25,11 @@ from ragger.navigator.navigation_scenario import (
 
 from ragger.bip.seed import SPECULOS_MNEMONIC
 from ragger.backend import BackendInterface
+from ragger.error import ExceptionRAPDU
 
+from tests.application_client.command_sender import CommandSender
 from tests.application_client.command_builder import AddressType
+from tests.application_client.status_words import StatusWord
 
 from tests.standalone.input_files.derive_address import DeriveAddressTestCase
 from tests.standalone.input_files.pubkey import (
@@ -66,6 +69,33 @@ class NavContext:
     @property
     def screenshot_path(self) -> Path:
         return self.scenario_navigator.screenshot_path
+
+
+def assert_expected_deny_and_app_alive(
+    backend: BackendInterface, err: ExceptionRAPDU, expected_swo: int | None
+) -> None:
+    assert expected_swo is not None
+    assert err.status == expected_swo
+
+    try:
+        response = CommandSender(backend).get_version_raw()
+    except ExceptionRAPDU as liveness_err:
+        raise AssertionError(
+            "App correctly denied the invalid input, but is not alive afterwards.\n"
+            f"Expected deny SW: {hex(expected_swo)}\n"
+            f"Observed deny SW: {hex(err.status)}\n"
+            f"Follow-up GET_VERSION SW: {hex(liveness_err.status)}\n"
+            "This usually means the app sent the correct deny response and then "
+            "crashed or corrupted its APDU/session state before the next command."
+        ) from liveness_err
+
+    assert response.status == StatusWord.SWO_SUCCESS, (
+        "App correctly denied the invalid input, but is not healthy afterwards.\n"
+        f"Expected deny SW: {hex(expected_swo)}\n"
+        f"Observed deny SW: {hex(err.status)}\n"
+        f"Follow-up GET_VERSION SW: {hex(response.status)}\n"
+        f"Expected GET_VERSION SW: {hex(StatusWord.SWO_SUCCESS)}"
+    )
 
 
 def _nano_instructions(

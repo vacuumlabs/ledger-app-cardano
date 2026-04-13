@@ -48,6 +48,7 @@ from tests.standalone.utils import (
     derive_address,
     review_approve,
     NavContext,
+    assert_expected_deny_and_app_alive,
 )
 
 
@@ -99,7 +100,7 @@ def test_sign_message_deny(
         chunk_apdu = build_sign_msg_chunk_apdu_for_deny(testCase, 0)
         with pytest.raises(ExceptionRAPDU) as err:
             backend.exchange_raw(chunk_apdu)
-        assert err.value.status == testCase.expected_swo
+        assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)
         return
 
     # Standard flow: always send INIT first
@@ -135,7 +136,7 @@ def test_sign_message_deny(
     if expect_init_failure:
         with pytest.raises(ExceptionRAPDU) as err:
             backend.exchange_raw(init_apdu)
-        assert err.value.status == testCase.expected_swo
+        assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)
         return
 
     # INIT succeeded, continue to CHUNK phase
@@ -150,7 +151,7 @@ def test_sign_message_deny(
         chunk_apdu = build_sign_msg_chunk_apdu_for_deny(testCase, 0)
         with pytest.raises(ExceptionRAPDU) as err:
             backend.exchange_raw(chunk_apdu)
-        assert err.value.status == testCase.expected_swo
+        assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)
         return
 
     # Handle CONFIRM-phase deny scenarios
@@ -159,7 +160,7 @@ def test_sign_message_deny(
         confirm_apdu = build_sign_msg_confirm_apdu_for_deny(testCase)
         with pytest.raises(ExceptionRAPDU) as err:
             backend.exchange_raw(confirm_apdu)
-        assert err.value.status == testCase.expected_swo
+        assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)
         return
 
     if testCase.send_confirm_with_payload:
@@ -176,7 +177,7 @@ def test_sign_message_deny(
         confirm_apdu = build_sign_msg_confirm_apdu_for_deny(testCase)
         with pytest.raises(ExceptionRAPDU) as err:
             backend.exchange_raw(confirm_apdu)
-        assert err.value.status == testCase.expected_swo
+        assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)
         return
 
     # If we reach here, the test case configuration is incomplete

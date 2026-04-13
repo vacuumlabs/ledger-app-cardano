@@ -37,6 +37,7 @@ from tests.standalone.utils import (
     review_approve,
     verify_signature,
     NavContext,
+    assert_expected_deny_and_app_alive,
 )
 
 
@@ -148,7 +149,7 @@ def test_cvote_deny(backend: BackendInterface, testCase: CVoteDenyTestCase) -> N
         )
         with pytest.raises(ExceptionRAPDU) as err:
             backend.exchange_raw(chunk_apdu)
-        assert err.value.status == testCase.expected_swo
+        assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)
         return
 
     if testCase.invalid_witness_path is not None:
@@ -173,7 +174,7 @@ def test_cvote_deny(backend: BackendInterface, testCase: CVoteDenyTestCase) -> N
         )
         with pytest.raises(ExceptionRAPDU) as err:
             backend.exchange_raw(confirm_apdu)
-        assert err.value.status == testCase.expected_swo
+        assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)
         return
 
     # Malformed INIT payload.
@@ -193,4 +194,4 @@ def test_cvote_deny(backend: BackendInterface, testCase: CVoteDenyTestCase) -> N
     )
     with pytest.raises(ExceptionRAPDU) as err:
         backend.exchange_raw(init_apdu)
-    assert err.value.status == testCase.expected_swo
+    assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)
