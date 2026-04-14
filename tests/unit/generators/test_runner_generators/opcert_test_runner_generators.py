@@ -102,7 +102,7 @@ static void run_opcert_fixture(const opcert_fixture_t *fixture) {
     test_read_buffer_t opcert_buffer = make_test_read_buffer(fixture->payload, fixture->payload_len);
     apdu_response_begin(INS_SIGN_OPCERT);
     handler_sign_opcert(&opcert_buffer.sdk_buffer);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&opcert_buffer, fixture->payload);
     assert_int_equal(g_last_swo, SWO_SUCCESS);
     assert_int_equal(g_last_response_len, ED25519_SIGNATURE_LENGTH);

@@ -28,7 +28,7 @@ static inline void run_cvote_apdu(const uint8_t *data, size_t len, uint8_t p1) {
     buffer_t buf = {.ptr = (uint8_t *) data, .size = len, .offset = 0};
     apdu_response_begin(INS_SIGN_CVOTE);
     handler_sign_cvote(&buf, p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 // A minimal valid INIT payload: 4-byte big-endian total length = 33 bytes,

@@ -76,7 +76,7 @@ static inline void run_fixture(const sign_msg_fixture_t *fixture) {
         make_test_read_buffer(fixture->init_data, fixture->init_data_len);
     apdu_response_begin(INS_SIGN_MSG);
     handler_sign_msg(&init_buffer.sdk_buffer, P1_SIGN_MSG_INIT);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&init_buffer, fixture->init_data);
     assert_int_equal(g_last_response_swo, fixture->check_expected);
     assert_int_equal(G_context.sign_msg_info.warnings, fixture->expected_warning_bits);
@@ -86,7 +86,7 @@ static inline void run_fixture(const sign_msg_fixture_t *fixture) {
         test_read_buffer_t chunk_buffer = make_test_read_buffer(chunk->data, chunk->data_len);
         apdu_response_begin(INS_SIGN_MSG);
         handler_sign_msg(&chunk_buffer.sdk_buffer, P1_SIGN_MSG_CHUNK);
-        apdu_response_assert_sent_or_deferred();
+        apdu_response_finalize_after_handler();
         assert_read_buffer_unchanged_and_cleanup(&chunk_buffer, chunk->data);
         assert_int_equal(g_last_response_swo, fixture->check_expected);
     }
@@ -95,7 +95,7 @@ static inline void run_fixture(const sign_msg_fixture_t *fixture) {
         make_test_read_buffer(fixture->confirm_data, fixture->confirm_data_len);
     apdu_response_begin(INS_SIGN_MSG);
     handler_sign_msg(&confirm_buffer.sdk_buffer, P1_SIGN_MSG_CONFIRM);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&confirm_buffer, fixture->confirm_data);
     assert_int_equal(g_last_response_swo, fixture->check_expected);
 

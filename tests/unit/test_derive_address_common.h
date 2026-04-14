@@ -71,7 +71,7 @@ static inline void run_fixture(const derive_address_fixture_t *fixture) {
     TRACE_BUFFER(derive_address_buffer.sdk_buffer.ptr, derive_address_buffer.sdk_buffer.size);
     apdu_response_begin(INS_DERIVE_ADDRESS);
     handler_derive_address(&derive_address_buffer.sdk_buffer, fixture->p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&derive_address_buffer, fixture->data);
     assert_int_equal(g_last_response_swo, fixture->check_expected);
 

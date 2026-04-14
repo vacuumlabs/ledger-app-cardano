@@ -55,7 +55,7 @@ static void test_finish_must_keep_request_lock_until_user_confirmation(void **st
     };
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&init_buf, P1_NATIVE_SCRIPT_INIT);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(get_last_swo(), SWO_SUCCESS);
 
     // Add one simple valid script: [type=PUBKEY, cred=KEY_HASH, 28-byte hash]
@@ -72,7 +72,7 @@ static void test_finish_must_keep_request_lock_until_user_confirmation(void **st
     };
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&simple_buf, P1_NATIVE_SCRIPT_ADD_SIMPLE);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(get_last_swo(), SWO_SUCCESS);
     assert_int_equal(G_context.req_type, REQUEST_DERIVE_NATIVE_SCRIPT_HASH);
 
@@ -84,7 +84,7 @@ static void test_finish_must_keep_request_lock_until_user_confirmation(void **st
     };
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&finish_buf, P1_NATIVE_SCRIPT_FINISH);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 
     // Expected invariant: request lock remains active while waiting for final confirmation.
     assert_int_equal(G_context.req_type, REQUEST_DERIVE_NATIVE_SCRIPT_HASH);
@@ -104,7 +104,7 @@ static void test_simple_parse_failure_must_not_reach_postparse_state_mutation(vo
     };
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&init_buf, P1_NATIVE_SCRIPT_INIT);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(get_last_swo(), SWO_SUCCESS);
 
     // Invalid device-owned key path fixture from reject vectors.
@@ -121,7 +121,7 @@ static void test_simple_parse_failure_must_not_reach_postparse_state_mutation(vo
     // This should produce a rejection SW and clean reset only.
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&invalid_buf, P1_NATIVE_SCRIPT_ADD_SIMPLE);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(get_last_swo(), SWO_NATIVE_SCRIPT_PARSING_FAIL_PUBKEY_CREDENTIAL);
     assert_int_equal(G_context.req_type, REQUEST_NONE);
 }
@@ -294,7 +294,7 @@ static void test_init_apdu_with_extra_bytes(void **state) {
     buffer_t buf = {.ptr = payload, .size = sizeof(payload), .offset = 0};
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&buf, P1_NATIVE_SCRIPT_INIT);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 
     assert_int_equal(get_last_swo(), SWO_WRONG_DATA_LENGTH);
     assert_int_equal(G_context.req_type, REQUEST_NONE);
@@ -313,7 +313,7 @@ static void test_non_init_apdu_before_init_rejected(void **state) {
     buffer_t buf = {.ptr = payload, .size = sizeof(payload), .offset = 0};
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&buf, P1_NATIVE_SCRIPT_START_COMPLEX);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 
     assert_int_equal(get_last_swo(), SWO_COMMAND_NOT_ALLOWED);
     assert_int_equal(G_context.req_type, REQUEST_NONE);
@@ -331,7 +331,7 @@ static void test_double_init_rejected(void **state) {
     buffer_t init_buf = {.ptr = NULL, .size = 0, .offset = 0};
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&init_buf, P1_NATIVE_SCRIPT_INIT);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 
     assert_int_equal(get_last_swo(), SWO_COMMAND_NOT_ALLOWED);
     assert_int_equal(G_context.req_type, REQUEST_NONE);

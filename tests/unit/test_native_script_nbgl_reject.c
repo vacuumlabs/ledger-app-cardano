@@ -84,7 +84,7 @@ static void run_apdu(const uint8_t *data, size_t data_len, uint8_t p1) {
     test_read_buffer_t buf = make_test_read_buffer(data, data_len);
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&buf.sdk_buffer, p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&buf, data);
 }
 

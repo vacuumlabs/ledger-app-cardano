@@ -52,7 +52,7 @@ def _build_deny_helpers() -> List[str]:
         "    test_read_buffer_t init_buffer = make_test_read_buffer(init_data, init_data_len);",
         "    apdu_response_begin(INS_SIGN_MSG);",
         "    handler_sign_msg(&init_buffer.sdk_buffer, P1_SIGN_MSG_INIT);",
-        "    apdu_response_assert_sent_or_deferred();",
+        "    apdu_response_finalize_after_handler();",
         "    assert_read_buffer_unchanged_and_cleanup(&init_buffer, init_data);",
         "    assert_int_equal(g_last_response_swo, expected_swo);",
         "}",
@@ -61,7 +61,7 @@ def _build_deny_helpers() -> List[str]:
         "    test_read_buffer_t chunk_buffer = make_test_read_buffer(chunk_data, chunk_data_len);",
         "    apdu_response_begin(INS_SIGN_MSG);",
         "    handler_sign_msg(&chunk_buffer.sdk_buffer, P1_SIGN_MSG_CHUNK);",
-        "    apdu_response_assert_sent_or_deferred();",
+        "    apdu_response_finalize_after_handler();",
         "    assert_read_buffer_unchanged_and_cleanup(&chunk_buffer, chunk_data);",
         "    assert_int_equal(g_last_response_swo, expected_swo);",
         "}",
@@ -70,7 +70,7 @@ def _build_deny_helpers() -> List[str]:
         "    test_read_buffer_t confirm_buffer = make_test_read_buffer(confirm_data, confirm_data_len);",
         "    apdu_response_begin(INS_SIGN_MSG);",
         "    handler_sign_msg(&confirm_buffer.sdk_buffer, P1_SIGN_MSG_CONFIRM);",
-        "    apdu_response_assert_sent_or_deferred();",
+        "    apdu_response_finalize_after_handler();",
         "    assert_read_buffer_unchanged_and_cleanup(&confirm_buffer, confirm_data);",
         "    assert_int_equal(g_last_response_swo, expected_swo);",
         "}",
@@ -277,7 +277,7 @@ def _build_deny_test_functions() -> tuple[List[str], List[str]]:
             body_lines.append(
                 "        handler_sign_msg(&buf.sdk_buffer, P1_SIGN_MSG_INIT);"
             )
-            body_lines.append("        apdu_response_assert_sent_or_deferred();")
+            body_lines.append("        apdu_response_finalize_after_handler();")
             body_lines.append(
                 f"        assert_int_equal(g_last_response_swo, {test_case.expected_swo.name});"
             )

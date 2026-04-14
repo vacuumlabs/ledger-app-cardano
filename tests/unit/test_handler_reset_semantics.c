@@ -91,9 +91,9 @@ static void test_reset_app_context_cleans_stale_deferred_state(void **state) {
     // if reset_app_context() did not fix up the stale deferred state this
     // would fire LEDGER_ASSERT.
     apdu_response_begin(INS_GET_PUBLIC_KEY);
-    // Send a response so apdu_response_assert_sent_or_deferred() is satisfied.
+    // Send a response so apdu_response_finalize_after_handler() is satisfied.
     apdu_response_send_sw(SWO_SUCCESS);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 static void test_native_script_finish_before_script_completion_resets_context(void **state) {
@@ -107,7 +107,7 @@ static void test_native_script_finish_before_script_completion_resets_context(vo
     };
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&init_buf, P1_NATIVE_SCRIPT_INIT);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(g_last_swo, SWO_SUCCESS);
 
     uint8_t finish_payload[1] = {DISPLAY_NATIVE_SCRIPT_HASH_BECH32};
@@ -119,7 +119,7 @@ static void test_native_script_finish_before_script_completion_resets_context(vo
 
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(&finish_buf, P1_NATIVE_SCRIPT_FINISH);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 
     assert_int_equal(g_last_swo, SWO_NATIVE_SCRIPT_PARSING_FAIL_NESTING);
     assert_int_equal(G_context.req_type, REQUEST_NONE);

@@ -48,6 +48,10 @@ static void test_app_main_handle_unexpected_exception_without_response_sends_unk
 
     app_main_handle_unexpected_exception(TEST_UNHANDLED_EXCEPTION);
     assert_int_equal(g_last_response_swo, SWO_UNKNOWN);
+
+    apdu_response_begin(INS_GET_VERSION);
+    apdu_response_send_sw(SWO_SUCCESS);
+    apdu_response_finalize_after_handler();
 }
 
 static void test_app_main_handle_unexpected_exception_after_response_does_not_double_send(void **state) {

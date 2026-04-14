@@ -56,7 +56,7 @@ void apdu_response_deferred(void) {
     G_apdu_response_state.response_deferred_to_ux = true;
 }
 
-void apdu_response_assert_sent_or_deferred(void) {
+void apdu_response_finalize_after_handler(void) {
     LEDGER_ASSERT(
         G_apdu_response_state.response_sent || G_apdu_response_state.response_deferred_to_ux,
         "No APDU response or UX defer marker for INS=0x%02x",
@@ -91,6 +91,10 @@ bool apdu_response_was_sent(void) {
     return G_apdu_response_state.response_sent;
 }
 
+bool apdu_response_is_pending_ux(void) {
+    return !G_apdu_response_state.response_sent && G_apdu_response_state.response_deferred_to_ux;
+}
+
 void reset_app_context(void) {
     TRACE("reset_app_context");
 
@@ -108,7 +112,7 @@ void reset_app_context(void) {
     // Fix up APDU response state for the next command:
     //
     //   sent=false, deferred=false  normal idle state, nothing to do
-    //   sent=true,  deferred=false  response sent; apdu_response_assert_sent_or_deferred()
+    //   sent=true,  deferred=false  response sent; apdu_response_finalize_after_handler()
     //                               will acknowledge it
     //   sent=true,  deferred=true   response sent; as above
     //   sent=false, deferred=true   stale: some failure occurred between

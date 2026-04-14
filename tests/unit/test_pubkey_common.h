@@ -56,7 +56,7 @@ static inline void run_fixture(const pubkey_fixture_t *fixture) {
 
     apdu_response_begin(INS_GET_PUBLIC_KEY);
     handler_get_public_key(&pubkey_buffer.sdk_buffer);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&pubkey_buffer, fixture->data);
     assert_int_equal(g_last_response_swo, fixture->check_expected);
 

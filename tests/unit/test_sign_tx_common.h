@@ -47,13 +47,13 @@ static inline bool fixture_blind_signing_enabled(const tx_fixture_t *fixture) {
 static inline void run_sign_tx_apdu(buffer_t *buffer, uint8_t p1) {
     apdu_response_begin(INS_SIGN_TX);
     handler_sign_tx(buffer, p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 static inline void run_sign_tx_witness_apdu(buffer_t *buffer) {
     apdu_response_begin(INS_SIGN_TX);
     handler_sign_tx_witness(buffer);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 static inline void run_sign_tx_body_chunked(const uint8_t *raw_tx, size_t raw_tx_len) {
@@ -79,7 +79,7 @@ static inline void run_sign_tx_aux_data_apdu(buffer_t *buffer, uint8_t p2) {
     io_capture_reset();
     apdu_response_begin(INS_SIGN_TX);
     handler_sign_tx_aux_data(buffer, p2);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 static inline void reset_context(void) {

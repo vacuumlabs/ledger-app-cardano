@@ -13,6 +13,6 @@ static inline int assert_no_pending_apdu_response(void **state) {
     (void) state;
     apdu_response_begin(INS_GET_VERSION);
     apdu_response_send_sw(SWO_SUCCESS);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     return 0;
 }

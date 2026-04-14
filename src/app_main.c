@@ -47,9 +47,9 @@ void app_main_process_one_apdu(void) {
             if (!apdu_parser(&cmd, G_io_apdu_buffer, input_len)) {
                 TRACE("BAD LENGTH:");
                 TRACE_BUFFER(G_io_apdu_buffer, input_len);
-                apdu_response_begin(INS_NONE);
-                send_swo_and_reset(SWO_WRONG_DATA_LENGTH);
-                apdu_response_assert_sent_or_deferred();
+                int io_send_result = io_send_sw(SWO_WRONG_DATA_LENGTH);
+                LEDGER_ASSERT(io_send_result >= 0, "io_send_sw failed");
+                reset_app_context();
             } else {
                 TRACE("CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=",
                       cmd.cla,

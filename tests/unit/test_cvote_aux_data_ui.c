@@ -103,7 +103,7 @@ static void run_sign_tx_apdu_helper(const uint8_t *data, size_t data_len, uint8_
     test_read_buffer_t buf = make_test_read_buffer(data, data_len);
     apdu_response_begin(INS_SIGN_TX);
     handler_sign_tx(&buf.sdk_buffer, p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&buf, data);
 }
 
@@ -112,7 +112,7 @@ static void run_aux_data_apdu_helper(const uint8_t *data, size_t data_len, uint8
     test_read_buffer_t buf = make_test_read_buffer(data, data_len);
     apdu_response_begin(INS_SIGN_TX);
     handler_sign_tx_aux_data(&buf.sdk_buffer, p2);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&buf, data);
 }
 

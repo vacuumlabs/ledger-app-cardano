@@ -37,7 +37,7 @@ static void run_sign_msg_apdu(const uint8_t *data, size_t data_len, uint8_t p1) 
     test_read_buffer_t sign_msg_buffer = make_test_read_buffer(data, data_len);
     apdu_response_begin(INS_SIGN_MSG);
     handler_sign_msg(&sign_msg_buffer.sdk_buffer, p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&sign_msg_buffer, data);
 }
 

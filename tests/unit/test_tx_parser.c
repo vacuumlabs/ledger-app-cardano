@@ -71,7 +71,7 @@ static void test_parse_tx_fails_on_missing_inputs(void **state) {
     tx_body_ctx()->raw_tx_current_length = 0;
     apdu_response_begin(INS_SIGN_TX);
     bool ok = tx_validate();
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_false(ok);
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_INPUTS);
 }
@@ -82,7 +82,7 @@ static void test_parse_tx_rejects_oversized_buffer(void **state) {
 
     apdu_response_begin(INS_SIGN_TX);
     tx_handle_parse_error(SWO_INVALID_TX_LENGTH);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(g_last_swo, SWO_INVALID_TX_LENGTH);
 }
 
@@ -92,7 +92,7 @@ static void test_parse_error_mapping_fee(void **state) {
 
     apdu_response_begin(INS_SIGN_TX);
     tx_handle_parse_error(SWO_TX_PARSING_FAIL_FEE);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_FEE);
 }
 
@@ -102,7 +102,7 @@ static void test_parse_error_mapping_buffer_not_fully_consumed(void **state) {
 
     apdu_response_begin(INS_SIGN_TX);
     tx_handle_parse_error(SWO_TX_PARSING_FAIL_BUFFER_NOT_FULLY_CONSUMED);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_BUFFER_NOT_FULLY_CONSUMED);
 }
 
@@ -168,7 +168,7 @@ static void test_process_inputs_field_parse_error_sends_inputs_swo(void **state)
 
     apdu_response_begin(INS_SIGN_TX);
     bool ok = tx_process_inputs(&buf, &tx_body_ctx()->processing_state);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_false(ok);
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_INPUTS);
 }
@@ -229,7 +229,7 @@ static void test_process_reference_inputs_field_parse_error_sends_reference_swo(
 
     apdu_response_begin(INS_SIGN_TX);
     bool ok = tx_process_reference_inputs(&buf, &tx_body_ctx()->processing_state);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_false(ok);
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_REFERENCE_INPUTS);
 }
@@ -293,7 +293,7 @@ static void test_process_required_signers_field_parse_error_sends_required_swo(v
 
     apdu_response_begin(INS_SIGN_TX);
     bool ok = tx_process_required_signers(&buf, &tx_body_ctx()->processing_state);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_false(ok);
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_REQUIRED_SIGNERS);
 }
@@ -453,7 +453,7 @@ static void test_validate_fails_on_truncated_fee(void **state) {
 
     apdu_response_begin(INS_SIGN_TX);
     bool ok = tx_validate();
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_false(ok);
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_FEE);
 }
@@ -503,7 +503,7 @@ static void test_validate_fails_on_truncated_ttl(void **state) {
 
     apdu_response_begin(INS_SIGN_TX);
     bool ok = tx_validate();
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_false(ok);
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_TTL);
 }
@@ -552,7 +552,7 @@ static void test_validate_fails_on_truncated_withdrawals(void **state) {
 
     apdu_response_begin(INS_SIGN_TX);
     bool ok = tx_validate();
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_false(ok);
     assert_int_equal(g_last_swo, SWO_TX_PARSING_FAIL_WITHDRAWALS);
 }

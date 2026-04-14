@@ -87,7 +87,7 @@ static void test_nbgl_reject_on_address_review_resets_context(void **state) {
 
     apdu_response_begin(INS_DERIVE_ADDRESS);
     handler_derive_address(&derive_address_buffer.sdk_buffer, P1_ADDRESS_DISPLAY);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&derive_address_buffer, SHELLEY_DISPLAY_APDU_PAYLOAD);
     nbgl_mock_assert_all_final_decisions_consumed();
 
@@ -108,7 +108,7 @@ static void test_derive_address_rejects_when_request_already_active(void **state
 
     apdu_response_begin(INS_DERIVE_ADDRESS);
     handler_derive_address(&derive_address_buffer.sdk_buffer, P1_ADDRESS_DISPLAY);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&derive_address_buffer, SHELLEY_DISPLAY_APDU_PAYLOAD);
 
     assert_int_equal(g_last_response_swo, SWO_COMMAND_NOT_ALLOWED);
@@ -126,7 +126,7 @@ static void test_derive_address_parse_failure(void **state) {
     test_read_buffer_t buf = make_test_read_buffer(payload, sizeof(payload));
     apdu_response_begin(INS_DERIVE_ADDRESS);
     handler_derive_address(&buf.sdk_buffer, P1_ADDRESS_DISPLAY);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 
     assert_int_equal(g_last_response_swo, SWO_DERIVE_ADDRESS_PARSING_FAIL_ADDRESS_PARAMS);
     assert_int_equal(G_context.req_type, REQUEST_NONE);
@@ -144,7 +144,7 @@ static void test_derive_address_trailing_bytes(void **state) {
     test_read_buffer_t buf = make_test_read_buffer(payload, sizeof(payload));
     apdu_response_begin(INS_DERIVE_ADDRESS);
     handler_derive_address(&buf.sdk_buffer, P1_ADDRESS_DISPLAY);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 
     assert_int_equal(g_last_response_swo, SWO_WRONG_DATA_LENGTH);
     assert_int_equal(G_context.req_type, REQUEST_NONE);
@@ -158,7 +158,7 @@ static void test_derive_address_display_policy_deny(void **state) {
                                                    sizeof(REWARD_KEY_HASH_STAKING_DISPLAY_APDU));
     apdu_response_begin(INS_DERIVE_ADDRESS);
     handler_derive_address(&buf.sdk_buffer, P1_ADDRESS_DISPLAY);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 
     assert_int_equal(g_last_response_swo, SWO_SECURITY_CONDITION_NOT_SATISFIED);
     assert_int_equal(G_context.req_type, REQUEST_NONE);

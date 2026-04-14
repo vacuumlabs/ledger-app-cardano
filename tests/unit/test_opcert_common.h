@@ -54,6 +54,6 @@ static inline void run_opcert_deny_fixture(const opcert_deny_fixture_t *fixture)
     };
     apdu_response_begin(INS_SIGN_OPCERT);
     handler_sign_opcert(&buf);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_int_equal(g_last_response_swo, fixture->expected_swo);
 }

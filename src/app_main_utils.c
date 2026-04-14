@@ -20,5 +20,6 @@ void app_main_handle_unexpected_exception(uint16_t exception) {
         reset_app_context();
     } else {
         send_swo_and_reset(swo);
+        apdu_response_state_force_reset();
     }
 }

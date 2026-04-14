@@ -62,19 +62,19 @@ static void reset_context(void) {
 static inline void run_sign_tx_apdu(buffer_t *buffer, uint8_t p1) {
     apdu_response_begin(INS_SIGN_TX);
     handler_sign_tx(buffer, p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 static inline void run_sign_tx_witness_apdu(buffer_t *buffer) {
     apdu_response_begin(INS_SIGN_TX);
     handler_sign_tx_witness(buffer);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 static inline void run_sign_tx_aux_data_apdu(buffer_t *buffer, uint8_t p2) {
     apdu_response_begin(INS_SIGN_TX);
     handler_sign_tx_aux_data(buffer, p2);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 typedef struct {

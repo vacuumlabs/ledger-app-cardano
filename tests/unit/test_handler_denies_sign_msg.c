@@ -28,7 +28,7 @@ static inline void run_sign_msg_apdu(const uint8_t *data, size_t len, uint8_t p1
     buffer_t buf = {.ptr = (uint8_t *) data, .size = len, .offset = 0};
     apdu_response_begin(INS_SIGN_MSG);
     handler_sign_msg(&buf, p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 // ----------------------------------------------------------------------

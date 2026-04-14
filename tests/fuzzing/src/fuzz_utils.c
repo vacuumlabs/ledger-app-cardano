@@ -16,7 +16,7 @@ fuzz_exit_jump_ctx_t fuzz_exit_jump_ctx;
 
 void fuzzing_reset_state(void) {
     // Reset APDU response state in case a previous iteration terminated early
-    // via siglongjmp from app_exit(), bypassing apdu_response_assert_sent_or_deferred().
+    // via siglongjmp from app_exit(), bypassing apdu_response_finalize_after_handler().
     apdu_response_state_force_reset();
 
     // Clean up UI allocations left over from the previous iteration

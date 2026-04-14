@@ -84,7 +84,7 @@ static void run_deny_fixture(const derive_address_fixture_t *fixture) {
     TRACE("Running deny fixture: %s", fixture->name);
     apdu_response_begin(INS_DERIVE_ADDRESS);
     handler_derive_address(&deny_fixture_buffer.sdk_buffer, fixture->p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
     assert_read_buffer_unchanged_and_cleanup(&deny_fixture_buffer, fixture->data);
     assert_int_equal(g_last_response_swo, fixture->check_expected);
 }

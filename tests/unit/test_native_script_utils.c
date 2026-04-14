@@ -92,7 +92,7 @@ size_t get_response_buffer_length(void) {
 void run_derive_native_script_apdu(buffer_t *buffer, uint8_t p1) {
     apdu_response_begin(INS_DERIVE_NATIVE_SCRIPT_HASH);
     handler_derive_native_script_hash(buffer, p1);
-    apdu_response_assert_sent_or_deferred();
+    apdu_response_finalize_after_handler();
 }
 
 void run_derive_native_script_init_apdu(void) {
