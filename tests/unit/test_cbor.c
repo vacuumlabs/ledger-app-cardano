@@ -11,6 +11,7 @@
 #include <cmocka.h>
 
 #include "utils/cbor.h"
+#include "utils/cbor_canonical.h"
 #include "hexUtils.h"
 
 // Test vectors are taken from
@@ -277,6 +278,36 @@ static void test_cbor_write_invalid_type(void **state) {
     }
 }
 
+// Tests for the canonical CBOR map key ordering tracker.
+static void test_cbor_canonical_tracker(void **state) {
+    (void) state;
+
+    CBOR_CANONICAL_START(tracker);
+
+    // First key accepted unconditionally.
+    const uint8_t key2a[] = {0x01, 0x02};
+    assert_true(CBOR_CANONICAL_CHECK(tracker, key2a, sizeof(key2a)));
+
+    // Same-length key, lexicographically smaller: rejected.
+    const uint8_t key2b[] = {0x01, 0x01};
+    assert_false(CBOR_CANONICAL_CHECK(tracker, key2b, sizeof(key2b)));
+
+    // Rejected key does not advance tracker — same key again is still rejected (duplicate).
+    assert_false(CBOR_CANONICAL_CHECK(tracker, key2a, sizeof(key2a)));
+
+    // Same-length key, lexicographically greater: accepted.
+    const uint8_t key2c[] = {0x01, 0x03};
+    assert_true(CBOR_CANONICAL_CHECK(tracker, key2c, sizeof(key2c)));
+
+    // Shorter key after longer: rejected (shorter keys must precede longer).
+    const uint8_t key1[] = {0x01};
+    assert_false(CBOR_CANONICAL_CHECK(tracker, key1, sizeof(key1)));
+
+    // Longer key after shorter: accepted.
+    const uint8_t key3[] = {0x01, 0x02, 0x03};
+    assert_true(CBOR_CANONICAL_CHECK(tracker, key3, sizeof(key3)));
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_cbor_parse_token),
@@ -286,6 +317,7 @@ int main(void) {
         cmocka_unit_test(test_cbor_write_token),
         cmocka_unit_test(test_cbor_write_invalid_type),
         cmocka_unit_test(test_cbor_write_unsupported_clean_type),
+        cmocka_unit_test(test_cbor_canonical_tracker),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

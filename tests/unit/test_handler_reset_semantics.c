@@ -70,6 +70,32 @@ void ui_start_native_script_streaming(void) {
     apdu_response_send_data(NULL, 0, SWO_SUCCESS);
 }
 
+// Verify that reset_app_context() handles the stale-deferred state:
+// apdu_response_deferred() was called but the UX callback never fired
+// (sent=false, deferred=true). reset_app_context() must set sent=true so
+// that the next apdu_response_begin() sees a completed deferred response
+// and clears the state cleanly instead of asserting.
+static void test_reset_app_context_cleans_stale_deferred_state(void **state) {
+    (void) state;
+    reset_test_context();
+
+    // Simulate a handler that defers the response then fails before the UX
+    // callback fires — e.g. an OOM error after apdu_response_deferred().
+    apdu_response_begin(INS_GET_PUBLIC_KEY);
+    apdu_response_deferred();
+    // Do NOT fire the UX callback — call reset directly instead.
+    reset_app_context();
+
+    // The next command must be able to start cleanly without asserting.
+    // apdu_response_begin() asserts that the previous response was completed;
+    // if reset_app_context() did not fix up the stale deferred state this
+    // would fire LEDGER_ASSERT.
+    apdu_response_begin(INS_GET_PUBLIC_KEY);
+    // Send a response so apdu_response_assert_sent_or_deferred() is satisfied.
+    apdu_response_send_sw(SWO_SUCCESS);
+    apdu_response_assert_sent_or_deferred();
+}
+
 static void test_native_script_finish_before_script_completion_resets_context(void **state) {
     (void) state;
     reset_test_context();
@@ -101,6 +127,7 @@ static void test_native_script_finish_before_script_completion_resets_context(vo
 
 int main(void) {
     const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_reset_app_context_cleans_stale_deferred_state),
         cmocka_unit_test(test_native_script_finish_before_script_completion_resets_context),
     };
     return cmocka_run_group_tests(tests, NULL, assert_no_pending_apdu_response);

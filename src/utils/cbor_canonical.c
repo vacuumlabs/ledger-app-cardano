@@ -38,10 +38,8 @@ bool cbor_canonical_tracker_check_and_advance(cbor_canonical_tracker_t *tracker,
                                                                        next_key_length)) {
         return false;
     }
-    if (tracker->previous_key_length > next_key_length)
-        memset(tracker->previous_key + next_key_length,
-               0,
-               tracker->previous_key_length - next_key_length);
+    LEDGER_ASSERT(next_key_length >= tracker->previous_key_length,
+                  "accepted key is shorter than previous — canonical ordering invariant violated");
     memcpy(tracker->previous_key, next_key, next_key_length);
     tracker->previous_key_length = next_key_length;
     tracker->has_previous = true;

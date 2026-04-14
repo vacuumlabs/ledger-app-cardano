@@ -90,6 +90,80 @@ static void test_pubkey_deny_12_export_pubkey_invalid_pool_cold_usecase(void **s
 }
 
 // ======================================================================
+// Silent export deny tests (same paths, silent_export_enabled = true)
+// ======================================================================
+
+static void test_pubkey_deny_silent_0_export_pubkey_path_shorter_than_3_indexes(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[0]);
+}
+
+static void test_pubkey_deny_silent_1_export_pubkey_path_not_matching_cold_key_structure(
+    void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[1]);
+}
+
+static void test_pubkey_deny_silent_2_export_pubkey_invalid_vote_key_path_1(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[2]);
+}
+
+static void test_pubkey_deny_silent_3_export_pubkey_invalid_vote_key_path_2(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[3]);
+}
+
+static void test_pubkey_deny_silent_4_export_pubkey_invalid_vote_key_path_3(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[4]);
+}
+
+static void test_pubkey_deny_silent_5_export_pubkey_invalid_multisig_account_not_hardened(
+    void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[5]);
+}
+
+static void test_pubkey_deny_silent_6_export_pubkey_invalid_multisig_chain(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[6]);
+}
+
+static void test_pubkey_deny_silent_7_export_pubkey_invalid_multisig_address_hardened(
+    void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[7]);
+}
+
+static void test_pubkey_deny_silent_8_export_pubkey_invalid_mint_policy_not_hardened(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[8]);
+}
+
+static void test_pubkey_deny_silent_9_export_pubkey_invalid_drep_chain(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[9]);
+}
+
+static void test_pubkey_deny_silent_10_export_pubkey_invalid_committee_cold_address_hardened(
+    void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[10]);
+}
+
+static void test_pubkey_deny_silent_11_export_pubkey_invalid_committee_hot_account_not_hardened(
+    void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[11]);
+}
+
+static void test_pubkey_deny_silent_12_export_pubkey_invalid_pool_cold_usecase(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_DENY_SILENT_FIXTURES[12]);
+}
+
+// ======================================================================
 // Main
 // ======================================================================
 
@@ -109,6 +183,23 @@ int main(void) {
         cmocka_unit_test(
             test_pubkey_deny_11_export_pubkey_invalid_committee_hot_account_not_hardened),
         cmocka_unit_test(test_pubkey_deny_12_export_pubkey_invalid_pool_cold_usecase),
+        cmocka_unit_test(test_pubkey_deny_silent_0_export_pubkey_path_shorter_than_3_indexes),
+        cmocka_unit_test(
+            test_pubkey_deny_silent_1_export_pubkey_path_not_matching_cold_key_structure),
+        cmocka_unit_test(test_pubkey_deny_silent_2_export_pubkey_invalid_vote_key_path_1),
+        cmocka_unit_test(test_pubkey_deny_silent_3_export_pubkey_invalid_vote_key_path_2),
+        cmocka_unit_test(test_pubkey_deny_silent_4_export_pubkey_invalid_vote_key_path_3),
+        cmocka_unit_test(
+            test_pubkey_deny_silent_5_export_pubkey_invalid_multisig_account_not_hardened),
+        cmocka_unit_test(test_pubkey_deny_silent_6_export_pubkey_invalid_multisig_chain),
+        cmocka_unit_test(test_pubkey_deny_silent_7_export_pubkey_invalid_multisig_address_hardened),
+        cmocka_unit_test(test_pubkey_deny_silent_8_export_pubkey_invalid_mint_policy_not_hardened),
+        cmocka_unit_test(test_pubkey_deny_silent_9_export_pubkey_invalid_drep_chain),
+        cmocka_unit_test(
+            test_pubkey_deny_silent_10_export_pubkey_invalid_committee_cold_address_hardened),
+        cmocka_unit_test(
+            test_pubkey_deny_silent_11_export_pubkey_invalid_committee_hot_account_not_hardened),
+        cmocka_unit_test(test_pubkey_deny_silent_12_export_pubkey_invalid_pool_cold_usecase),
     };
 
     return cmocka_run_group_tests(tests, NULL, assert_no_pending_apdu_response);

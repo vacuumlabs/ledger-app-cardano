@@ -31,9 +31,7 @@ static void free_warning_dynamic_strings(void) {
 }
 
 static void free_warning_bar_list_allocations(const nbgl_warningDetails_t *page) {
-    if (page == NULL || page->type != BAR_LIST_WARNING) {
-        return;
-    }
+    ASSERT(page != NULL && page->type == BAR_LIST_WARNING);
 
     if (page->barList.details != NULL) {
         APP_MEM_FREE((void *) page->barList.details);
@@ -136,24 +134,30 @@ static bool build_wallet_warning_details_page(const warning_definition_t *const 
 
     if (!allocate_zeroed((void **) &icons, sizeof(nbgl_icon_details_t *) * row_count) ||
         icons == NULL) {
-        return false;
+        return false;  // LCOV_EXCL_LINE
     }
     if (!allocate_zeroed((void **) &titles, sizeof(const char *) * row_count) || titles == NULL) {
+        // LCOV_EXCL_START
         APP_MEM_FREE((void *) icons);
         return false;
+        // LCOV_EXCL_STOP
     }
     if (!allocate_zeroed((void **) &subtexts, sizeof(const char *) * row_count) ||
         subtexts == NULL) {
+        // LCOV_EXCL_START
         APP_MEM_FREE((void *) titles);
         APP_MEM_FREE((void *) icons);
         return false;
+        // LCOV_EXCL_STOP
     }
     if (!allocate_zeroed((void **) &details, sizeof(nbgl_warningDetails_t) * row_count) ||
         details == NULL) {
+        // LCOV_EXCL_START
         APP_MEM_FREE((void *) subtexts);
         APP_MEM_FREE((void *) titles);
         APP_MEM_FREE((void *) icons);
         return false;
+        // LCOV_EXCL_STOP
     }
 
     for (size_t i = 0; i < warnings_on_page; i++) {
@@ -217,9 +221,7 @@ static bool build_wallet_warning_details_page(const warning_definition_t *const 
 }
 
 static void free_wallet_warning_details_page(const nbgl_warningDetails_t *page) {
-    if (page == NULL) {
-        return;
-    }
+    ASSERT(page != NULL);
 
     if (page->type == BAR_LIST_WARNING) {
         free_warning_dynamic_strings();
@@ -258,11 +260,13 @@ ui_status_t ui_build_warnings(warning_bits_t warnings) {
 
     if (!allocate_zeroed((void **) &intro, sizeof(nbgl_warningDetails_t)) ||
         !build_wallet_warning_details_page(warning_defs, warning_count, intro)) {
+        // LCOV_EXCL_START
         if (intro != NULL) {
             APP_MEM_FREE(intro);
         }
         ui_free_warnings();
         return UI_STATUS_OUT_OF_MEMORY;
+        // LCOV_EXCL_STOP
     }
 
     info->icon = &WARNING_ICON;
@@ -289,10 +293,9 @@ void ui_free_warnings(void) {
     const nbgl_contentCenter_t *info = g_warning->info;
 
     if (g_warning->introDetails != NULL) {
-        if (g_warning->introDetails->type == BAR_LIST_WARNING) {
-            free_wallet_warning_details_page(g_warning->introDetails);
-        } else
-            APP_MEM_FREE((void *) g_warning->introDetails);
+        LEDGER_ASSERT(g_warning->introDetails->type == BAR_LIST_WARNING,
+                      "introDetails is always a BAR_LIST_WARNING page");
+        free_wallet_warning_details_page(g_warning->introDetails);
     }
     if (g_warning->reviewDetails != NULL) {
         APP_MEM_FREE((void *) g_warning->reviewDetails);  // LCOV_EXCL_LINE

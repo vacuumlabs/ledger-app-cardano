@@ -529,6 +529,25 @@ static void test_tx_aux_data_init_rejects_wrong_aux_state(void **state) {
     assert_int_equal(g_last_response_swo, SWO_COMMAND_NOT_ALLOWED);
 }
 
+// AUX_DATA INIT with a zero-length payload triggers the empty-payload guard
+// in handler_tx_aux_data_init before any allocation or parsing.
+static void test_tx_aux_data_init_rejects_empty_payload(void **state) {
+    (void) state;
+    reset_context();
+    assert_true(test_mem_init());
+
+    G_context.req_type = REQUEST_SIGN_TRANSACTION;
+    G_context.state.tx_state = TX_STATE_AUX_DATA;
+    tx_aux_data_ctx()->cvote_aux_data.state = CVOTE_AUX_DATA_STATE_EXPECTING_INIT;
+
+    // Empty buffer — buffer_data_size(cdata) == 0 triggers the early-return guard.
+    static const uint8_t placeholder[1] = {0x00};
+    run_sign_tx_aux_data_apdu(
+        &(buffer_t){.ptr = (uint8_t *) placeholder, .size = 0, .offset = 0},
+        P2_AUX_DATA_INIT);
+    assert_int_equal(g_last_response_swo, SWO_CVOTE_AUX_DATA_PARSING_FAIL);
+}
+
 static void test_tx_aux_data_delegation_rejects_wrong_aux_state(void **state) {
     (void) state;
     reset_context();
@@ -880,6 +899,7 @@ int main(void) {
         cmocka_unit_test(test_tx_aux_data_rejects_wrong_request_type),
         cmocka_unit_test(test_tx_aux_data_rejects_wrong_tx_state),
         cmocka_unit_test(test_tx_aux_data_init_rejects_wrong_aux_state),
+        cmocka_unit_test(test_tx_aux_data_init_rejects_empty_payload),
         cmocka_unit_test(test_tx_aux_data_delegation_rejects_wrong_aux_state),
         cmocka_unit_test(test_tx_aux_data_delegation_rejects_truncated_credential),
         cmocka_unit_test(test_tx_aux_data_delegation_rejects_missing_weight),

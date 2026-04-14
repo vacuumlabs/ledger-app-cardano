@@ -72,6 +72,19 @@ static const uint8_t SIGN_MSG_INIT_TRAILING_GARBAGE[] = {
     0xFF,  // trailing garbage byte
 };
 
+// Valid CHUNK for a 4-byte message with one trailing garbage byte appended
+static const uint8_t SIGN_MSG_CHUNK_4BYTE_TRAILING[] = {
+    0x00,
+    0x00,
+    0x00,
+    0x04,  // chunkSize = 4
+    0xDE,
+    0xAD,
+    0xBE,
+    0xEF,  // data
+    0xFF,  // trailing garbage
+};
+
 // Valid CHUNK for a 4-byte message: [4B chunkSize BE] [4B data]
 static const uint8_t SIGN_MSG_CHUNK_4BYTE[] = {
     0x00,
@@ -174,6 +187,21 @@ static void test_sign_msg_chunk_rejects_truncated_after_size_header(void **state
     assert_int_equal(g_last_response_swo, SWO_SIGN_MSG_PARSING_FAIL_CHUNK_DATA);
 }
 
+static void test_sign_msg_chunk_rejects_trailing_bytes(void **state) {
+    (void) state;
+    reset_sign_msg_test_state();
+    run_sign_msg_apdu(SIGN_MSG_INIT_4BYTE_KEYHASH,
+                      sizeof(SIGN_MSG_INIT_4BYTE_KEYHASH),
+                      P1_SIGN_MSG_INIT);
+    assert_int_equal(g_last_response_swo, SWO_SUCCESS);
+    // CHUNK has correct size header and data but one trailing garbage byte — deny_unconsumed_bytes
+    // fires
+    run_sign_msg_apdu(SIGN_MSG_CHUNK_4BYTE_TRAILING,
+                      sizeof(SIGN_MSG_CHUNK_4BYTE_TRAILING),
+                      P1_SIGN_MSG_CHUNK);
+    assert_int_equal(g_last_response_swo, SWO_WRONG_DATA_LENGTH);
+}
+
 static void test_sign_msg_chunk_rejects_missing_size_header(void **state) {
     (void) state;
     reset_sign_msg_test_state();
@@ -197,6 +225,7 @@ int main(void) {
         cmocka_unit_test(test_sign_msg_confirm_rejects_without_init),
         cmocka_unit_test(test_sign_msg_chunk_rejects_when_in_confirm_state),
         cmocka_unit_test(test_sign_msg_chunk_rejects_truncated_after_size_header),
+        cmocka_unit_test(test_sign_msg_chunk_rejects_trailing_bytes),
         cmocka_unit_test(test_sign_msg_chunk_rejects_missing_size_header),
     };
     return cmocka_run_group_tests(tests, NULL, assert_no_pending_apdu_response);

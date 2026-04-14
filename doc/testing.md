@@ -108,6 +108,7 @@ Notes:
   - `make -C tests clang-format-src-check` checks `clang-format-14` on `src/**/*.c` and `src/**/*.h`.
   - `make -C tests clang-format-generated-check` checks `clang-format-14` on generated unit-test C/H files.
   - `make -C tests tests-unit` regenerates unit fixtures, checks drift and generated C formatting, builds, and runs unit tests.
+  - `make -C tests unit-coverage` builds unit tests, runs them, and generates an HTML coverage report at `tests/unit/coverage/index.html`.
   - `make -C tests fuzzing` builds fuzzing harnesses and runs each for 1 second by default (override with `FUZZ_SECONDS=<n>`, requires `BOLOS_SDK`).
 
 ## Coverage Exclusion Policy

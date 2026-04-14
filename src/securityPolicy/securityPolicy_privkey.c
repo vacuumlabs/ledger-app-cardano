@@ -25,8 +25,8 @@ security_policy_t policyForDerivePrivateKey(const bip44_path_t* path) {
         case PATH_CVOTE_KEY:
             return POLICY_HIDE;
 
-        case PATH_INVALID:
         // LCOV_EXCL_START
+        case PATH_INVALID:
         default:
             ASSERT(false);
             return POLICY_DENY;
