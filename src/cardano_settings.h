@@ -24,14 +24,28 @@ static inline uint8_t flip_bool_setting(uint8_t value) {
     }
 }
 
+static inline bool setting_is_enabled(uint8_t value) {
+    switch (value) {
+        case SETTINGS_NO:
+            return false;
+        case SETTINGS_YES:
+            return true;
+        // LCOV_EXCL_START
+        default:
+            ASSERT(false);
+            return false;  // Unreachable, but satisfies compiler
+                           // LCOV_EXCL_STOP
+    }
+}
+
 static inline bool is_expert_mode() {
-    return N_storage.expert_mode_enabled;
+    return setting_is_enabled(N_storage.expert_mode_enabled);
 }
 
 static inline bool is_silent_pubkey_export_allowed() {
-    return N_storage.silent_pubkey_export_enabled;
+    return setting_is_enabled(N_storage.silent_pubkey_export_enabled);
 }
 
 static inline bool is_blind_signing_enabled() {
-    return N_storage.blind_signing_enabled;
+    return setting_is_enabled(N_storage.blind_signing_enabled);
 }

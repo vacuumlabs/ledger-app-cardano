@@ -76,11 +76,16 @@ static bool is_msg_length_valid_for_sign_msg_init(uint32_t message_length,
     // Caller already checked message_length <= UINT16_MAX before setting ctx->msgLength (uint16_t).
     LEDGER_ASSERT(message_length <= UINT16_MAX, "message_length > UINT16_MAX");
 
-    // Non-ASCII messages are displayed as hex in UI:
-    // max_len = 2 * message_length + 1.
     // UI formatting allocates max_len + UI_BUFFER_SAFETY_MARGIN where safety margin is 2 bytes.
-    // Keep this guard in sync with UI_ADD_FORMAT2 allocation constraints.
-    if (!is_ascii) {
+    // Keep these guards in sync with UI_ADD_FORMAT2 allocation constraints.
+    if (is_ascii) {
+        // ASCII messages are displayed as-is: max_len = message_length.
+        const size_t ui_ascii_display_allocation_size = (size_t) message_length + 2;
+        if (ui_ascii_display_allocation_size > UINT16_MAX) {
+            return false;
+        }
+    } else {
+        // Non-ASCII messages are displayed as hex: max_len = 2 * message_length + 1.
         const size_t max_hex_display_length = 2 * (size_t) message_length + 1;
         const size_t ui_hex_display_allocation_size = max_hex_display_length + 2;
         if (ui_hex_display_allocation_size > UINT16_MAX) {
@@ -471,8 +476,7 @@ static bool build_sig_structure(sign_msg_ctx_t *ctx) {
     }
 
     const size_t sigStructureSize = buffer.offset;
-    TRACE("Sig_structure size = %u", sigStructureSize);
-    TRACE_BUFFER(sigStructure, sigStructureSize);
+    TRACE("Sig_structure size = %u", (unsigned) sigStructureSize);
 
     // CIP-8/COSE Sig_structure has fixed semantics and no extra app-defined domain-separation
     // field for Cardano witness-vs-message separation. Adding a custom prefix/tag here would

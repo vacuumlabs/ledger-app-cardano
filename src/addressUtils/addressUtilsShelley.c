@@ -363,10 +363,16 @@ bool format_address_human_readable(const uint8_t* address,
     const uint8_t networkId = getNetworkId(address[0]);
 
     if (addressType == BYRON) {
-        size_t len = base58_encode(address, addressSize, out, outSize);
-        ASSERT(len > 0);
-        ASSERT(len == strlen(out));
-        ASSERT(len + 1 < outSize);  // checks for truncation
+        if (addressSize > MAX_ENC_INPUT_SIZE) {
+            return false;
+        }
+        int len = base58_encode(address, addressSize, out, outSize - 1);
+        if (len < 0) {
+            return false;
+        }
+        out[len] = '\0';
+        ASSERT((size_t) len == strlen(out));
+        ASSERT((size_t) len + 1 < outSize);  // checks for truncation
         return true;
     }
 

@@ -201,7 +201,8 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
 
     // 5. Voting purpose (CIP36 only)
     security_policy_t voting_purpose_policy =
-        policyForCVoteRegistrationVotingPurpose(&tx_aux_data_ctx()->cvote_warning_bits);
+        policyForCVoteRegistrationVotingPurpose(aux_data->voting_purpose,
+                                                &tx_aux_data_ctx()->cvote_warning_bits);
 
     switch (voting_purpose_policy) {
         case POLICY_SHOW:

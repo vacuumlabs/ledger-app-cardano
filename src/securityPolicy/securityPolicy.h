@@ -218,7 +218,8 @@ security_policy_t policyForCVoteRegistrationPaymentDestination(
     const uint8_t networkId,
     warning_bits_t* w);
 security_policy_t policyForCVoteRegistrationNonce(warning_bits_t* w);
-security_policy_t policyForCVoteRegistrationVotingPurpose(warning_bits_t* w);
+security_policy_t policyForCVoteRegistrationVotingPurpose(uint64_t votingPurpose,
+                                                          warning_bits_t* w);
 
 security_policy_t policyForSignOpCert(const bip44_path_t* poolColdKeyPathSpec, warning_bits_t* w);
 

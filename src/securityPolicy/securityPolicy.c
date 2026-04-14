@@ -2426,8 +2426,12 @@ security_policy_t policyForCVoteRegistrationNonce(warning_bits_t *w) {
     SHOW();
 }
 
-security_policy_t policyForCVoteRegistrationVotingPurpose(warning_bits_t *w) {
+security_policy_t policyForCVoteRegistrationVotingPurpose(uint64_t votingPurpose,
+                                                          warning_bits_t *w) {
     POLICY_INIT();
+    // Non-default voting purpose is security-relevant: always show it so the
+    // user can see an attacker-controlled governance domain before signing.
+    SHOW_IF(votingPurpose != 0);
     SHOW_IF(is_expert_mode());
     HIDE();
 }
