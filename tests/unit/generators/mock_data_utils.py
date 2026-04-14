@@ -22,6 +22,7 @@ from tests.unit.generators.common import (
     format_bytes_as_c_array,
     remove_static_uint8_arrays_by_name,
     resolve_mnemonic,
+    write_file_safe,
 )
 from tests.unit.generators.paths import UNIT_TESTS_DIR
 
@@ -204,8 +205,6 @@ def regenerate_mock_data_with_options(*, verbose: bool, report_summary: bool) ->
         return lines
 
     input_file = UNIT_TESTS_DIR / "mock_crypto" / "crypto_mock_data.h"
-    temp_output_file = UNIT_TESTS_DIR / "mock_crypto" / "crypto_mock_data_regenerated.h"
-
     if not input_file.exists():
         print(f"ERROR: Mock data input file not found: {input_file}")
         sys.exit(1)
@@ -219,7 +218,7 @@ def regenerate_mock_data_with_options(*, verbose: bool, report_summary: bool) ->
     if verbose:
         print("Regenerating mock data from standard test mnemonic...")
         print(f"Input:  {input_file}")
-        print(f"Output: {temp_output_file}\n")
+        print(f"Output: {input_file}\n")
 
     mock_paths_match = _MOCK_PATHS_PATTERN.search(content)
     if not mock_paths_match:
@@ -460,19 +459,7 @@ def regenerate_mock_data_with_options(*, verbose: bool, report_summary: bool) ->
         + content[signature_match.end(2) :]
     )
 
-    try:
-        temp_output_file.write_text(new_content)
-    except Exception as exc:
-        print(
-            f"ERROR: Failed to write temporary mock data file {temp_output_file}: {exc}"
-        )
-        sys.exit(1)
-
-    try:
-        temp_output_file.replace(input_file)
-    except Exception as exc:
-        print(f"ERROR: Failed to replace {input_file} with regenerated content: {exc}")
-        sys.exit(1)
+    write_file_safe(input_file, new_content)
 
     if verbose:
         print(f"\nOK Regenerated mock data written to: {input_file}")

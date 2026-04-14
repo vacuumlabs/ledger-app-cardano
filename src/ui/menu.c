@@ -94,7 +94,7 @@ static void controls_callback(int token, uint8_t index, int page) {
 void ui_menu_main(void) {
     // Initialize switches data
     switches[SILENT_PUBKEY_EXPORT_ID].initState =
-        (nbgl_state_t) N_storage.silent_pubkey_export_enabled;
+        (nbgl_state_t) silent_pubkey_export_setting_value();
 #ifdef SCREEN_SIZE_WALLET
     switches[SILENT_PUBKEY_EXPORT_ID].text = "Silent public key export";
     switches[SILENT_PUBKEY_EXPORT_ID].subText = "Allow usual public keys to be exported silently";
@@ -107,7 +107,7 @@ void ui_menu_main(void) {
     switches[SILENT_PUBKEY_EXPORT_ID].tuneId = TUNE_TAP_CASUAL;
 #endif
 
-    switches[EXPERT_MODE_ID].initState = (nbgl_state_t) N_storage.expert_mode_enabled;
+    switches[EXPERT_MODE_ID].initState = (nbgl_state_t) expert_mode_setting_value();
     switches[EXPERT_MODE_ID].text = "Expert mode";
 #ifdef SCREEN_SIZE_WALLET
     switches[EXPERT_MODE_ID].subText = "Show technical details in transactions";
@@ -119,7 +119,7 @@ void ui_menu_main(void) {
     switches[EXPERT_MODE_ID].tuneId = TUNE_TAP_CASUAL;
 #endif
 
-    switches[BLIND_SIGNING_ID].initState = (nbgl_state_t) N_storage.blind_signing_enabled;
+    switches[BLIND_SIGNING_ID].initState = (nbgl_state_t) blind_signing_setting_value();
     switches[BLIND_SIGNING_ID].text = "Blind signing";
     switches[BLIND_SIGNING_ID].subText = "Enable blind signing for long transactions";
     switches[BLIND_SIGNING_ID].token = BLIND_SIGNING_TOKEN;
@@ -129,9 +129,9 @@ void ui_menu_main(void) {
 
     TRACE(
         "Calling nbgl_useCaseHomeAndSettings(APPNAME), expert=%d, silentPubkey=%d, blindSigning=%d",
-        N_storage.expert_mode_enabled,
-        N_storage.silent_pubkey_export_enabled,
-        N_storage.blind_signing_enabled);
+        expert_mode_setting_value(),
+        silent_pubkey_export_setting_value(),
+        blind_signing_setting_value());
     nbgl_useCaseHomeAndSettings(APPNAME,
                                 &ICON_APP_HOME,
                                 NULL,

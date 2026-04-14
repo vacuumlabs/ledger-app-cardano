@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+umask 077
+
 if [[ $# -lt 1 || $# -gt 2 ]]; then
   echo "Usage: $0 <timeout_seconds> [output_dir]"
   echo "Example: $0 600 out-local"
@@ -43,7 +45,7 @@ fi
 
 # Try requested output location first, then fallback to /tmp if not writable.
 if ! mkdir -p "$output_root/logs" "$output_root/artifacts" "$output_root/corpus" 2>/dev/null; then
-  fallback_root="/tmp/cardano-fuzz-out-$(id -u)"
+  fallback_root="$(mktemp -d "${TMPDIR:-/tmp}/cardano-fuzz-out.XXXXXX")"
   echo "Warning: cannot write to '$output_root', falling back to '$fallback_root'"
   output_root="$fallback_root"
   mkdir -p "$output_root/logs" "$output_root/artifacts" "$output_root/corpus"

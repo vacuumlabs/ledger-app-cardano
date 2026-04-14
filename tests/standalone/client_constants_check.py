@@ -506,8 +506,15 @@ def assert_settings_menu_constants_match() -> None:
         if not callback_pattern.search(text):
             raise AssertionError(f"Callback wiring mismatch for {setting_name}")
 
+        # Accept either direct NVM access or the validated accessor function
+        setting_value_fn = (
+            storage_field_name.removesuffix("_enabled") + "_setting_value()"
+        )
+        init_value_pattern = (
+            rf"(?:N_storage\.{storage_field_name}|{re.escape(setting_value_fn)})"
+        )
         init_pattern = re.compile(
-            rf"switches\[{setting_name}_ID\]\.initState\s*=\s*\(nbgl_state_t\)\s*N_storage\.{storage_field_name};"
+            rf"switches\[{setting_name}_ID\]\.initState\s*=\s*\(nbgl_state_t\)\s*{init_value_pattern};"
             rf".*?switches\[{setting_name}_ID\]\.token\s*=\s*{setting_name}_TOKEN;",
             re.DOTALL,
         )

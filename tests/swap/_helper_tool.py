@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
 
-import os
 import subprocess
+import shutil
 from pathlib import Path
 from git import Repo
 
@@ -41,17 +41,18 @@ DEVICES_CONF = {
 
 
 def run_cmd(
-    cmd: str, cwd: Path = Path("."), print_output: bool = False, no_throw: bool = False
+    cmd: list[str],
+    cwd: Path = Path("."),
+    print_output: bool = False,
+    no_throw: bool = False,
 ) -> str:
-
-    print(f"[run_cmd] Running: '{cmd}'' inside '{cwd}'")
+    print(f"[run_cmd] Running: {cmd!r} inside '{cwd}'")
 
     ret = subprocess.run(
         cmd,
-        shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        universal_newlines=True,
+        text=True,
         cwd=cwd,
         check=False,
     )
@@ -70,10 +71,11 @@ def run_cmd(
 def clone_or_pull(repo_url: str, clone_dir: str):
     # Only needed when cloning / pulling, not when building.
     # By putting the import here we allow the script to be imported inside the docker image
-    git_dir = os.path.join(clone_dir, ".git")
-    if not os.path.exists(git_dir):
+    clone_dir_path = Path(clone_dir)
+    git_dir = clone_dir_path / ".git"
+    if not git_dir.exists():
         print(f"Cloning into {clone_dir}")
-        run_cmd(f"rm -rf {clone_dir}")
+        shutil.rmtree(clone_dir_path, ignore_errors=True)
         Repo.clone_from(repo_url, clone_dir, recursive=True)
     else:
         print(f"Pulling latest changes in {clone_dir}")
@@ -84,22 +86,28 @@ def clone_or_pull(repo_url: str, clone_dir: str):
 
         # Update submodules
         print(f"Updating submodules in {clone_dir}")
-        run_cmd("git submodule sync", cwd=Path(clone_dir))
-        run_cmd("git submodule update --init --recursive", cwd=Path(clone_dir))
+        run_cmd(["git", "submodule", "sync"], cwd=clone_dir_path)
+        run_cmd(
+            ["git", "submodule", "update", "--init", "--recursive"], cwd=clone_dir_path
+        )
 
 
 def build_app(clone_dir: str, flags: str):
-    cmd = "make clean"
-    run_cmd(cmd, cwd=Path(clone_dir))
+    clone_dir_path = Path(clone_dir)
+    run_cmd(["make", "clean"], cwd=clone_dir_path)
     for d in DEVICES_CONF.values():
         sdk = d["sdk"]
-        cmd = f"make -j BOLOS_SDK=${sdk} {flags}"
-        run_cmd(cmd, cwd=Path(clone_dir))
+        cmd = ["make", "-j", f"BOLOS_SDK=${sdk}", *flags.split()]
+        run_cmd(cmd, cwd=clone_dir_path)
 
 
 def copy_build_output(clone_dir: str, dest_dir: str):
-    run_cmd(f"mkdir -p {dest_dir}")
-    run_cmd(f"cp -rT {clone_dir}/build {dest_dir}/build")
+    clone_build_dir = Path(clone_dir) / "build"
+    destination_build_dir = Path(dest_dir) / "build"
+
+    destination_build_dir.parent.mkdir(parents=True, exist_ok=True)
+    shutil.rmtree(destination_build_dir, ignore_errors=True)
+    shutil.copytree(clone_build_dir, destination_build_dir)
 
 
 # ==== Build app-exchange ====
