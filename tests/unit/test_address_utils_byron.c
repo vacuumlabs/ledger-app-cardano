@@ -253,6 +253,15 @@ static void test_extract_protocol_magic_trailing_bytes(void **state) {
         "82d818582183581cb1999ee43d0c3a9fe4a1a5d959ae87069781fbb7f60ff7e8e0136881a0001ad7ed912f00");
 }
 
+static void test_extract_protocol_magic_embedded_payload_has_trailing_bytes(void **state) {
+    (void) state;
+    // Embedded Byron payload bytes contain one extra trailing byte beyond the parsed
+    // inner array/map/type structure. The checksum is recomputed over the full tagged
+    // payload so the parser must reject based on inner payload overrun, not CRC mismatch.
+    testcase_extractProtocolMagicFails(
+        "82d818582283581cb1999ee43d0c3a9fe4a1a5d959ae87069781fbb7f60ff7e8e0136881a000001a79043f45");
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         // Protocol magic extraction success tests
@@ -283,6 +292,7 @@ int main(void) {
         cmocka_unit_test(test_extract_protocol_magic_address_type_not_unsigned),
         cmocka_unit_test(test_extract_protocol_magic_address_type_parse_fails),
         cmocka_unit_test(test_extract_protocol_magic_trailing_bytes),
+        cmocka_unit_test(test_extract_protocol_magic_embedded_payload_has_trailing_bytes),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

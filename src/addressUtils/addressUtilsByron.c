@@ -259,26 +259,31 @@ bool extractProtocolMagic(const uint8_t* addressBuffer,
         return false;
     }
 
-    size_t unboxedAddressPayloadSize;
-    if (!parseBytesSizeToken(&buf, &unboxedAddressPayloadSize)) {
+    size_t addressPayloadSize;
+    if (!parseBytesSizeToken(&buf, &addressPayloadSize)) {
         return false;
     }
-    const uint8_t* unboxedAddressPayload = buf.ptr + buf.offset;
+    const uint8_t* addressPayload = buf.ptr + buf.offset;
+    buffer_t addressPayloadBuf = {
+        .ptr = (uint8_t*) addressPayload,
+        .size = addressPayloadSize,
+        .offset = 0,
+    };
 
-    if (!parseTokenWithValue(&buf, CBOR_TYPE_ARRAY, 3)) {
+    if (!parseTokenWithValue(&addressPayloadBuf, CBOR_TYPE_ARRAY, 3)) {
         return false;
     }
 
     // address root (public key hash, 224 bits)
     {
         size_t parsedAddressRootSize;
-        if (!parseBytesSizeToken(&buf, &parsedAddressRootSize)) {
+        if (!parseBytesSizeToken(&addressPayloadBuf, &parsedAddressRootSize)) {
             return false;
         }
         if (parsedAddressRootSize != ADDRESS_ROOT_SIZE) {
             return false;
         }
-        LEDGER_ASSERT(buffer_seek_cur(&buf, ADDRESS_ROOT_SIZE),
+        LEDGER_ASSERT(buffer_seek_cur(&addressPayloadBuf, ADDRESS_ROOT_SIZE),
                       "buffer seek failed past address root");
     }
 
@@ -286,7 +291,7 @@ bool extractProtocolMagic(const uint8_t* addressBuffer,
     {
         const size_t MAX_ADDRESS_ATTRIBUTES_MAP_LENGTH = 3;
         uint64_t addressAttributesMapLength;
-        if (!parseToken(&buf, CBOR_TYPE_MAP, &addressAttributesMapLength)) {
+        if (!parseToken(&addressPayloadBuf, CBOR_TYPE_MAP, &addressAttributesMapLength)) {
             return false;
         }
         if (addressAttributesMapLength > (uint64_t) MAX_ADDRESS_ATTRIBUTES_MAP_LENGTH) {
@@ -295,12 +300,12 @@ bool extractProtocolMagic(const uint8_t* addressBuffer,
 
         for (size_t i = 0; i < addressAttributesMapLength; i++) {
             uint64_t currentKey;
-            if (!parseToken(&buf, CBOR_TYPE_UNSIGNED, &currentKey)) {
+            if (!parseToken(&addressPayloadBuf, CBOR_TYPE_UNSIGNED, &currentKey)) {
                 return false;
             }
 
             size_t currentValueSize;
-            if (!parseBytesSizeToken(&buf, &currentValueSize)) {
+            if (!parseBytesSizeToken(&addressPayloadBuf, &currentValueSize)) {
                 return false;
             }
 
@@ -311,9 +316,11 @@ bool extractProtocolMagic(const uint8_t* addressBuffer,
 
                 // Protocol magic attribute value is CBOR bytes containing exactly one
                 // CBOR-encoded unsigned integer; parse it in an isolated sub-buffer.
-                buffer_t valueBuf = {.ptr = buf.ptr + buf.offset,
-                                     .size = currentValueSize,
-                                     .offset = 0};
+                buffer_t valueBuf = {
+                    .ptr = addressPayloadBuf.ptr + addressPayloadBuf.offset,
+                    .size = currentValueSize,
+                    .offset = 0,
+                };
                 uint64_t parsedProtocolMagic;
                 if (!parseToken(&valueBuf, CBOR_TYPE_UNSIGNED, &parsedProtocolMagic)) {
                     return false;
@@ -336,9 +343,7 @@ bool extractProtocolMagic(const uint8_t* addressBuffer,
                 protocolMagicFound = true;
             }
 
-            // Skip this attribute value in the outer buffer.
-            LEDGER_ASSERT(buffer_seek_cur(&buf, currentValueSize),
-                          "buffer seek failed skipping attribute value");
+            ASSERT(buffer_seek_cur(&addressPayloadBuf, currentValueSize));
         }
     }
 
@@ -348,14 +353,20 @@ bool extractProtocolMagic(const uint8_t* addressBuffer,
     // values.
     {
         uint64_t addressType;
-        if (!parseToken(&buf, CBOR_TYPE_UNSIGNED, &addressType)) {
+        if (!parseToken(&addressPayloadBuf, CBOR_TYPE_UNSIGNED, &addressType)) {
             return false;  // LCOV_EXCL_LINE
         }
     }
 
+    if (addressPayloadBuf.offset != addressPayloadBuf.size) {
+        return false;
+    }
+
+    ASSERT(buffer_seek_cur(&buf, addressPayloadSize));
+
     // verify checksum
     {
-        uint32_t checksum = cx_crc32(unboxedAddressPayload, unboxedAddressPayloadSize);
+        uint32_t checksum = cx_crc32(addressPayload, addressPayloadSize);
         if (!parseTokenWithValue(&buf, CBOR_TYPE_UNSIGNED, (uint64_t) checksum)) {
             return false;
         }
