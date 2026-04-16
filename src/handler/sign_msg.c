@@ -122,7 +122,7 @@ static void signMsg_handle_init(buffer_t *cdata) {
         send_swo_and_reset(SWO_SIGN_MSG_PARSING_FAIL_MSG_LENGTH);
         return;
     }
-    TRACE("Message length = %u", msg_length_from_wire);
+    TRACE_MODULE("Message length = %u", msg_length_from_wire);
     if (msg_length_from_wire > UINT16_MAX) {
         TRACE("Message length out of uint16 range: %u", msg_length_from_wire);
         send_swo_and_reset(SWO_INSUFFICIENT_MEMORY);
@@ -135,22 +135,24 @@ static void signMsg_handle_init(buffer_t *cdata) {
         send_swo_and_reset(SWO_SIGN_MSG_PARSING_FAIL_SIGNING_PATH);
         return;
     }
-    TRACE("Signing path:");
+    TRACE_MODULE("Signing path:");
+#ifdef TRACE_HANDLERS
     BIP44_PRINTF(&ctx->signingPath);
+#endif
 
     if (!buffer_read_flag_included(cdata, &ctx->hashPayload)) {
         TRACE("Failed to read hashPayload");
         send_swo_and_reset(SWO_SIGN_MSG_PARSING_FAIL_HASH_PAYLOAD);
         return;
     }
-    TRACE("Hash payload = %d", ctx->hashPayload);
+    TRACE_MODULE("Hash payload = %d", ctx->hashPayload);
 
     if (!buffer_read_flag_included(cdata, &ctx->isAscii)) {
         TRACE("Failed to read isAscii");
         send_swo_and_reset(SWO_SIGN_MSG_PARSING_FAIL_IS_ASCII);
         return;
     }
-    TRACE("Is ASCII = %d", ctx->isAscii);
+    TRACE_MODULE("Is ASCII = %d", ctx->isAscii);
 
     uint8_t addressFieldType_byte;
     if (!buffer_read_u8(cdata, &addressFieldType_byte)) {
@@ -158,7 +160,7 @@ static void signMsg_handle_init(buffer_t *cdata) {
         send_swo_and_reset(SWO_SIGN_MSG_PARSING_FAIL_ADDRESS_FIELD_TYPE);
         return;
     }
-    TRACE("Address field type = %d", addressFieldType_byte);
+    TRACE_MODULE("Address field type = %d", addressFieldType_byte);
 
     switch (addressFieldType_byte) {
         case CIP8_ADDRESS_FIELD_ADDRESS:
@@ -203,7 +205,7 @@ static void signMsg_handle_init(buffer_t *cdata) {
                                                 &ctx->address_params,
                                                 &ctx->warnings);
     ctx->signing_policy = policy;
-    TRACE("Policy: %d", (int) policy);
+    TRACE_MODULE("Policy: %d", (int) policy);
     if (policy == POLICY_DENY) {
         TRACE("Policy denied");
         send_swo_and_reset(SWO_SECURITY_CONDITION_NOT_SATISFIED);
@@ -237,7 +239,7 @@ static void signMsg_handle_init(buffer_t *cdata) {
     }
 
     // Show spinner to indicate message processing
-    TRACE("Calling nbgl_useCaseSpinner(\"Processing\")");
+    TRACE_MODULE("Calling nbgl_useCaseSpinner(\"Processing\")");
     nbgl_useCaseSpinner("Processing");
 
     // Transition: skip CHUNK stage for empty messages
@@ -265,7 +267,7 @@ static void signMsg_handle_chunk(buffer_t *cdata) {
         send_swo_and_reset(SWO_SIGN_MSG_PARSING_FAIL_CHUNK_SIZE);
         return;
     }
-    TRACE("Chunk size = %u", chunkSize_u32);
+    TRACE_MODULE("Chunk size = %u", chunkSize_u32);
 
     // Validate chunk size doesn't exceed remaining bytes
     if (chunkSize_u32 > ctx->remainingBytes) {
@@ -293,13 +295,12 @@ static void signMsg_handle_chunk(buffer_t *cdata) {
         // Compute write offset into the accumulated message buffer
         const uint32_t writeOffset = ctx->msgLength - ctx->remainingBytes;
         ASSERT(ctx->msgBuffer != NULL);
-        LEDGER_ASSERT(writeOffset + chunkSize_u32 <= ctx->msgBufferSize,
-                      "Chunk would overflow message buffer");
+        ASSERT(writeOffset + chunkSize_u32 <= ctx->msgBufferSize);
 
         // Read chunk data directly into accumulated message buffer
         bool chunk_data_read =
             buffer_read_bytes(cdata, ctx->msgBuffer + writeOffset, chunkSize_u32);
-        LEDGER_ASSERT(chunk_data_read, "buffer_read_bytes failed unexpectedly");
+        ASSERT(chunk_data_read);
 
         // Add chunk to hash
         blake2b_224_append(&ctx->msgHashCtx, ctx->msgBuffer + writeOffset, chunkSize_u32);
@@ -337,9 +338,7 @@ static void prepare_address_field(sign_msg_ctx_t *ctx) {
         case CIP8_ADDRESS_FIELD_ADDRESS: {
             ctx->addressFieldSize =
                 deriveAddress(&ctx->address_params, ctx->addressField, SIZEOF(ctx->addressField));
-            LEDGER_ASSERT(
-                ctx->addressFieldSize > 0 && ctx->addressFieldSize <= SIZEOF(ctx->addressField),
-                "Invalid address length");
+            ASSERT(ctx->addressFieldSize > 0 && ctx->addressFieldSize <= SIZEOF(ctx->addressField));
             break;
         }
 
@@ -353,7 +352,7 @@ static void prepare_address_field(sign_msg_ctx_t *ctx) {
 
         // LCOV_EXCL_START
         default:
-            LEDGER_ASSERT(false, "Invalid address field type");
+            ASSERT(false);
             // LCOV_EXCL_STOP
     }
 }
@@ -369,35 +368,30 @@ static size_t create_protected_header(sign_msg_ctx_t *ctx,
     buffer_t buffer = buffer_create(protectedHeaderBuffer, maxSize);
 
     // Map with 2 entries
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_MAP, 2), "CBOR write failed");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_MAP, 2));
 
     // Key: 1 (unsigned)
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_UNSIGNED, 1), "CBOR write failed");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_UNSIGNED, 1));
 
     // Value: -8 (algorithm EdDSA)
     // cbor_writeToken expects the actual negative value, not the CBOR-encoded form
     uint64_t negValueAsU64 = cbor_token_value_from_negative_i64(-8);
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_NEGATIVE, negValueAsU64),
-                  "CBOR write failed");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_NEGATIVE, negValueAsU64));
 
     // Key: "address" (text string)
     const char *address_key = "address";
     const size_t address_key_len = strlen(address_key);
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_TEXT, address_key_len),
-                  "CBOR write failed");
-    LEDGER_ASSERT(buffer_write_bytes(&buffer, (const uint8_t *) address_key, address_key_len),
-                  "Buffer overflow");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_TEXT, address_key_len));
+    ASSERT(buffer_write_bytes(&buffer, (const uint8_t *) address_key, address_key_len));
 
     // Value: address bytes prepared during CONFIRM handling.
-    LEDGER_ASSERT(ctx->addressFieldSize > 0, "Address field not prepared");
+    ASSERT(ctx->addressFieldSize > 0);
 
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, ctx->addressFieldSize),
-                  "CBOR write failed");
-    LEDGER_ASSERT(buffer_write_bytes(&buffer, ctx->addressField, ctx->addressFieldSize),
-                  "Buffer overflow");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, ctx->addressFieldSize));
+    ASSERT(buffer_write_bytes(&buffer, ctx->addressField, ctx->addressFieldSize));
 
     const size_t protectedHeaderSize = buffer.offset;
-    LEDGER_ASSERT(protectedHeaderSize > 0 && protectedHeaderSize <= maxSize, "Invalid header size");
+    ASSERT(protectedHeaderSize > 0 && protectedHeaderSize <= maxSize);
 
     return protectedHeaderSize;
 }
@@ -422,7 +416,7 @@ static bool build_sig_structure(sign_msg_ctx_t *ctx) {
     // For non-hashed payloads, is_msg_length_valid_for_sign_msg_init() already guaranteed
     // sigStructureMaxSize <= UINT16_MAX at INIT time. For hashed payloads the size is
     // SIG_STRUCTURE_OVERHEAD + sizeof(msgHash) which is always well within limits.
-    LEDGER_ASSERT(sigStructureMaxSize <= UINT16_MAX, "Sig_structure size overflow");
+    ASSERT(sigStructureMaxSize <= UINT16_MAX);
     if (!APP_MEM_CALLOC((void **) &sigStructure, (uint16_t) sigStructureMaxSize)) {
         // LCOV_EXCL_START
         // Requires allocator failure — not reachable in unit tests.
@@ -434,57 +428,49 @@ static bool build_sig_structure(sign_msg_ctx_t *ctx) {
     buffer_t buffer = buffer_create(sigStructure, sigStructureMaxSize);
 
     // Array with 4 elements
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_ARRAY, 4), "CBOR write failed");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_ARRAY, 4));
 
     // Element 1: "Signature1" (text string)
     const char *context = "Signature1";
     const size_t context_len = strlen(context);
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_TEXT, context_len),
-                  "CBOR write failed");
-    LEDGER_ASSERT(buffer_write_bytes(&buffer, (const uint8_t *) context, context_len),
-                  "Buffer overflow");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_TEXT, context_len));
+    ASSERT(buffer_write_bytes(&buffer, (const uint8_t *) context, context_len));
 
     // Element 2: CBOR-encoded protectedHeader (as bytes)
     uint8_t protectedHeaderBuffer[MAX_ADDRESS_LENGTH + 32];
     const size_t protectedHeaderSize =
         create_protected_header(ctx, protectedHeaderBuffer, SIZEOF(protectedHeaderBuffer));
 
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, protectedHeaderSize),
-                  "CBOR write failed");
-    LEDGER_ASSERT(buffer_write_bytes(&buffer, protectedHeaderBuffer, protectedHeaderSize),
-                  "Buffer overflow");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, protectedHeaderSize));
+    ASSERT(buffer_write_bytes(&buffer, protectedHeaderBuffer, protectedHeaderSize));
 
     // Element 3: empty external_aad (empty byte string)
-    LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, 0), "CBOR write failed");
+    ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, 0));
 
     // Element 4: payload (message hash or raw message)
     if (ctx->hashPayload) {
         // Payload is the hash
-        LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, SIZEOF(ctx->msgHash)),
-                      "CBOR write failed");
-        LEDGER_ASSERT(buffer_write_bytes(&buffer, ctx->msgHash, SIZEOF(ctx->msgHash)),
-                      "Buffer overflow");
+        ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, SIZEOF(ctx->msgHash)));
+        ASSERT(buffer_write_bytes(&buffer, ctx->msgHash, SIZEOF(ctx->msgHash)));
     } else {
         // Payload is the raw message from accumulated buffer
-        LEDGER_ASSERT(ctx->remainingBytes == 0, "Message not fully received");
-        LEDGER_ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, ctx->msgLength),
-                      "CBOR write failed");
+        ASSERT(ctx->remainingBytes == 0);
+        ASSERT(buffer_write_cbor_token(&buffer, CBOR_TYPE_BYTES, ctx->msgLength));
         if (ctx->msgLength > 0) {
-            LEDGER_ASSERT(buffer_write_bytes(&buffer, ctx->msgBuffer, ctx->msgLength),
-                          "Buffer overflow");
+            ASSERT(buffer_write_bytes(&buffer, ctx->msgBuffer, ctx->msgLength));
         }
     }
 
     const size_t sigStructureSize = buffer.offset;
-    TRACE("Sig_structure size = %u", (unsigned) sigStructureSize);
+    TRACE_MODULE("Sig_structure size = %u", (unsigned) sigStructureSize);
 
     // CIP-8/COSE Sig_structure has fixed semantics and no extra app-defined domain-separation
     // field for Cardano witness-vs-message separation. Adding a custom prefix/tag here would
     // break interoperability, so we sign the standard CBOR Sig_structure bytes as defined.
     // This check only guards against the degenerate 32-byte ambiguity with raw tx hashes.
-    LEDGER_ASSERT(sigStructureSize != TX_HASH_LENGTH, "Sig_structure size equals TX_HASH_LENGTH");
+    ASSERT(sigStructureSize != TX_HASH_LENGTH);
 
-    LEDGER_ASSERT(sigStructureSize <= UINT16_MAX, "Sig_structure too large");
+    ASSERT(sigStructureSize <= UINT16_MAX);
     ctx->sigStructureBuffer = sigStructure;
     ctx->sigStructureSize = (uint16_t) sigStructureSize;
 
@@ -493,7 +479,7 @@ static bool build_sig_structure(sign_msg_ctx_t *ctx) {
 
 static void finalize_message_hash_to_context(sign_msg_ctx_t *ctx) {
     STATIC_ASSERT(SIZEOF(ctx->msgHash) * 8 == 224, "inconsistent message hash size");
-    LEDGER_ASSERT(ctx->remainingBytes == 0, "Message not fully received");
+    ASSERT(ctx->remainingBytes == 0);
     blake2b_224_finalize(&ctx->msgHashCtx, ctx->msgHash, SIZEOF(ctx->msgHash));
 }
 
@@ -511,7 +497,7 @@ static void signMsg_handle_confirm(buffer_t *cdata) {
 
     // Prepare address field and hash for review UI and later signing.
     prepare_address_field(ctx);
-    LEDGER_ASSERT(ctx->addressFieldSize > 0, "Address field not prepared");
+    ASSERT(ctx->addressFieldSize > 0);
     finalize_message_hash_to_context(ctx);
 
     // Build Sig_structure before UI confirmation so finalize path is infallible.
@@ -534,7 +520,7 @@ static void signMsg_handle_confirm(buffer_t *cdata) {
         case POLICY_HIDE:
             // policyForSignMsg currently never returns POLICY_HIDE;
             // if it ever does, replace the assert with: finalize_sign_msg(); return;
-            LEDGER_ASSERT(false, "Unexpected POLICY_HIDE for sign_msg");
+            ASSERT(false);
             return;
         // LCOV_EXCL_STOP
 
@@ -555,7 +541,7 @@ void finalize_sign_msg(void) {
 
     // User confirmed - sign already prepared Sig_structure.
     ASSERT(ctx->sigStructureBuffer != NULL);
-    LEDGER_ASSERT(ctx->sigStructureSize > 0, "Sig_structure size missing");
+    ASSERT(ctx->sigStructureSize > 0);
     signRawMessageWithPath(&ctx->signingPath,
                            ctx->sigStructureBuffer,
                            ctx->sigStructureSize,
@@ -572,17 +558,13 @@ void finalize_sign_msg(void) {
     uint8_t response_buffer[ED25519_SIGNATURE_LENGTH + PUBLIC_KEY_LENGTH + 4 + MAX_ADDRESS_LENGTH];
     buffer_t response = buffer_create(response_buffer, SIZEOF(response_buffer));
 
-    LEDGER_ASSERT(buffer_write_bytes(&response, ctx->signature, SIZEOF(ctx->signature)),
-                  "Write signature failed");
-    LEDGER_ASSERT(buffer_write_bytes(&response, ctx->witnessKey, SIZEOF(ctx->witnessKey)),
-                  "Write witness key failed");
-    LEDGER_ASSERT(buffer_write_u32(&response, ctx->addressFieldSize, BE),
-                  "Write address size failed");
-    LEDGER_ASSERT(buffer_write_bytes(&response, ctx->addressField, ctx->addressFieldSize),
-                  "Write address failed");
+    ASSERT(buffer_write_bytes(&response, ctx->signature, SIZEOF(ctx->signature)));
+    ASSERT(buffer_write_bytes(&response, ctx->witnessKey, SIZEOF(ctx->witnessKey)));
+    ASSERT(buffer_write_u32(&response, ctx->addressFieldSize, BE));
+    ASSERT(buffer_write_bytes(&response, ctx->addressField, ctx->addressFieldSize));
 
     const size_t response_size = response.offset;
-    TRACE("Response size = %u", response_size);
+    TRACE_MODULE("Response size = %u", response_size);
 
     apdu_response_send_data(response_buffer, response_size, SWO_SUCCESS);
     reset_app_context();
@@ -592,11 +574,13 @@ void finalize_sign_msg(void) {
 
 void handler_sign_msg(buffer_t *cdata, uint8_t p1) {
     ASSERT(cdata != NULL);
+#ifdef TRACE_HANDLERS
     TRACE_BUFFER_T(cdata);
+#endif
 
     switch (p1) {
         case P1_SIGN_MSG_INIT: {
-            TRACE("P1_SIGN_MSG_INIT");
+            TRACE_MODULE("P1_SIGN_MSG_INIT");
             if (!ensure_sign_msg_request_type(REQUEST_NONE)) {
                 return;
             }
@@ -610,7 +594,7 @@ void handler_sign_msg(buffer_t *cdata, uint8_t p1) {
             break;
         }
         case P1_SIGN_MSG_CHUNK: {
-            TRACE("P1_SIGN_MSG_CHUNK");
+            TRACE_MODULE("P1_SIGN_MSG_CHUNK");
             if (!ensure_sign_msg_request_type(REQUEST_SIGN_MSG)) {
                 return;
             }
@@ -621,7 +605,7 @@ void handler_sign_msg(buffer_t *cdata, uint8_t p1) {
             break;
         }
         case P1_SIGN_MSG_CONFIRM: {
-            TRACE("P1_SIGN_MSG_CONFIRM");
+            TRACE_MODULE("P1_SIGN_MSG_CONFIRM");
             if (!ensure_sign_msg_request_type(REQUEST_SIGN_MSG)) {
                 return;
             }

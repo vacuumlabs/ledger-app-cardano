@@ -39,9 +39,7 @@ void apdu_response_begin(command_e instruction) {
         apdu_response_state_reset();
     }
 
-    LEDGER_ASSERT(
-        !G_apdu_response_state.response_sent && !G_apdu_response_state.response_deferred_to_ux,
-        "Previous APDU response state not finalized");
+    ASSERT(!G_apdu_response_state.response_sent && !G_apdu_response_state.response_deferred_to_ux);
 
     G_apdu_response_state.response_sent = false;
     G_apdu_response_state.response_deferred_to_ux = false;
@@ -49,18 +47,13 @@ void apdu_response_begin(command_e instruction) {
 }
 
 void apdu_response_deferred(void) {
-    LEDGER_ASSERT(!G_apdu_response_state.response_sent,
-                  "Response already sent for INS=0x%02x",
-                  G_apdu_response_state.instruction);
+    ASSERT(!G_apdu_response_state.response_sent);
 
     G_apdu_response_state.response_deferred_to_ux = true;
 }
 
 void apdu_response_finalize_after_handler(void) {
-    LEDGER_ASSERT(
-        G_apdu_response_state.response_sent || G_apdu_response_state.response_deferred_to_ux,
-        "No APDU response or UX defer marker for INS=0x%02x",
-        G_apdu_response_state.instruction);
+    ASSERT(G_apdu_response_state.response_sent || G_apdu_response_state.response_deferred_to_ux);
 
     if (G_apdu_response_state.response_sent) {
         apdu_response_state_reset();
@@ -68,23 +61,19 @@ void apdu_response_finalize_after_handler(void) {
 }
 
 void apdu_response_send_sw(uint16_t swo) {
-    LEDGER_ASSERT(!G_apdu_response_state.response_sent,
-                  "Second APDU response for INS=0x%02x",
-                  G_apdu_response_state.instruction);
+    ASSERT(!G_apdu_response_state.response_sent);
     G_apdu_response_state.response_sent = true;
 
     int io_send_result = io_send_sw(swo);
-    LEDGER_ASSERT(io_send_result >= 0, "io_send_sw failed");
+    ASSERT(io_send_result >= 0);
 }
 
 void apdu_response_send_data(const uint8_t *buffer, size_t bufferLength, uint16_t swo) {
-    LEDGER_ASSERT(!G_apdu_response_state.response_sent,
-                  "Second APDU response for INS=0x%02x",
-                  G_apdu_response_state.instruction);
+    ASSERT(!G_apdu_response_state.response_sent);
     G_apdu_response_state.response_sent = true;
 
     int io_send_result = io_send_response_pointer(buffer, bufferLength, swo);
-    LEDGER_ASSERT(io_send_result >= 0, "io_send_response_pointer failed");
+    ASSERT(io_send_result >= 0);
 }
 
 bool apdu_response_was_sent(void) {
@@ -96,12 +85,10 @@ bool apdu_response_is_pending_ux(void) {
 }
 
 void reset_app_context(void) {
-    TRACE("reset_app_context");
-
     ui_all_cleanup();
 
     // Reset the SDK allocator to wipe all transient memory
-    LEDGER_ASSERT(mem_utils_reset_app_heap(), "Failed to reset memory allocator");
+    ASSERT(mem_utils_reset_app_heap());
 
     // Securely zero out the entire global context
     explicit_bzero(&G_context, sizeof(G_context));
@@ -130,7 +117,7 @@ void reset_app_context(void) {
 }
 
 void send_swo_and_reset(uint16_t swo) {
-    TRACE("send_swo_and_reset swo=0x%04x", swo);
+    TRACE("swo=0x%04x", swo);
     apdu_response_send_sw(swo);
     reset_app_context();
 }

@@ -38,6 +38,12 @@
 #include "swap_lib.h"
 #endif
 
+#ifdef TRACE_HANDLERS
+#define TRACE_MODULE(...) TRACE("[dispatcher] " __VA_ARGS__)
+#else
+#define TRACE_MODULE(...) (void) 0
+#endif
+
 /**
  * Map request type to its expected instruction
  * Used to detect instruction interleaving attacks
@@ -45,7 +51,7 @@
  * Precondition: req_type != REQUEST_NONE
  */
 static command_e req_type_to_instruction(request_type_e req_type) {
-    LEDGER_ASSERT(req_type != REQUEST_NONE, "REQUEST_NONE does not map to an instruction");
+    ASSERT(req_type != REQUEST_NONE);
 
     switch (req_type) {
         case REQUEST_EXPORT_PUBKEY:
@@ -72,20 +78,20 @@ static command_e req_type_to_instruction(request_type_e req_type) {
 
 void apdu_dispatcher(const command_t *cmd) {
     ASSERT(cmd != NULL);
-    TRACE("G_context.req_type: %d", G_context.req_type);
+    TRACE_MODULE("G_context.req_type: %d", G_context.req_type);
 
     if (cmd->cla != CLA) {
         // No handler is invoked for malformed top-level APDUs; send the terminal SW directly.
         TRACE("Invalid CLA: got=0x%02x expected=0x%02x", cmd->cla, CLA);
         int io_send_result = io_send_sw(SWO_INVALID_CLA);
-        LEDGER_ASSERT(io_send_result >= 0, "io_send_sw failed");
+        ASSERT(io_send_result >= 0);
         return;
     }
 
     if (apdu_response_is_pending_ux()) {
-        TRACE("Deferred APDU still pending UX, rejecting new command ins=%d", cmd->ins);
+        TRACE_MODULE("Deferred APDU still pending UX, rejecting new command ins=%d", cmd->ins);
         int io_send_result = io_send_sw(SWO_COMMAND_NOT_ALLOWED);
-        LEDGER_ASSERT(io_send_result >= 0, "io_send_sw failed");
+        ASSERT(io_send_result >= 0);
         return;
     }
 
@@ -99,10 +105,10 @@ void apdu_dispatcher(const command_t *cmd) {
                   G_context.req_type,
                   cmd->ins);
             int io_send_result = io_send_sw(SWO_COMMAND_NOT_ALLOWED);
-            LEDGER_ASSERT(io_send_result >= 0, "io_send_sw failed");
+            ASSERT(io_send_result >= 0);
             return;
         }
-        TRACE("Same instruction continuing: ins=%d", cmd->ins);
+        TRACE_MODULE("Same instruction continuing: ins=%d", cmd->ins);
     } else {
         // This is a new request, ensure we start with a clean context
         reset_app_context();
@@ -113,13 +119,14 @@ void apdu_dispatcher(const command_t *cmd) {
     // Log the appropriate state based on request type
     switch (G_context.req_type) {
         case REQUEST_SIGN_TRANSACTION:
-            TRACE("G_context.state.tx_state: %d", G_context.state.tx_state);
+            TRACE_MODULE("G_context.state.tx_state: %d", G_context.state.tx_state);
             break;
         case REQUEST_SIGN_OPCERT:
-            TRACE("G_context.state.opcert_state: %d", G_context.state.opcert_state);
+            TRACE_MODULE("G_context.state.opcert_state: %d", G_context.state.opcert_state);
             break;
         case REQUEST_DERIVE_ADDRESS:
-            TRACE("G_context.state.derive_address_state: %d", G_context.state.derive_address_state);
+            TRACE_MODULE("G_context.state.derive_address_state: %d",
+                         G_context.state.derive_address_state);
             break;
         default:
             // Stateless operations (GET_PUBLIC_KEY, GET_VERSION, etc.)
@@ -298,4 +305,5 @@ void apdu_dispatcher(const command_t *cmd) {
 #undef REJECT_USED_P2
 #undef REJECT_USED_P1
 #undef REJECT_INCORRECT_P1_P2_IF
+#undef TRACE_MODULE
 }

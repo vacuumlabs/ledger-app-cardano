@@ -53,7 +53,7 @@ bool build_warning_summary_text(const warning_definition_t *const *warning_defs,
                                 bool include_descriptions,
                                 char **out) {
     ASSERT(warning_defs != NULL);
-    LEDGER_ASSERT(start_index < warning_count, "Invalid warning summary range");
+    ASSERT(start_index < warning_count);
     ASSERT(out != NULL);
 
     size_t total_length = 1;  // null terminator
@@ -69,9 +69,7 @@ bool build_warning_summary_text(const warning_definition_t *const *warning_defs,
         }
         total_length += 1;  // newline
     }
-    LEDGER_ASSERT(total_length < BUFFER_SIZE_PARANOIA,
-                  "Warning summary buffer too large: %u",
-                  (unsigned) total_length);
+    ASSERT(total_length < BUFFER_SIZE_PARANOIA);
 
     char *buffer = NULL;
     if (!allocate_zeroed((void **) &buffer, total_length) || buffer == NULL) {
@@ -85,7 +83,7 @@ bool build_warning_summary_text(const warning_definition_t *const *warning_defs,
         const char *title = (const char *) PIC(def->title);
         size_t title_length = strlen(title);
 
-        LEDGER_ASSERT(title_length + 2 <= remaining, "Warning summary buffer too small");
+        ASSERT(title_length + 2 <= remaining);
         memmove(write_ptr, title, title_length);
         write_ptr += title_length;
         if (include_descriptions) {
@@ -94,8 +92,7 @@ bool build_warning_summary_text(const warning_definition_t *const *warning_defs,
 
             *write_ptr++ = ':';
             *write_ptr++ = ' ';
-            LEDGER_ASSERT(description_length + 1 <= remaining - (title_length + 2),
-                          "Warning summary buffer too small for description");
+            ASSERT(description_length + 1 <= remaining - (title_length + 2));
             memmove(write_ptr, description, description_length);
             write_ptr += description_length;
             *write_ptr++ = '\n';
@@ -106,7 +103,7 @@ bool build_warning_summary_text(const warning_definition_t *const *warning_defs,
             remaining -= title_length + 2;
         }
     }
-    LEDGER_ASSERT(remaining > 0, "No space left for warning terminator");
+    ASSERT(remaining > 0);
     if (include_descriptions && write_ptr > buffer) {
         write_ptr[-1] = '\0';
     } else {
@@ -206,8 +203,7 @@ static bool build_wallet_warning_details_page(const warning_definition_t *const 
         details[more_index].centeredInfo.description = NULL;
     }
 #else
-    LEDGER_ASSERT(!has_more_warnings,
-                  "Nano warning UI must fit all warnings in a single bar-list page");
+    ASSERT(!has_more_warnings);
 #endif
 
     page->title = (const char *) PIC(SECURITY_WARNING_TITLE);
@@ -231,7 +227,7 @@ static void free_wallet_warning_details_page(const nbgl_warningDetails_t *page) 
 }
 
 ui_status_t ui_build_warnings(warning_bits_t warnings) {
-    LEDGER_ASSERT(g_warning == NULL, "Warnings already built");
+    ASSERT(g_warning == NULL);
     const warning_definition_t *warning_defs[WARNING_BIT_COUNT];
     size_t warning_count = warning_bits_to_definitions(warnings, warning_defs, WARNING_BIT_COUNT);
 
@@ -293,8 +289,7 @@ void ui_free_warnings(void) {
     const nbgl_contentCenter_t *info = g_warning->info;
 
     if (g_warning->introDetails != NULL) {
-        LEDGER_ASSERT(g_warning->introDetails->type == BAR_LIST_WARNING,
-                      "introDetails is always a BAR_LIST_WARNING page");
+        ASSERT(g_warning->introDetails->type == BAR_LIST_WARNING);
         free_wallet_warning_details_page(g_warning->introDetails);
     }
     if (g_warning->reviewDetails != NULL) {

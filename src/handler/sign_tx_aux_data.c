@@ -83,8 +83,7 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
     ASSERT(aux_data != NULL);
 
     // Assert that CVote warnings are initially empty and TX warnings haven't leaked in
-    LEDGER_ASSERT(warning_bits_is_empty(&tx_aux_data_ctx()->cvote_warning_bits),
-                  "Non-empty cvote_warning_bits");
+    ASSERT(warning_bits_is_empty(&tx_aux_data_ctx()->cvote_warning_bits));
 
     // 1. Vote key (only checked in CIP15 or CIP36 with no delegations)
     security_policy_t vote_key_policy = POLICY_DENY;
@@ -93,10 +92,9 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
         vote_key_policy = policyForCVoteRegistrationVoteKey(&aux_data->vote_credential,
                                                             aux_data->format,
                                                             &vote_key_warnings);
-        LEDGER_ASSERT(warning_bits_except_mask(
-                          vote_key_warnings,
-                          warning_bits_mask_for(WARNING_BIT_UNUSUAL_KEY_DERIVATION_PATH)) == 0,
-                      "Unexpected vote-key warnings");
+        ASSERT(warning_bits_except_mask(
+                   vote_key_warnings,
+                   warning_bits_mask_for(WARNING_BIT_UNUSUAL_KEY_DERIVATION_PATH)) == 0);
         // CVote vote-key unusual derivation warning is rendered inline as a dedicated UI pair.
     } else {
         vote_key_policy = POLICY_HIDE;  // Not used with delegations
@@ -140,7 +138,7 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
         case POLICY_HIDE:
             // policyForCVoteRegistrationStakingKey currently never returns POLICY_HIDE;
             // if it ever does, replace the assert with: aux_data->ui_show.staking_key = false;
-            LEDGER_ASSERT(false, "Unexpected POLICY_HIDE for staking key");
+            ASSERT(false);
             return false;
         default:
             ASSERT(false);
@@ -166,7 +164,7 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
             // policyForCVoteRegistrationPaymentDestination currently never returns POLICY_HIDE;
             // if it ever does, replace the assert with: aux_data->ui_show.payment_destination =
             // false;
-            LEDGER_ASSERT(false, "Unexpected POLICY_HIDE for payment destination");
+            ASSERT(false);
             return false;
         default:
             ASSERT(false);
@@ -186,12 +184,12 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
         case POLICY_DENY:
             // policyForCVoteRegistrationNonce currently never returns POLICY_DENY;
             // if it ever does, replace the assert with: return false;
-            LEDGER_ASSERT(false, "Unexpected POLICY_DENY for nonce");
+            ASSERT(false);
             return false;
         case POLICY_HIDE:
             // policyForCVoteRegistrationNonce currently never returns POLICY_HIDE;
             // if it ever does, replace the assert with: aux_data->ui_show.nonce = false;
-            LEDGER_ASSERT(false, "Unexpected POLICY_HIDE for nonce");
+            ASSERT(false);
             return false;
         default:
             ASSERT(false);
@@ -215,7 +213,7 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
         case POLICY_DENY:
             // policyForCVoteRegistrationVotingPurpose currently never returns POLICY_DENY;
             // if it ever does, replace the assert with: return false;
-            LEDGER_ASSERT(false, "Unexpected POLICY_DENY for voting purpose");
+            ASSERT(false);
             return false;
         default:
             ASSERT(false);
@@ -236,8 +234,8 @@ static void handler_tx_aux_data_init(buffer_t *cdata) {
     cvote_aux_data_t *aux_data = &tx_aux_data_ctx()->cvote_aux_data;
 
     ASSERT(aux_data->state == CVOTE_AUX_DATA_STATE_EXPECTING_INIT);
-    LEDGER_ASSERT(tx_aux_data_ctx()->raw_cvote_init_data == NULL, "Stale raw init ptr");
-    LEDGER_ASSERT(tx_aux_data_ctx()->raw_cvote_init_data_len == 0, "Stale raw init len");
+    ASSERT(tx_aux_data_ctx()->raw_cvote_init_data == NULL);
+    ASSERT(tx_aux_data_ctx()->raw_cvote_init_data_len == 0);
 
     // Allocate persistent buffer for CVote init data
     const size_t init_payload_len = buffer_data_size(cdata);
@@ -246,7 +244,7 @@ static void handler_tx_aux_data_init(buffer_t *cdata) {
         send_swo_and_reset(SWO_CVOTE_AUX_DATA_PARSING_FAIL);
         return;
     }
-    LEDGER_ASSERT(init_payload_len <= UINT16_MAX, "init_payload_len > UINT16_MAX");
+    ASSERT(init_payload_len <= UINT16_MAX);
     if (!APP_MEM_CALLOC((void **) &tx_aux_data_ctx()->raw_cvote_init_data,
                         (uint16_t) init_payload_len)) {
         // LCOV_EXCL_START
@@ -296,7 +294,7 @@ static void handler_tx_aux_data_init(buffer_t *cdata) {
     ui_cvote_aux_data_init_vars(aux_data);
 
     if (aux_data->ui_streaming.on) {
-        LEDGER_ASSERT(aux_data->remaining_delegations > 0, "Streaming without delegations");
+        ASSERT(aux_data->remaining_delegations > 0);
         aux_data->state = CVOTE_AUX_DATA_STATE_STREAMING_INITIAL_PAGE;
         apdu_response_deferred();
         ui_cvote_aux_data_streaming_show_initial_page(aux_data);
@@ -315,7 +313,7 @@ static void handler_tx_aux_data_init(buffer_t *cdata) {
     // Non-streaming with zero delegations: show final review immediately.
     // State stays TX_STATE_AUX_DATA until user confirms (finalize_sign_tx_aux_data).
     if (aux_data->state == CVOTE_AUX_DATA_STATE_ALL_DATA_RECEIVED) {
-        LEDGER_ASSERT(aux_data->remaining_delegations == 0, "Delegations remaining");
+        ASSERT(aux_data->remaining_delegations == 0);
         TRACE_MODULE("CVote AUX_DATA ready for UI confirmation");
         apdu_response_deferred();
         ui_cvote_aux_data_show_non_streaming_final_review(aux_data);
@@ -332,7 +330,7 @@ static void handler_tx_aux_data_delegation(buffer_t *cdata) {
     cvote_aux_data_t *aux_data = &tx_aux_data_ctx()->cvote_aux_data;
 
     ASSERT(aux_data->state == CVOTE_AUX_DATA_STATE_RECEIVING_DELEGATIONS);
-    LEDGER_ASSERT(aux_data->remaining_delegations > 0, "No delegations remaining");
+    ASSERT(aux_data->remaining_delegations > 0);
 
     TRACE_MODULE("CVote AUX_DATA delegation received, payload_len=%u", cdata->size);
     cvote_credential_t delegation_credential = {0};
@@ -349,10 +347,9 @@ static void handler_tx_aux_data_delegation(buffer_t *cdata) {
     security_policy_t delegation_policy = policyForCVoteRegistrationVoteKey(&delegation_credential,
                                                                             aux_data->format,
                                                                             &delegation_warnings);
-    LEDGER_ASSERT(warning_bits_except_mask(
-                      delegation_warnings,
-                      warning_bits_mask_for(WARNING_BIT_UNUSUAL_KEY_DERIVATION_PATH)) == 0,
-                  "Unexpected delegation warnings");
+    ASSERT(warning_bits_except_mask(
+               delegation_warnings,
+               warning_bits_mask_for(WARNING_BIT_UNUSUAL_KEY_DERIVATION_PATH)) == 0);
     // CVote vote-key unusual derivation warning is rendered inline as a dedicated UI pair.
     if (delegation_policy == POLICY_DENY) {
         TRACE("CVote AUX_DATA delegation: vote key policy denied");
@@ -373,7 +370,7 @@ static void handler_tx_aux_data_delegation(buffer_t *cdata) {
 
     cvote_hash_builder_add_delegation(aux_data, &delegation_credential, weight);
 
-    LEDGER_ASSERT(aux_data->remaining_delegations > 0, "wrong remaining delegation count");
+    ASSERT(aux_data->remaining_delegations > 0);
     aux_data->remaining_delegations--;
     const bool is_last_delegation_chunk = (aux_data->remaining_delegations == 0);
 
@@ -410,7 +407,9 @@ static void handler_tx_aux_data_delegation(buffer_t *cdata) {
 
 void handler_sign_tx_aux_data(buffer_t *cdata, uint8_t p2) {
     ASSERT(cdata != NULL);
+#ifdef TRACE_HANDLERS
     TRACE_BUFFER_T(cdata);
+#endif
 
     if (!ensure_sign_tx_aux_data_request_type(REQUEST_SIGN_TRANSACTION)) {
         return;

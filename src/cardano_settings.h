@@ -41,20 +41,19 @@ static inline bool setting_is_enabled(uint8_t value) {
 
 static inline uint8_t expert_mode_setting_value() {
     uint8_t value = N_storage.expert_mode_enabled;
-    LEDGER_ASSERT(value == SETTINGS_NO || value == SETTINGS_YES, "Invalid expert mode setting");
+    ASSERT(value == SETTINGS_NO || value == SETTINGS_YES);
     return value;
 }
 
 static inline uint8_t silent_pubkey_export_setting_value() {
     uint8_t value = N_storage.silent_pubkey_export_enabled;
-    LEDGER_ASSERT(value == SETTINGS_NO || value == SETTINGS_YES,
-                  "Invalid silent pubkey export setting");
+    ASSERT(value == SETTINGS_NO || value == SETTINGS_YES);
     return value;
 }
 
 static inline uint8_t blind_signing_setting_value() {
     uint8_t value = N_storage.blind_signing_enabled;
-    LEDGER_ASSERT(value == SETTINGS_NO || value == SETTINGS_YES, "Invalid blind signing setting");
+    ASSERT(value == SETTINGS_NO || value == SETTINGS_YES);
     return value;
 }
 

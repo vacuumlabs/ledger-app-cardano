@@ -24,6 +24,12 @@
 #include "swap.h"
 #endif
 
+#ifdef TRACE_APP_MAIN
+#define TRACE_MODULE(...) TRACE("[app_main] " __VA_ARGS__)
+#else
+#define TRACE_MODULE(...) (void) 0
+#endif
+
 #ifndef APP_MAIN_EXTERNAL_GLOBALS
 global_ctx_t G_context;
 
@@ -48,16 +54,16 @@ void app_main_process_one_apdu(void) {
                 TRACE("BAD LENGTH:");
                 TRACE_BUFFER(G_io_apdu_buffer, input_len);
                 int io_send_result = io_send_sw(SWO_WRONG_DATA_LENGTH);
-                LEDGER_ASSERT(io_send_result >= 0, "io_send_sw failed");
+                ASSERT(io_send_result >= 0);
                 reset_app_context();
             } else {
-                TRACE("CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=",
-                      cmd.cla,
-                      cmd.ins,
-                      cmd.p1,
-                      cmd.p2,
-                      cmd.lc);
-                TRACE_BUFFER(cmd.data, cmd.lc);
+                TRACE_MODULE("CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=",
+                             cmd.cla,
+                             cmd.ins,
+                             cmd.p1,
+                             cmd.p2,
+                             cmd.lc);
+                TRACE_MODULE("%.*h", (int) cmd.lc, cmd.data);
 
                 // Dispatch structured APDU command to handler
                 apdu_dispatcher(&cmd);
@@ -85,7 +91,7 @@ void app_main(void) {
     // Structured APDU command
 
     // Initialize SDK memory allocator
-    LEDGER_ASSERT(mem_utils_reset_app_heap(), "Failed to initialize memory allocator");
+    ASSERT(mem_utils_reset_app_heap());
 
     io_init();
 
@@ -113,3 +119,5 @@ void app_main(void) {
         app_main_process_one_apdu();
     }
 }
+
+#undef TRACE_MODULE
