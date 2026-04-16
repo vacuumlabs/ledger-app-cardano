@@ -100,7 +100,10 @@ __noinline_due_to_stack__ bool format_tx_output_destination_human_readable(
     const tx_output_destination_t* destination,
     char* out,
     size_t outSize) {
-    uint8_t* address_bytes = tx_alloc_temp_buffer_or_fail(MAX_ADDRESS_LENGTH);
+    // Use a stack buffer — formatters used with UI_ADD_FORMAT* must not heap-allocate.
+    // See the contract note in ui_utils.h.
+    uint8_t address_bytes[MAX_ADDRESS_LENGTH];
+    explicit_bzero(address_bytes, sizeof(address_bytes));
 
     size_t address_size = 0;
     bool destination_parsed = tx_output_destination_to_address_bytes(destination,
@@ -109,7 +112,5 @@ __noinline_due_to_stack__ bool format_tx_output_destination_human_readable(
                                                                      &address_size);
     LEDGER_ASSERT(destination_parsed, "Failed to build output address bytes for UI");
 
-    bool formatted = format_address_human_readable(address_bytes, address_size, out, outSize);
-    APP_MEM_FREE_AND_NULL((void**) &address_bytes);
-    return formatted;
+    return format_address_human_readable(address_bytes, address_size, out, outSize);
 }

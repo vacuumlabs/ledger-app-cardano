@@ -164,6 +164,15 @@ bool ui_pairs_add_static_label(const char *label, char *tmp_buf);
  * (value, output_buffer, buffer_size), verifies success and no truncation,
  * and adds result to UI pairs.
  *
+ * CONTRACT: format_fn MUST NOT allocate from the heap (APP_MEM_CALLOC /
+ * allocate_zeroed / tx_alloc_temp_buffer_or_fail).  These macros allocate the
+ * output string buffer from the heap immediately before calling format_fn; a
+ * second heap allocation inside format_fn may fail with a hard ASSERT rather
+ * than the graceful UI_STATUS_OUT_OF_MEMORY path, breaking the streaming
+ * OOM-recovery mechanism.  Use stack-local temporaries inside formatters
+ * instead, and annotate with __noinline_due_to_stack__ if the local buffer is
+ * large (>= ~64 bytes).
+ *
  * Formatting function signature: bool format_fn(value_type value, char *out, size_t outSize)
  *
  * @param label      Static label for UI pair (use UI_STATIC_LABEL macro)
@@ -194,6 +203,8 @@ bool ui_pairs_add_static_label(const char *label, char *tmp_buf);
  * Allocates buffer, calls formatting function with signature
  * (param1, param2, output_buffer, buffer_size), verifies success and no truncation,
  * and adds result to UI pairs.
+ *
+ * CONTRACT: same as UI_ADD_FORMAT1 — format_fn must not heap-allocate.
  *
  * Formatting function signature: bool format_fn(param1_type p1, param2_type p2, char *out, size_t
  * outSize)
@@ -227,6 +238,8 @@ bool ui_pairs_add_static_label(const char *label, char *tmp_buf);
  * Allocates buffer, calls formatting function with signature
  * (param1, param2, param3, output_buffer, buffer_size), verifies success and no truncation,
  * and adds result to UI pairs.
+ *
+ * CONTRACT: same as UI_ADD_FORMAT1 — format_fn must not heap-allocate.
  *
  * Formatting function signature: bool format_fn(p1_type p1, p2_type p2, p3_type p3, char *out,
  * size_t outSize)
@@ -286,6 +299,8 @@ bool ui_pairs_add_static_label(const char *label, char *tmp_buf);
  * Allocates buffer, calls formatting function with signature
  * (param1, param2, param3, param4, output_buffer, buffer_size), verifies success and no truncation,
  * and adds result to UI pairs.
+ *
+ * CONTRACT: same as UI_ADD_FORMAT1 — format_fn must not heap-allocate.
  *
  * Formatting function signature: bool format_fn(p1_type p1, p2_type p2, p3_type p3, p4_type p4,
  * char *out, size_t outSize)
