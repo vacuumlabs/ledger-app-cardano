@@ -167,6 +167,7 @@ set(SIGN_TX_COMMON_SOURCES
     ../../src/transaction/tx_parse_certificates.c
     ../../src/transaction/tx_parse_outputs.c
     ../../src/transaction/tx_utils.c
+    ../../src/transaction/tx_signing_mode.c
     ../../src/parsers/cardano_parsers.c
     ../../src/securityPolicy/securityPolicy.c
     ../../src/securityPolicy/securityPolicy_privkey.c

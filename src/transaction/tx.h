@@ -48,6 +48,11 @@ typedef enum {
     SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR = 5,
     SIGN_TX_SIGNINGMODE_MULTISIG_TX = 6,
     SIGN_TX_SIGNINGMODE_PLUTUS_TX = 7,
+    // AUTO is a client-side hint: the device infers the concrete mode from the
+    // tx body fields present in the init APDU.  It is replaced by a concrete
+    // mode before any security-policy check runs; no policy function ever sees
+    // this value.
+    SIGN_TX_SIGNINGMODE_AUTO = 8,
 } sign_tx_signingmode_t;
 
 // Transaction parameters parsed from SIGN_TX INIT APDU.

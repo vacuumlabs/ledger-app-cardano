@@ -100,11 +100,12 @@ void apdu_dispatcher(const command_t *cmd) {
     if (G_context.req_type != REQUEST_NONE) {
         command_e expected_ins = req_type_to_instruction(G_context.req_type);
         if (cmd->ins != expected_ins) {
-            TRACE("Stale in-progress call detected: current=%d (req_type=%d), attempted=%d;"
-                  " resetting and asking host to retry",
-                  expected_ins,
-                  G_context.req_type,
-                  cmd->ins);
+            TRACE(
+                "Stale in-progress call detected: current=%d (req_type=%d), attempted=%d;"
+                " resetting and asking host to retry",
+                expected_ins,
+                G_context.req_type,
+                cmd->ins);
             // Non-UX stale state from an abandoned transport stream: reset to idle and return
             // a dedicated retryable status so the host can safely re-send the first APDU.
             // UX-pending case was already handled above and is explicitly not this path.

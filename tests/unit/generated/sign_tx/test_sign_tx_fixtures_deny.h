@@ -865,6 +865,27 @@ static const apdu_segment_t
         },
 };
 
+// Source: tests/standalone/input_files/signTx.py > transactionInitDenyTestCases >
+// Auto_mode_ambiguous_no_plutus_indicators
+static const apdu_segment_t SIGN_TX_SEGMENTS_DENY_INIT_AUTO_MODE_AMBIGUOUS_NO_PLUTUS_INDICATORS[] =
+    {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
 // Source: tests/standalone/input_files/signTx.py > addressParamsDenyTestCases > Reward_address_key
 static const apdu_segment_t SIGN_TX_SEGMENTS_DENY_ADDRESS_REWARD_ADDRESS_KEY[] = {
     {
@@ -4349,6 +4370,19 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_REFERENCE_INPUTS_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = true,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > transactionInitDenyTestCases >
+    // Auto_mode_ambiguous_no_plutus_indicators
+    {
+        .name = "[DENY_INIT] Auto_mode_ambiguous_no_plutus_indicators",
+        .init_hex = "0000000000000000012D964A0908000100010200000000010100000100000000"
+                    "0101010000000001010001007F",
+        .chunks = SIGN_TX_SEGMENTS_DENY_INIT_AUTO_MODE_AMBIGUOUS_NO_PLUTUS_INDICATORS,
+        .chunk_count =
+            ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_AUTO_MODE_AMBIGUOUS_NO_PLUTUS_INDICATORS),
+        .expected_swo = SWO_AMBIGUOUS_TX_SIGNING_MODE,
         .expect_init_failure = true,
         .skip_reason = NULL,
     },

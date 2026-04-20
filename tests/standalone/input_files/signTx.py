@@ -4866,6 +4866,35 @@ _tx_streaming_many_outputs = _make_tx_many_outputs(90)
 _tx_blind_signing_prompt_many_outputs = _make_tx_many_outputs(10)
 
 testsAlonzo: List[SignTxTestCase] = [
+    # Same tx as Sign_tx_with_collateral_inputs_shelley but with AUTO_TRANSACTION mode.
+    # The tx body, hash, and witness are identical — only the init APDU signing mode byte differs.
+    SignTxTestCase(
+        name="Sign_tx_auto_mode_resolves_to_plutus_via_collateral",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[],
+            collateralInputs=[inputs["utxoShelley"]],
+            includeNetworkId=True,
+        ),
+        signingMode=TransactionSigningMode.AUTO_TRANSACTION,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a0d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000f01"
+        ),
+        expected_warnings=(
+            WarningBit.WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL,
+            WarningBit.WARNING_BIT_PLUTUS_MISSING_SCRIPT_DATA_HASH,
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="4e94b319a7e5a28f333932b0e2337b7c16da22f5eacae684edf2b2fbca2bf2f7",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="bcaa0f5f289a5606153abff0d6f4842b1a05fb001d8cc8cb40a7bfb64ec1e422cfa346c240b1c1099164ab44b265b75a350368f51f14e0392c84255bd89afc09",
+                ),
+            ),
+        ),
+    ),
     SignTxTestCase(
         name="Sign_tx_with_script_data_hash",
         tx=Transaction(
@@ -7312,6 +7341,17 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
         ),
         signingMode=TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
         expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+    ),
+    SignTxTestCase(
+        name="Auto_mode_ambiguous_no_plutus_indicators",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+        ),
+        signingMode=TransactionSigningMode.AUTO_TRANSACTION,
+        expected_swo=StatusWord.SWO_AMBIGUOUS_TX_SIGNING_MODE,
+        deny_before_review=True,
     ),
 ]
 

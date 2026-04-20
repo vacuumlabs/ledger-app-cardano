@@ -27,6 +27,7 @@
 #include "tx_credential_types.h"
 #include "tx_output_types.h"
 #include "tx_processing.h"
+#include "tx_signing_mode.h"
 #include "tx_utils.h"
 #include "utils.h"
 #include "cardano_buffer.h"
@@ -45,19 +46,6 @@
 #include "swap_error_code_helpers.h"
 #include "swap_lib.h"
 #endif
-
-static bool is_valid_tx_signing_mode(uint8_t tx_signing_mode) {
-    switch (tx_signing_mode) {
-        case SIGN_TX_SIGNINGMODE_ORDINARY_TX:
-        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
-        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
-        case SIGN_TX_SIGNINGMODE_MULTISIG_TX:
-        case SIGN_TX_SIGNINGMODE_PLUTUS_TX:
-            return true;
-        default:
-            return false;
-    }
-}
 
 static bool ensure_sign_tx_state(tx_state_e required_state) {
     if (G_context.state.tx_state != required_state) {
@@ -357,6 +345,14 @@ static void handle_tx_init_apdu(buffer_t *cdata) {
         tx_params->includeValidityIntervalStart,
         G_context.tx_info.num_witnesses,
         G_context.tx_info.raw_tx_total_length);
+
+    // Resolve AUTO signing mode from init-APDU fields before any policy check.
+    if (!resolve_auto_tx_signing_mode(tx_params)) {
+        TRACE("TX init: AUTO mode cannot be resolved from init APDU fields alone");
+        send_swo_and_reset(SWO_AMBIGUOUS_TX_SIGNING_MODE);
+        return;
+    }
+    TRACE("TX mode after AUTO resolution: %d", tx_params->txSigningMode);
 
     // Check security policy for DENY at init time (before buffering the tx body).
     // Warning bits are intentionally discarded here; they will be re-set in tx_validate
