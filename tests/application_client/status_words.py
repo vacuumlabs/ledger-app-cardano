@@ -87,3 +87,9 @@ class StatusWord(IntEnum):
 
     # Swap validation errors
     SWO_SWAP_CHECKING_FAIL = 0x6001
+
+    # Stale-call recovery (matches old Cardano app's ERR_STILL_IN_CALL = 0x6E04).
+    # Emitted when the dispatcher detects a stale non-UX in-progress request after a new
+    # instruction arrives; the app has already reset to idle and the host may retry the
+    # first APDU once.
+    SWO_STILL_IN_CALL_RESET_DONE = 0x6E04

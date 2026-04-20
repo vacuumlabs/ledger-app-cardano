@@ -86,4 +86,12 @@ typedef enum {
 
     // Swap validation errors
     SWO_SWAP_CHECKING_FAIL = 0x6001,  // swap parameter validation failed
+
+    // Stale-call recovery: a new instruction arrived while a previous (non-UX) request was still
+    // in progress. The dispatcher has reset the app to idle before returning this status; the host
+    // may safely retry the first APDU of the new operation once. Must NOT be emitted when a
+    // deferred UX response is still pending — that case continues to return
+    // SWO_COMMAND_NOT_ALLOWED. Value and semantics match the old Cardano app's ERR_STILL_IN_CALL,
+    // so LedgerJS' existing retry-once wrapper works unchanged.
+    SWO_STILL_IN_CALL_RESET_DONE = 0x6E04,
 } cardano_status_word_t;
