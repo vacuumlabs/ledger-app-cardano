@@ -78,6 +78,16 @@ ifneq ($(DEBUG), 0)
     DEFINES += DEBUG
 endif
 
+# Enable OS-level stack consumption monitoring
+# Pass via command line: make DEBUG_OS_STACK_CONSUMPTION=1
+# Then run ragger tests with: pytest ... --get-stack-consumption
+# Requires ragger >= 1.44.0
+#DEBUG_OS_STACK_CONSUMPTION = 1
+
+ifneq ($(DEBUG_OS_STACK_CONSUMPTION),)
+    DEFINES += DEBUG_OS_STACK_CONSUMPTION
+endif
+
 ########################################
 #     Application custom permissions   #
 ########################################

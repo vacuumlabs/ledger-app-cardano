@@ -214,6 +214,19 @@ make clean_target && make DEBUG=1 -j8
 strings build/app-cardano/bin/app.elf | grep "your-string" | wc -l
 ```
 
+### Stack Consumption Profiling
+
+To measure OS-level stack consumption across APDU flows, build with `DEBUG_OS_STACK_CONSUMPTION=1`
+(inside the Ledger SDK / Docker environment) and then run ragger tests with `--get-stack-consumption`:
+
+```bash
+make DEBUG=1 DEBUG_OS_STACK_CONSUMPTION=1 -j8
+pytest tests/standalone/ --device stax --get-stack-consumption
+```
+
+Requires `ragger >= 1.44.0`. This flag is independent of the `TRACE_*` guards and works on top of
+any `DEBUG=1` build.
+
 ### Impact on Release Builds
 **None.** In release builds (where `HAVE_PRINTF` is not defined), the `TRACE` macro is defined as `do {} while(0)` in `utils/utils.h`. This means all strings are removed by the preprocessor regardless of guards. These guards specifically target the **debug binary** size constraints.
 
