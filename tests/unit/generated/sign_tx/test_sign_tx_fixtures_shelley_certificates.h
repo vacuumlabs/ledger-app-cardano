@@ -15,7 +15,7 @@
 //   - Source file and era
 //   - Original Ragger test name
 //
-// Total tests in this era: 6
+// Total tests in this era: 7
 
 #pragma once
 
@@ -633,7 +633,145 @@ static const tx_fixture_t
         .expected_warning_bits = 0,
 };
 
-// Test 5: Sign_tx_with_pool_retirement_combined_with_stake_deregistration
+// Test 5: Unrestricted_tx_with_pool_retirement_and_stake_registration
+// Source: tests/standalone/input_files/signTx.py > shelley_certificates era tests
+//
+static const uint8_t
+    FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_RAW_TX
+        [] = {
+            0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0,
+            0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3,
+            0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82,
+            0xD8, 0x18, 0x58, 0x21, 0x83, 0x58, 0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8,
+            0xB8, 0x5F, 0xEC, 0x29, 0x6F, 0x06, 0x85, 0xCA, 0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2,
+            0xE1, 0xA5, 0xD8, 0x9D, 0x92, 0xF4, 0x5F, 0xA0, 0x00, 0x1A, 0x0D, 0x0C, 0x25, 0x61,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x2D, 0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x0A, 0x04, 0x02, 0x04, 0x80, 0x00, 0x07, 0x3D, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A,
+            0x00, 0x02, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_0_PAYLOAD
+        [] = {
+            0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x82, 0x12, 0xCD, 0xAB, 0xE1, 0xBE, 0x51, 0x4F, 0xDC, 0x21, 0xE0, 0x2A, 0x2B,
+            0x40, 0x5C, 0xE2, 0x84, 0xEB, 0xBC, 0xE0, 0x20, 0x8A, 0x5C, 0x2B, 0x28, 0x9D,
+            0xAC, 0x66, 0x2B, 0xF8, 0x7F, 0xB4, 0xC2, 0xD1, 0x82, 0x37, 0xC6, 0x67, 0x61,
+            0xE2, 0x85, 0xD7, 0x8E, 0xE7, 0x6C, 0xC2, 0x6B, 0x75, 0x17, 0x71, 0x8E, 0x64,
+            0x11, 0x74, 0xD6, 0x9F, 0x49, 0x73, 0x7A, 0x49, 0xE9, 0x48, 0x26, 0x07,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_1_PAYLOAD
+        [] = {
+            0x04,
+            0x80,
+            0x00,
+            0x07,
+            0x3D,
+            0x80,
+            0x00,
+            0x07,
+            0x17,
+            0x80,
+            0x00,
+            0x00,
+            0x00,
+            0x80,
+            0x00,
+            0x00,
+            0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_1_EXPECTED_SIGNATURE
+        [] = {
+            0x93, 0x86, 0xC2, 0x54, 0x5E, 0x26, 0x71, 0x49, 0x7D, 0xAF, 0x95, 0xDB, 0x93,
+            0xBE, 0x13, 0x86, 0x69, 0x0A, 0x4F, 0x88, 0x45, 0x47, 0xA6, 0x0F, 0x29, 0x13,
+            0xEF, 0x8A, 0x9E, 0x61, 0x48, 0x6B, 0xA0, 0x68, 0xD7, 0x47, 0x7E, 0x1C, 0xD7,
+            0x12, 0xF8, 0xD9, 0xCC, 0x20, 0x77, 0x8D, 0x9E, 0x71, 0xB7, 0x2E, 0xDA, 0x96,
+            0xC9, 0x39, 0x4C, 0x2F, 0x31, 0x11, 0xC6, 0x18, 0x03, 0xF9, 0xA7, 0x0D,
+};
+
+static const witness_payload_t FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_PAYLOADS
+    [] = {
+        {.payload =
+             FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_0_EXPECTED_SIGNATURE},
+        {.payload =
+             FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_1_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_1_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_1_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t
+    FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION = {
+        .name = "Unrestricted_tx_with_pool_retirement_and_stake_registration",
+        .raw_tx =
+            FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_RAW_TX,
+        .raw_tx_len = sizeof(
+            FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_RAW_TX),
+        .tx_body_cbor_hex =
+            "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258"
+            "2b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25"
+            "611a002dd2e802182a030a04828304581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c27"
+            "37b70a82008200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c",
+        .expected_hash_hex = "70aea83c8e5e9a3e0ec92860d5bd4750c34911193f092a96b9da6906d6ea6247",
+        .signing_mode = 9,
+        .network_id = 1,
+        .protocol_magic = 764824073,
+        .num_inputs = 1,
+        .num_outputs = 1,
+        .num_witnesses = 2,
+        .witness_payloads =
+            FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION_WITNESS_PAYLOADS,
+        .witness_payload_count = 2,
+        .num_certificates = 2,
+        .num_withdrawals = 0,
+        .num_mint_asset_groups = 0,
+        .include_ttl = true,
+        .include_validity_interval_start = false,
+        .include_aux_data_hash = false,
+        .aux_data_type = 0,
+        .aux_data_init_payload = NULL,
+        .aux_data_init_payload_len = 0,
+        .aux_data_delegations = NULL,
+        .aux_data_delegation_count = 0,
+        .include_script_data_hash = false,
+        .num_collateral_inputs = 0,
+        .num_required_signers = 0,
+        .include_network_id = false,
+        .include_collateral_output = false,
+        .include_total_collateral = false,
+        .num_reference_inputs = 0,
+        .num_voters = 0,
+        .include_treasury = false,
+        .treasury = 0,
+        .include_donation = false,
+        .donation = 0,
+        .aux_data_hash_hex = NULL,
+        .options = 0,
+        .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+        .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING),
+};
+
+// Test 6: Sign_tx_with_pool_retirement_combined_with_stake_deregistration
 // Source: tests/standalone/input_files/signTx.py > shelley_certificates era tests
 //
 static const uint8_t

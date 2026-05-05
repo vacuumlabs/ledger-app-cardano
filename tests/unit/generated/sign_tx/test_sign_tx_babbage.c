@@ -332,6 +332,111 @@ test_sign_tx_with_change_output_as_map_and_multiple_reference_inputs_reject_tx_e
         true);
 }
 
+static void test_unrestricted_tx_with_collateral_and_reference_inputs_deny_init_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_collateral_and_reference_inputs_expert_on(void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS,
+        true);
+}
+
+static void test_unrestricted_tx_with_collateral_and_reference_inputs_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS,
+        true);
+}
+
+static void
+test_unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash_deny_init_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH,
+        true);
+}
+
+static void
+test_unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH,
+        true);
+}
+
+static void
+test_unrestricted_tx_with_cross_account_outputs_and_missing_collateral_deny_init_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_cross_account_outputs_and_missing_collateral_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL,
+        true);
+}
+
+static void
+test_unrestricted_tx_with_cross_account_outputs_and_missing_collateral_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL,
+        true);
+}
+
+static void
+test_unrestricted_tx_with_required_signers_and_collateral_without_script_data_deny_init_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_required_signers_and_collateral_without_script_data_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA,
+        true);
+}
+
+static void
+test_unrestricted_tx_with_required_signers_and_collateral_without_script_data_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA,
+        true);
+}
+
 static void test_sign_tx_with_change_output_as_map_and_total_collateral_expert_off(void **state) {
     (void) state;
     run_fixture_with_expert_mode(
@@ -768,6 +873,29 @@ int main(void) {
             test_sign_tx_with_change_output_as_map_and_multiple_reference_inputs_expert_on),
         cmocka_unit_test(
             test_sign_tx_with_change_output_as_map_and_multiple_reference_inputs_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_collateral_and_reference_inputs_deny_init_expert_off),
+        cmocka_unit_test(test_unrestricted_tx_with_collateral_and_reference_inputs_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_collateral_and_reference_inputs_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash_deny_init_expert_off),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_cross_account_outputs_and_missing_collateral_deny_init_expert_off),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_cross_account_outputs_and_missing_collateral_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_cross_account_outputs_and_missing_collateral_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_required_signers_and_collateral_without_script_data_deny_init_expert_off),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_required_signers_and_collateral_without_script_data_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_required_signers_and_collateral_without_script_data_reject_tx_expert_on),
         cmocka_unit_test(test_sign_tx_with_change_output_as_map_and_total_collateral_expert_off),
         cmocka_unit_test(
             test_sign_tx_with_change_output_as_map_and_total_collateral_reject_tx_expert_off),

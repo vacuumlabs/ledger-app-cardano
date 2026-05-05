@@ -16,8 +16,11 @@
 #include "cardano_constants.h"
 #include "globals.h"
 
+extern bool unit_test_expert_mode_enabled;
+
 static void reset_context(void) {
     memset(&G_context, 0, sizeof(G_context));
+    unit_test_expert_mode_enabled = false;
 }
 
 static bip44_path_t make_ordinary_staking_path(void) {
@@ -325,6 +328,101 @@ static void test_pool_retirement_allowed_in_plutus(void **state) {
     assert_int_equal(policy, POLICY_SHOW);
 }
 
+static void test_unrestricted_init_requires_expert_mode(void **state) {
+    (void) state;
+    reset_context();
+
+    tx_params_t tx_params = {
+        .txSigningMode = SIGN_TX_SIGNINGMODE_UNRESTRICTED,
+        .networkId = MAINNET_NETWORK_ID,
+        .protocolMagic = MAINNET_PROTOCOL_MAGIC,
+        .num_inputs = 1,
+    };
+    warning_bits_t w = 0;
+
+    unit_test_expert_mode_enabled = false;
+    assert_int_equal(policyForSignTxInit(&tx_params, &w), POLICY_DENY);
+
+    unit_test_expert_mode_enabled = true;
+    w = 0;
+    assert_int_equal(policyForSignTxInit(&tx_params, &w), POLICY_SHOW);
+    assert_true(warning_bits_has(w, WARNING_BIT_UNRESTRICTED_SIGNING));
+}
+
+static void test_pool_retirement_allowed_in_unrestricted(void **state) {
+    (void) state;
+    reset_context();
+
+    ext_credential_t pool_credential = make_pool_cold_credential();
+    warning_bits_t w = 0;
+    security_policy_t policy =
+        policyForSignTxCertificateStakePoolRetirement(SIGN_TX_SIGNINGMODE_UNRESTRICTED,
+                                                      &pool_credential,
+                                                      0,
+                                                      &w);
+    assert_int_equal(policy, POLICY_SHOW);
+}
+
+static void test_pool_registration_denied_in_unrestricted(void **state) {
+    (void) state;
+    reset_context();
+
+    warning_bits_t w = 0;
+    security_policy_t policy = policyForSignTxStakePoolRegistrationInit(
+        SIGN_TX_SIGNINGMODE_UNRESTRICTED,
+        1,
+        1,
+        0,
+        &w);
+    assert_int_equal(policy, POLICY_DENY);
+}
+
+static void test_stake_pool_key_hash_voter_allowed_in_unrestricted(void **state) {
+    (void) state;
+    reset_context();
+
+    static const uint8_t stake_pool_key_hash[ADDRESS_KEY_HASH_LENGTH] = {0};
+    ext_voter_t voter = {
+        .type = EXT_VOTER_STAKE_POOL_KEY_HASH,
+        .keyHash = stake_pool_key_hash,
+    };
+    warning_bits_t w = 0;
+
+    security_policy_t policy =
+        policyForSignTxVotingProcedure(SIGN_TX_SIGNINGMODE_UNRESTRICTED, &voter, &w);
+    assert_int_equal(policy, POLICY_SHOW);
+}
+
+static void test_stake_pool_key_path_voter_allowed_in_unrestricted(void **state) {
+    (void) state;
+    reset_context();
+
+    ext_voter_t voter = {
+        .type = EXT_VOTER_STAKE_POOL_KEY_PATH,
+        .keyPath = make_pool_cold_key_path(),
+    };
+    warning_bits_t w = 0;
+
+    security_policy_t policy =
+        policyForSignTxVotingProcedure(SIGN_TX_SIGNINGMODE_UNRESTRICTED, &voter, &w);
+    assert_int_equal(policy, POLICY_SHOW);
+}
+
+static void test_pool_cold_required_signer_allowed_in_unrestricted(void **state) {
+    (void) state;
+    reset_context();
+
+    required_signer_t required_signer = {
+        .type = REQUIRED_SIGNER_WITH_PATH,
+        .keyPath = make_pool_cold_key_path(),
+    };
+    warning_bits_t w = 0;
+
+    security_policy_t policy =
+        policyForSignTxRequiredSigner(SIGN_TX_SIGNINGMODE_UNRESTRICTED, &required_signer, &w);
+    assert_int_equal(policy, POLICY_SHOW);
+}
+
 static void test_pool_registration_reward_account_path_compatibility(void **state) {
     (void) state;
     reset_context();
@@ -401,6 +499,12 @@ int main(void) {
         cmocka_unit_test(test_pool_retirement_denied_in_pool_registration_operator),
         cmocka_unit_test(test_pool_retirement_allowed_in_ordinary),
         cmocka_unit_test(test_pool_retirement_allowed_in_plutus),
+        cmocka_unit_test(test_unrestricted_init_requires_expert_mode),
+        cmocka_unit_test(test_pool_retirement_allowed_in_unrestricted),
+        cmocka_unit_test(test_pool_registration_denied_in_unrestricted),
+        cmocka_unit_test(test_stake_pool_key_hash_voter_allowed_in_unrestricted),
+        cmocka_unit_test(test_stake_pool_key_path_voter_allowed_in_unrestricted),
+        cmocka_unit_test(test_pool_cold_required_signer_allowed_in_unrestricted),
         cmocka_unit_test(test_pool_registration_reward_account_path_compatibility),
         cmocka_unit_test(test_pool_registration_owner_with_script_hash_denied),
         cmocka_unit_test(test_combine_security_policies_all_combinations),

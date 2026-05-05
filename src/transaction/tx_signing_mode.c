@@ -13,6 +13,7 @@ bool is_valid_tx_signing_mode(uint8_t raw_mode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
         case SIGN_TX_SIGNINGMODE_AUTO:
             return true;
         default:

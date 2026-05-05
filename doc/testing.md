@@ -90,6 +90,49 @@ Notes:
 - Do not rely on the system `python3` for these workflows; missing packages and
   import-path mismatches are common outside the shared venv.
 
+## Speculos Seed & Crypto Derivation
+
+Ragger tests run against Speculos with a deterministic, well-known mnemonic. The
+same mnemonic is also used by Python-side test tooling to precompute expected
+transaction hashes, reward addresses, and key hashes for fixture data.
+
+### Accessing the seed in test code
+
+```python
+from ragger.bip.seed import SPECULOS_MNEMONIC
+from ragger.bip import calculate_public_key_and_chaincode, CurveChoice
+import hashlib
+
+# Derive a Blake2b-224 key hash for a Cardano derivation path
+def derive_key_hash(path_str: str):
+    pk_hex, _chain_code = calculate_public_key_and_chaincode(
+        CurveChoice.Ed25519Kholaw, path_str, mnemonic=SPECULOS_MNEMONIC
+    )
+    pk_bytes = bytes.fromhex(pk_hex)
+    return hashlib.blake2b(pk_bytes, digest_size=28).digest()
+```
+
+This is the same derivation used by `get_device_pubkey()` in
+`tests/standalone/utils.py`, but performed offline without a running device.
+Use it to compute reward addresses, voter key hashes, and other
+seed-dependent fixture values.
+
+### Why fixture CBOR values must match the speculos seed
+
+Ragger fixtures carry a `unit_test_expect.txBodyHex` that encodes reward
+addresses, key hashes, and other cryptographic material derived from BIP32
+paths. The mock-crypto unit tests use a separate seed; the fixture's CBOR must
+be generated with speculos-derived values for Ragger to accept it, because the
+device-side `constructRewardAddressFromKeyPath` and
+`txHashBuilder_serializeVoterKey` call into real crypto that uses the speculos
+seed.
+
+When a fixture with `DUMMY_TX_HASH_HEX` and mock-crypto-derived CBOR values
+fails with `SWO_TX_PARSING_FAIL_WITHDRAWALS` (0x6B25) or
+`SWO_TX_PARSING_FAIL_VOTING_PROCEDURES` (0x6B33), the `ENFORCE_CANONICAL_ORDERING`
+checks compare device-derived addresses/keys that differ from the fixture's CBOR
+bytes. Regenerate these fixtures from a speculos run.
+
 ## Test Suites
 
 - Unit tests: `tests/unit/README.md`
@@ -212,7 +255,7 @@ To use a guard in your module:
 | `TRACE_AUX_DATA_HASH_BUILDER` | `src/cvote/aux_data_hash_builder.c` | Voting aux data hashing |
 | `TRACE_VOTECAST_HASH_BUILDER` | `src/cvote/vote_cast_hash_builder.c` | Vote cast hashing |
 | `TRACE_NATIVE_SCRIPT_HASH_BUILDER` | `src/deriveNativeScriptHash/derive_native_script_hash_builder.c` | Native script hashing |
-| `TRACE_SWAP` | `src/swap/swap_lib.c` | Swap/library-mode validation flow |
+| `TRACE_TX_PROCESSING` | `src/transaction/tx_processing.c` | Transaction body processing, per-element iteration and canonical ordering |
 
 ### How to Build & Verify
 

@@ -375,6 +375,42 @@ static inline void run_fixture_with_expert_mode(const tx_fixture_t *fixture, boo
     unit_test_blind_signing_enabled = previous_blind_signing_enabled;
 }
 
+static inline void run_fixture_init_deny_with_expert_mode(const tx_fixture_t *fixture,
+                                                          bool expert_mode,
+                                                          uint16_t expected_swo) {
+    extern bool unit_test_expert_mode_enabled;
+    extern bool unit_test_blind_signing_enabled;
+    const bool previous_mode = unit_test_expert_mode_enabled;
+    const bool previous_blind_signing_enabled = unit_test_blind_signing_enabled;
+    unit_test_expert_mode_enabled = expert_mode;
+    unit_test_blind_signing_enabled = fixture_blind_signing_enabled(fixture);
+
+    reset_context();
+    assert_true(test_mem_init());
+
+    uint8_t init_raw[512];
+    uint8_t aux_data_hash[AUX_DATA_HASH_LENGTH] = {0};
+    size_t aux_hash_len = 0;
+    if (fixture->include_aux_data_hash && fixture->aux_data_type == AUX_DATA_TYPE_ARBITRARY_HASH) {
+        assert_non_null(fixture->aux_data_hash_hex);
+        aux_hash_len =
+            hex_to_bytes(fixture->aux_data_hash_hex, aux_data_hash, sizeof(aux_data_hash));
+        assert_int_equal(aux_hash_len, AUX_DATA_HASH_LENGTH);
+    }
+
+    init_apdu_params_t params =
+        build_init_params_from_fixture(fixture, aux_data_hash, aux_hash_len);
+    size_t init_len = build_init_apdu(&params, init_raw, sizeof(init_raw));
+    assert_true(init_len > 0);
+
+    run_sign_tx_apdu(&(buffer_t){.ptr = init_raw, .size = init_len, .offset = 0}, P1_TX_INIT);
+    assert_int_equal(g_last_response_swo, expected_swo);
+    assert_int_equal(G_context.req_type, REQUEST_NONE);
+
+    unit_test_expert_mode_enabled = previous_mode;
+    unit_test_blind_signing_enabled = previous_blind_signing_enabled;
+}
+
 static inline bool fixture_has_cvote_aux_data(const tx_fixture_t *fixture) {
     return fixture->include_aux_data_hash &&
            fixture->aux_data_type == AUX_DATA_TYPE_CVOTE_REGISTRATION;

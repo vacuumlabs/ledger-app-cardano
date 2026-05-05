@@ -69,6 +69,48 @@ static void test_sign_tx_without_outputs_reject_tx_expert_on(void **state) {
     run_fixture_reject_tx_with_expert_mode(&FIXTURE_SHELLEY_SIGN_TX_WITHOUT_OUTPUTS, true);
 }
 
+static void test_unrestricted_tx_with_mint_witness_without_mint_deny_init_expert_off(void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_mint_witness_without_mint_expert_on(void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(&FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT,
+                                 true);
+}
+
+static void test_unrestricted_tx_with_mint_witness_without_mint_reject_tx_expert_on(void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT,
+        true);
+}
+
+static void test_unrestricted_tx_with_additional_witness_roles_deny_init_expert_off(void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_additional_witness_roles_expert_on(void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(&FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES,
+                                 true);
+}
+
+static void test_unrestricted_tx_with_additional_witness_roles_reject_tx_expert_on(void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES,
+        true);
+}
+
 static void test_sign_tx_with_258_tag_on_inputs_expert_off(void **state) {
     (void) state;
     run_fixture_with_expert_mode(&FIXTURE_SHELLEY_SIGN_TX_WITH_258_TAG_ON_INPUTS, false);
@@ -261,6 +303,47 @@ static void test_sign_tx_with_path_based_withdrawal_reject_tx_expert_on(void **s
                                            true);
 }
 
+static void test_unrestricted_tx_with_cross_account_withdrawal_deny_init_expert_off(void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_cross_account_withdrawal_expert_on(void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(&FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL,
+                                 true);
+}
+
+static void test_unrestricted_tx_with_cross_account_withdrawal_reject_tx_expert_on(void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL,
+        true);
+}
+
+static void test_unrestricted_tx_with_key_hash_withdrawal_deny_init_expert_off(void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_key_hash_withdrawal_expert_on(void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(&FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL, true);
+}
+
+static void test_unrestricted_tx_with_key_hash_withdrawal_reject_tx_expert_on(void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL,
+        true);
+}
+
 static void test_sign_tx_with_unusual_path_based_withdrawal_expert_off(void **state) {
     (void) state;
     run_fixture_with_expert_mode(&FIXTURE_SHELLEY_SIGN_TX_WITH_UNUSUAL_PATH_BASED_WITHDRAWAL,
@@ -317,6 +400,12 @@ int main(void) {
         cmocka_unit_test(test_sign_tx_without_outputs_reject_tx_expert_off),
         cmocka_unit_test(test_sign_tx_without_outputs_expert_on),
         cmocka_unit_test(test_sign_tx_without_outputs_reject_tx_expert_on),
+        cmocka_unit_test(test_unrestricted_tx_with_mint_witness_without_mint_deny_init_expert_off),
+        cmocka_unit_test(test_unrestricted_tx_with_mint_witness_without_mint_expert_on),
+        cmocka_unit_test(test_unrestricted_tx_with_mint_witness_without_mint_reject_tx_expert_on),
+        cmocka_unit_test(test_unrestricted_tx_with_additional_witness_roles_deny_init_expert_off),
+        cmocka_unit_test(test_unrestricted_tx_with_additional_witness_roles_expert_on),
+        cmocka_unit_test(test_unrestricted_tx_with_additional_witness_roles_reject_tx_expert_on),
         cmocka_unit_test(test_sign_tx_with_258_tag_on_inputs_expert_off),
         cmocka_unit_test(test_sign_tx_with_258_tag_on_inputs_reject_tx_expert_off),
         cmocka_unit_test(test_sign_tx_with_258_tag_on_inputs_expert_on),
@@ -353,6 +442,12 @@ int main(void) {
         cmocka_unit_test(test_sign_tx_with_path_based_withdrawal_reject_tx_expert_off),
         cmocka_unit_test(test_sign_tx_with_path_based_withdrawal_expert_on),
         cmocka_unit_test(test_sign_tx_with_path_based_withdrawal_reject_tx_expert_on),
+        cmocka_unit_test(test_unrestricted_tx_with_cross_account_withdrawal_deny_init_expert_off),
+        cmocka_unit_test(test_unrestricted_tx_with_cross_account_withdrawal_expert_on),
+        cmocka_unit_test(test_unrestricted_tx_with_cross_account_withdrawal_reject_tx_expert_on),
+        cmocka_unit_test(test_unrestricted_tx_with_key_hash_withdrawal_deny_init_expert_off),
+        cmocka_unit_test(test_unrestricted_tx_with_key_hash_withdrawal_expert_on),
+        cmocka_unit_test(test_unrestricted_tx_with_key_hash_withdrawal_reject_tx_expert_on),
         cmocka_unit_test(test_sign_tx_with_unusual_path_based_withdrawal_expert_off),
         cmocka_unit_test(test_sign_tx_with_unusual_path_based_withdrawal_reject_tx_expert_off),
         cmocka_unit_test(test_sign_tx_with_unusual_path_based_withdrawal_expert_on),

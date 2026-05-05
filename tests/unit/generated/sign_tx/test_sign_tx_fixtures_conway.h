@@ -15,7 +15,7 @@
 //   - Source file and era
 //   - Original Ragger test name
 //
-// Total tests in this era: 16
+// Total tests in this era: 17
 
 #pragma once
 
@@ -1188,7 +1188,207 @@ static const tx_fixture_t FIXTURE_CONWAY_SIGN_TX_WITH_ALL_CERTIFICATES_EXCEPT_PO
     .expected_warning_bits = 0,
 };
 
-// Test 8: Sign_tx_with_AUTHORIZE_COMMITTEE_HOT_certificates
+// Test 8: Unrestricted_tx_with_cross_account_governance_certificates
+// Source: tests/standalone/input_files/signTx.py > conway era tests
+//
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_RAW_TX[] = {
+        0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF,
+        0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1,
+        0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82, 0xD8, 0x18, 0x58,
+        0x21, 0x83, 0x58, 0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8, 0xB8, 0x5F, 0xEC, 0x29,
+        0x6F, 0x06, 0x85, 0xCA, 0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2, 0xE1, 0xA5, 0xD8, 0x9D, 0x92,
+        0xF4, 0x5F, 0xA0, 0x00, 0x1A, 0x0D, 0x0C, 0x25, 0x61, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2D,
+        0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x09, 0x02, 0x05, 0x80, 0x00, 0x07, 0x3E,
+        0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+        0x00, 0x64, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x0E, 0x02, 0x05, 0x80, 0x00, 0x07, 0x3C,
+        0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
+        0x00, 0x02, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x02, 0x05, 0x80, 0x00, 0x07, 0x3C,
+        0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
+        0x00, 0x01, 0x10, 0x02, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x13, 0x01,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_0_PAYLOAD[] =
+        {
+            0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x5D, 0x32, 0xC4, 0x47, 0xB4, 0xDE, 0x6D, 0x7E, 0xCA, 0xE5, 0x2B, 0x43, 0x2C,
+            0xB6, 0x3E, 0xA1, 0x41, 0xA2, 0x38, 0x6A, 0x91, 0xC0, 0xD3, 0x69, 0x65, 0x19,
+            0x8F, 0xFB, 0x48, 0x04, 0x9C, 0xF0, 0xFB, 0x1A, 0xE1, 0x9D, 0x2B, 0xD5, 0xC0,
+            0xE2, 0xB5, 0x5C, 0x54, 0xB0, 0x9D, 0xCD, 0x8F, 0x91, 0xC9, 0xCA, 0xBE, 0x5D,
+            0x96, 0x83, 0x47, 0xF4, 0x65, 0x4D, 0x79, 0xBB, 0x1E, 0xE4, 0x8B, 0x07,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_1_PAYLOAD[] =
+        {
+            0x05, 0x80, 0x00, 0x07, 0x3E, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_1_EXPECTED_SIGNATURE
+        [] = {
+            0xCF, 0x48, 0x0A, 0xEF, 0xF8, 0xC2, 0x96, 0x90, 0xC2, 0xDF, 0x62, 0xF8, 0x41,
+            0xA9, 0xBF, 0x31, 0xC3, 0xB2, 0x02, 0xBA, 0x85, 0x7B, 0x47, 0xFF, 0x39, 0xCC,
+            0x8B, 0xAD, 0x26, 0x8D, 0x4A, 0xD7, 0x13, 0x78, 0x0C, 0x46, 0xB6, 0xF9, 0x45,
+            0xDF, 0xE5, 0xC6, 0xE6, 0x6B, 0x05, 0x2B, 0x95, 0x8F, 0xBE, 0xBC, 0xF5, 0x6B,
+            0x6A, 0x62, 0x7E, 0x2C, 0xDB, 0xCB, 0xF0, 0x41, 0x64, 0xF4, 0xB2, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_2_PAYLOAD[] =
+        {
+            0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_2_EXPECTED_SIGNATURE
+        [] = {
+            0x37, 0x6E, 0xA3, 0xB3, 0x5E, 0x60, 0xA2, 0x6B, 0x13, 0x3C, 0x82, 0xFC, 0x09,
+            0xBB, 0xB4, 0x66, 0x5B, 0x23, 0x1C, 0x5C, 0xC1, 0x03, 0x04, 0x8E, 0xEE, 0xC2,
+            0x7A, 0xCC, 0x72, 0xC4, 0x8E, 0x14, 0xD3, 0x70, 0xA4, 0x0E, 0xD1, 0x4B, 0x48,
+            0x5D, 0xE5, 0x21, 0x02, 0x61, 0x95, 0x14, 0xA3, 0x83, 0x84, 0x84, 0xAA, 0x5D,
+            0xB3, 0xD1, 0x42, 0xD8, 0x0E, 0x14, 0xF5, 0xD7, 0x1C, 0xD3, 0x50, 0x04,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_3_PAYLOAD[] =
+        {
+            0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x02, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_3_EXPECTED_SIGNATURE
+        [] = {
+            0xED, 0x1C, 0x27, 0x79, 0x54, 0x83, 0xC7, 0xE0, 0x3A, 0x33, 0x4C, 0x1C, 0xFE,
+            0x31, 0x5E, 0x2C, 0xED, 0xF1, 0x30, 0x1F, 0x3A, 0x05, 0x6F, 0xC9, 0x88, 0x4E,
+            0xF6, 0x4E, 0x4F, 0x4C, 0x6D, 0x40, 0x6B, 0x7C, 0xC4, 0x20, 0xDD, 0xF6, 0xF1,
+            0x11, 0x5E, 0xFD, 0xA1, 0xC7, 0xC2, 0x84, 0x68, 0xB2, 0x48, 0x66, 0xBF, 0x07,
+            0x30, 0x73, 0x99, 0x17, 0xAD, 0x62, 0xC5, 0x9B, 0x57, 0x2C, 0xE9, 0x03,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_4_PAYLOAD[] =
+        {
+            0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x01, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_4_EXPECTED_SIGNATURE
+        [] = {
+            0xD3, 0xED, 0xFF, 0x8B, 0x27, 0x74, 0xD0, 0x71, 0xCD, 0x4A, 0xBC, 0x8C, 0x1F,
+            0x83, 0xF5, 0x09, 0xFF, 0x24, 0xA6, 0xA8, 0xB3, 0x6C, 0xC6, 0xEB, 0xBA, 0x1F,
+            0x61, 0xCF, 0x19, 0xAE, 0x1D, 0x14, 0x42, 0x5B, 0x4A, 0x1D, 0x02, 0x97, 0xCB,
+            0x05, 0xE9, 0xB2, 0x8A, 0x77, 0xCB, 0x6D, 0xD5, 0x07, 0x9C, 0xD7, 0x3B, 0x7F,
+            0x05, 0x07, 0xEB, 0xAE, 0x61, 0xA6, 0xB0, 0x29, 0x83, 0x0C, 0xB2, 0x07,
+};
+
+static const witness_payload_t FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_PAYLOADS[] = {
+    {.payload =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_0_PAYLOAD,
+     .payload_len = sizeof(
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_0_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_0_EXPECTED_SIGNATURE},
+    {.payload =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_1_PAYLOAD,
+     .payload_len = sizeof(
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_1_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_1_EXPECTED_SIGNATURE},
+    {.payload =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_2_PAYLOAD,
+     .payload_len = sizeof(
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_2_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_2_EXPECTED_SIGNATURE},
+    {.payload =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_3_PAYLOAD,
+     .payload_len = sizeof(
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_3_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_3_EXPECTED_SIGNATURE},
+    {.payload =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_4_PAYLOAD,
+     .payload_len = sizeof(
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_4_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_4_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES = {
+    .name = "Unrestricted_tx_with_cross_account_governance_certificates",
+    .raw_tx = FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_RAW_TX,
+    .raw_tx_len =
+        sizeof(FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_RAW_TX),
+    .tx_body_cbor_hex =
+        "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82"
+        "d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002d"
+        "d2e802182a030a048483098200581cf699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f738200"
+        "581c01b07d6a6b1df4b593b0ef6d3b47e99c38f4ac9ee53de4d5dee5768f830e8200581ceb95b29b4827b78903"
+        "39e478c37a2e64a40b182a14957f7f71dc411d8200581cd098c6a0a621f3343abe55877ee88fd5a83363e3c788"
+        "7b3c48839092830f8200581c6128578d3c229c7b8068e799e5313031b7c06688167be6a21b60c784f684108200"
+        "581c01b07d6a6b1df4b593b0ef6d3b47e99c38f4ac9ee53de4d5dee5768f13f6",
+    .expected_hash_hex = "2fe56cc50ed991a5505152943349e8b843216be130a74c665eef1d5a47282716",
+    .signing_mode = 9,
+    .network_id = 1,
+    .protocol_magic = 764824073,
+    .num_inputs = 1,
+    .num_outputs = 1,
+    .num_witnesses = 5,
+    .witness_payloads =
+        FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES_WITNESS_PAYLOADS,
+    .witness_payload_count = 5,
+    .num_certificates = 4,
+    .num_withdrawals = 0,
+    .num_mint_asset_groups = 0,
+    .include_ttl = true,
+    .include_validity_interval_start = false,
+    .include_aux_data_hash = false,
+    .aux_data_type = 0,
+    .aux_data_init_payload = NULL,
+    .aux_data_init_payload_len = 0,
+    .aux_data_delegations = NULL,
+    .aux_data_delegation_count = 0,
+    .include_script_data_hash = false,
+    .num_collateral_inputs = 0,
+    .num_required_signers = 0,
+    .include_network_id = false,
+    .include_collateral_output = false,
+    .include_total_collateral = false,
+    .num_reference_inputs = 0,
+    .num_voters = 0,
+    .include_treasury = false,
+    .treasury = 0,
+    .include_donation = false,
+    .donation = 0,
+    .aux_data_hash_hex = NULL,
+    .options = 0,
+    .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+    .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING),
+};
+
+// Test 9: Sign_tx_with_AUTHORIZE_COMMITTEE_HOT_certificates
 // Source: tests/standalone/input_files/signTx.py > conway era tests
 //
 static const uint8_t FIXTURE_CONWAY_SIGN_TX_WITH_AUTHORIZE_COMMITTEE_HOT_CERTIFICATES_RAW_TX[] = {
@@ -1312,7 +1512,7 @@ static const tx_fixture_t FIXTURE_CONWAY_SIGN_TX_WITH_AUTHORIZE_COMMITTEE_HOT_CE
     .expected_warning_bits = 0,
 };
 
-// Test 9: Sign_tx_with_RESIGN_COMMITTEE_COLD_certificates
+// Test 10: Sign_tx_with_RESIGN_COMMITTEE_COLD_certificates
 // Source: tests/standalone/input_files/signTx.py > conway era tests
 //
 static const uint8_t FIXTURE_CONWAY_SIGN_TX_WITH_RESIGN_COMMITTEE_COLD_CERTIFICATES_RAW_TX[] = {
@@ -1441,7 +1641,7 @@ static const tx_fixture_t FIXTURE_CONWAY_SIGN_TX_WITH_RESIGN_COMMITTEE_COLD_CERT
     .expected_warning_bits = 0,
 };
 
-// Test 10: Sign_tx_with_RESIGN_COMMITTEE_COLD_hash_certificates
+// Test 11: Sign_tx_with_RESIGN_COMMITTEE_COLD_hash_certificates
 // Source: tests/standalone/input_files/signTx.py > conway era tests
 //
 static const uint8_t FIXTURE_CONWAY_SIGN_TX_WITH_RESIGN_COMMITTEE_COLD_HASH_CERTIFICATES_RAW_TX[] =
@@ -1538,7 +1738,7 @@ static const tx_fixture_t FIXTURE_CONWAY_SIGN_TX_WITH_RESIGN_COMMITTEE_COLD_HASH
                              ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_MISSING_SCRIPT_DATA_HASH),
 };
 
-// Test 11: Sign_tx_with_DREP_REGISTRATION_certificates
+// Test 12: Sign_tx_with_DREP_REGISTRATION_certificates
 // Source: tests/standalone/input_files/signTx.py > conway era tests
 //
 static const uint8_t FIXTURE_CONWAY_SIGN_TX_WITH_DREP_REGISTRATION_CERTIFICATES_RAW_TX[] = {
@@ -1653,7 +1853,7 @@ static const tx_fixture_t FIXTURE_CONWAY_SIGN_TX_WITH_DREP_REGISTRATION_CERTIFIC
     .expected_warning_bits = 0,
 };
 
-// Test 12: Sign_tx_with_DREP_DEREGISTRATION_certificate
+// Test 13: Sign_tx_with_DREP_DEREGISTRATION_certificate
 // Source: tests/standalone/input_files/signTx.py > conway era tests
 //
 static const uint8_t FIXTURE_CONWAY_SIGN_TX_WITH_DREP_DEREGISTRATION_CERTIFICATE_RAW_TX[] = {
@@ -1761,7 +1961,7 @@ static const tx_fixture_t FIXTURE_CONWAY_SIGN_TX_WITH_DREP_DEREGISTRATION_CERTIF
     .expected_warning_bits = 0,
 };
 
-// Test 13: Sign_tx_with_DREP_UPDATE_certificates
+// Test 14: Sign_tx_with_DREP_UPDATE_certificates
 // Source: tests/standalone/input_files/signTx.py > conway era tests
 //
 static const uint8_t FIXTURE_CONWAY_SIGN_TX_WITH_DREP_UPDATE_CERTIFICATES_RAW_TX[] = {
@@ -1873,7 +2073,7 @@ static const tx_fixture_t FIXTURE_CONWAY_SIGN_TX_WITH_DREP_UPDATE_CERTIFICATES =
     .expected_warning_bits = 0,
 };
 
-// Test 14: Sign_tx_with_mixed_script_hash_certificates_in_plutus_mode
+// Test 15: Sign_tx_with_mixed_script_hash_certificates_in_plutus_mode
 // Source: tests/standalone/input_files/signTx.py > conway era tests
 //
 static const uint8_t
@@ -1982,7 +2182,7 @@ static const tx_fixture_t FIXTURE_CONWAY_SIGN_TX_WITH_MIXED_SCRIPT_HASH_CERTIFIC
                              ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_MISSING_SCRIPT_DATA_HASH),
 };
 
-// Test 15: Sign_tx_with_missing_script_hash_conway_certificates_in_plutus_mode
+// Test 16: Sign_tx_with_missing_script_hash_conway_certificates_in_plutus_mode
 // Source: tests/standalone/input_files/signTx.py > conway era tests
 //
 static const uint8_t

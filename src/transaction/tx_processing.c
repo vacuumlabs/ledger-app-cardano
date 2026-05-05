@@ -48,6 +48,15 @@
 #include "swap_error_code_helpers.h"
 #endif
 
+/* Optional module-specific tracing for debugging.
+ * Enabled via -DTRACE_TX_PROCESSING to trace this module's processing details.
+ */
+#ifdef TRACE_TX_PROCESSING
+#define TRACE_MODULE(...) TRACE("[tx_process] " __VA_ARGS__)
+#else
+#define TRACE_MODULE(...) (void) 0  // Compiled out
+#endif
+
 // ---------------------------------------------------------------------------
 // Context helpers
 // ---------------------------------------------------------------------------
@@ -412,6 +421,9 @@ static bool tx_process_withdrawals(buffer_t *buf, tx_processing_state_t *state) 
         return true;
     }
 
+    TRACE_MODULE("tx_process_withdrawals: num_withdrawals=%u",
+                 (unsigned) tx_params->num_withdrawals);
+
     if (mode->run_hash_builder) {
         txHashBuilder_enterWithdrawals(&state->hash_builder);
     }
@@ -421,10 +433,21 @@ static bool tx_process_withdrawals(buffer_t *buf, tx_processing_state_t *state) 
     for (uint16_t withdrawal_index = 0; withdrawal_index < tx_params->num_withdrawals;
          withdrawal_index++) {
         withdrawal_t parsed_withdrawal = {0};
+        TRACE_MODULE("withdrawal %u/%u: parsing",
+                     (unsigned) withdrawal_index + 1,
+                     (unsigned) tx_params->num_withdrawals);
         if (!parse_withdrawal(buf, &parsed_withdrawal)) {
+            TRACE_MODULE("withdrawal %u/%u: parse_withdrawal FAILED",
+                         (unsigned) withdrawal_index + 1,
+                         (unsigned) tx_params->num_withdrawals);
             tx_handle_parse_error(SWO_TX_PARSING_FAIL_WITHDRAWALS);
             return false;
         }
+        TRACE_MODULE("withdrawal %u/%u: amount=%llu cred_type=%u",
+                     (unsigned) withdrawal_index + 1,
+                     (unsigned) tx_params->num_withdrawals,
+                     (unsigned long long) parsed_withdrawal.amount,
+                     (unsigned) parsed_withdrawal.stakeCredential.type);
 
         if (mode->run_validation) {
             security_policy_t withdrawal_policy =
@@ -481,7 +504,7 @@ static bool tx_process_withdrawals(buffer_t *buf, tx_processing_state_t *state) 
             ENFORCE_CANONICAL_ORDERING_CHECK(withdrawal_key_tracker,
                                              reward_address,
                                              reward_address_length,
-                                             SWO_TX_PARSING_FAIL_WITHDRAWALS);
+                                             SWO_TX_PARSING_FAIL_CANONICAL_ORDER);
 
             if (mode->run_hash_builder) {
                 txHashBuilder_addWithdrawal(&state->hash_builder,
@@ -847,7 +870,7 @@ static bool tx_process_votes(buffer_t *buf,
         ENFORCE_CANONICAL_ORDERING_CHECK(vote_key_tracker,
                                          gov_action_key,
                                          gov_action_key_length,
-                                         SWO_TX_PARSING_FAIL_VOTING_PROCEDURES);
+                                         SWO_TX_PARSING_FAIL_CANONICAL_ORDER);
         APP_MEM_FREE_AND_NULL((void **) &gov_action_key);
 
         if (!tx_process_vote(state, &parsed_vote, voter_policy)) {
@@ -867,6 +890,8 @@ static bool tx_process_voting_procedures(buffer_t *buf, tx_processing_state_t *s
         return true;
     }
 
+    TRACE_MODULE("tx_process_voting_procedures: num_voters=%u", (unsigned) tx_params->num_voters);
+
     if (mode->run_hash_builder) {
         txHashBuilder_enterVotingProcedures(&state->hash_builder);
     }
@@ -875,10 +900,21 @@ static bool tx_process_voting_procedures(buffer_t *buf, tx_processing_state_t *s
     for (uint16_t voter_index = 0; voter_index < tx_params->num_voters; voter_index++) {
         ext_voter_t parsed_voter = {0};
         uint16_t num_votes = 0;
+        TRACE_MODULE("voter %u/%u: parsing header",
+                     (unsigned) voter_index + 1,
+                     (unsigned) tx_params->num_voters);
         if (!parse_voter_votes_header(buf, &parsed_voter, &num_votes)) {
+            TRACE_MODULE("voter %u/%u: parse_voter_votes_header FAILED",
+                         (unsigned) voter_index + 1,
+                         (unsigned) tx_params->num_voters);
             tx_handle_parse_error(SWO_TX_PARSING_FAIL_VOTING_PROCEDURES);
             return false;
         }
+        TRACE_MODULE("voter %u/%u: type=%u num_votes=%u",
+                     (unsigned) voter_index + 1,
+                     (unsigned) tx_params->num_voters,
+                     (unsigned) parsed_voter.type,
+                     (unsigned) num_votes);
 
         security_policy_t voter_policy = POLICY_DENY;
         if (mode->run_validation) {
@@ -900,7 +936,7 @@ static bool tx_process_voting_procedures(buffer_t *buf, tx_processing_state_t *s
         ENFORCE_CANONICAL_ORDERING_CHECK(voter_key_tracker,
                                          voter_key,
                                          voter_key_length,
-                                         SWO_TX_PARSING_FAIL_VOTING_PROCEDURES);
+                                         SWO_TX_PARSING_FAIL_CANONICAL_ORDER);
         APP_MEM_FREE_AND_NULL((void **) &voter_key);
 
         if (mode->run_hash_builder) {

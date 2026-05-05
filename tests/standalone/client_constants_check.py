@@ -620,6 +620,7 @@ def assert_sign_tx_related_constants_match() -> None:
             ],
             "MULTISIG": tx_values["SIGN_TX_SIGNINGMODE_MULTISIG"],
             "PLUTUS": tx_values["SIGN_TX_SIGNINGMODE_PLUTUS"],
+            "UNRESTRICTED": tx_values["SIGN_TX_SIGNINGMODE_UNRESTRICTED"],
             "AUTO": tx_values["SIGN_TX_SIGNINGMODE_AUTO"],
         },
     )

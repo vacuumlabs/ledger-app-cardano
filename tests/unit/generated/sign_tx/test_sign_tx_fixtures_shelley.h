@@ -15,7 +15,7 @@
 //   - Source file and era
 //   - Original Ragger test name
 //
-// Total tests in this era: 11
+// Total tests in this era: 15
 
 #pragma once
 
@@ -109,7 +109,332 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITHOUT_OUTPUTS = {
     .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_NETWORK_NOT_VERIFIABLE),
 };
 
-// Test 1: Sign_tx_with_258_tag_on_inputs
+// Test 1: Unrestricted_tx_with_mint_witness_without_mint
+// Source: tests/standalone/input_files/signTx.py > shelley era tests
+//
+static const uint8_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_RAW_TX[] = {
+    0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3,
+    0xA0, 0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19,
+    0x39, 0xB3, 0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_0_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_0_EXPECTED_SIGNATURE[] =
+        {
+            0x19, 0x0D, 0xCE, 0xE0, 0xCC, 0x71, 0x25, 0xFD, 0x0E, 0xC1, 0x04, 0xCF, 0x68,
+            0x56, 0x74, 0xF1, 0xAD, 0x77, 0xF3, 0xE4, 0x39, 0xA4, 0xA2, 0x49, 0xE5, 0x96,
+            0xA3, 0x30, 0x6F, 0x9E, 0xB1, 0x10, 0xCE, 0xD8, 0xFB, 0x8E, 0xC5, 0x9D, 0xA1,
+            0x5B, 0x72, 0x12, 0x03, 0xC8, 0x97, 0x3B, 0xD3, 0x41, 0xD8, 0x8E, 0x6A, 0x60,
+            0xB8, 0x5C, 0x1E, 0x9F, 0x26, 0x23, 0x15, 0x2F, 0xEE, 0x8D, 0xC0, 0x0A,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_1_PAYLOAD[] = {
+        0x03,
+        0x80,
+        0x00,
+        0x07,
+        0x3F,
+        0x80,
+        0x00,
+        0x07,
+        0x17,
+        0x80,
+        0x00,
+        0x00,
+        0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_1_EXPECTED_SIGNATURE[] =
+        {
+            0x57, 0x29, 0x61, 0x86, 0x1B, 0xA4, 0x2B, 0xAA, 0x76, 0xFA, 0xF3, 0x17, 0xF1,
+            0x21, 0x4F, 0x3A, 0xCF, 0x26, 0xCA, 0x32, 0x8B, 0xC4, 0x01, 0xA9, 0x7A, 0x42,
+            0xDB, 0x91, 0x2F, 0x6D, 0xB1, 0xEF, 0x8B, 0xCD, 0x25, 0x7B, 0xA9, 0x47, 0x01,
+            0xEB, 0x3C, 0x90, 0xF5, 0x0F, 0xEE, 0x86, 0x11, 0x90, 0x42, 0xF6, 0x40, 0x38,
+            0xD3, 0xFA, 0x32, 0x80, 0xE4, 0x8C, 0xBA, 0xEE, 0xBB, 0x3F, 0x0A, 0x08,
+};
+
+static const witness_payload_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_PAYLOADS[] = {
+        {.payload =
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_0_EXPECTED_SIGNATURE},
+        {.payload =
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_1_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_1_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_1_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT = {
+    .name = "Unrestricted_tx_with_mint_witness_without_mint",
+    .raw_tx = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_RAW_TX,
+    .raw_tx_len = sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_RAW_TX),
+    .tx_body_cbor_hex =
+        "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a03"
+        "0a",
+    .expected_hash_hex = "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+    .signing_mode = 9,
+    .network_id = 1,
+    .protocol_magic = 764824073,
+    .num_inputs = 1,
+    .num_outputs = 0,
+    .num_witnesses = 2,
+    .witness_payloads =
+        FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_MINT_WITNESS_WITHOUT_MINT_WITNESS_PAYLOADS,
+    .witness_payload_count = 2,
+    .num_certificates = 0,
+    .num_withdrawals = 0,
+    .num_mint_asset_groups = 0,
+    .include_ttl = true,
+    .include_validity_interval_start = false,
+    .include_aux_data_hash = false,
+    .aux_data_type = 0,
+    .aux_data_init_payload = NULL,
+    .aux_data_init_payload_len = 0,
+    .aux_data_delegations = NULL,
+    .aux_data_delegation_count = 0,
+    .include_script_data_hash = false,
+    .num_collateral_inputs = 0,
+    .num_required_signers = 0,
+    .include_network_id = false,
+    .include_collateral_output = false,
+    .include_total_collateral = false,
+    .num_reference_inputs = 0,
+    .num_voters = 0,
+    .include_treasury = false,
+    .treasury = 0,
+    .include_donation = false,
+    .donation = 0,
+    .aux_data_hash_hex = NULL,
+    .options = 0,
+    .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+    .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_NETWORK_NOT_VERIFIABLE) |
+                             ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING),
+};
+
+// Test 2: Unrestricted_tx_with_additional_witness_roles
+// Source: tests/standalone/input_files/signTx.py > shelley era tests
+//
+static const uint8_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_RAW_TX[] = {
+    0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3,
+    0xA0, 0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19,
+    0x39, 0xB3, 0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_0_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_0_EXPECTED_SIGNATURE[] = {
+        0x19, 0x0D, 0xCE, 0xE0, 0xCC, 0x71, 0x25, 0xFD, 0x0E, 0xC1, 0x04, 0xCF, 0x68,
+        0x56, 0x74, 0xF1, 0xAD, 0x77, 0xF3, 0xE4, 0x39, 0xA4, 0xA2, 0x49, 0xE5, 0x96,
+        0xA3, 0x30, 0x6F, 0x9E, 0xB1, 0x10, 0xCE, 0xD8, 0xFB, 0x8E, 0xC5, 0x9D, 0xA1,
+        0x5B, 0x72, 0x12, 0x03, 0xC8, 0x97, 0x3B, 0xD3, 0x41, 0xD8, 0x8E, 0x6A, 0x60,
+        0xB8, 0x5C, 0x1E, 0x9F, 0x26, 0x23, 0x15, 0x2F, 0xEE, 0x8D, 0xC0, 0x0A,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_1_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_1_EXPECTED_SIGNATURE[] = {
+        0x59, 0x74, 0xDF, 0xCC, 0xA7, 0x51, 0x12, 0xBF, 0xDB, 0x7E, 0xEE, 0x69, 0x20,
+        0x4B, 0x7D, 0x30, 0x0B, 0x21, 0x32, 0xD6, 0x78, 0x4B, 0xEE, 0xA0, 0xED, 0x0C,
+        0x51, 0xAD, 0xA9, 0xA2, 0x69, 0x81, 0x67, 0x51, 0x00, 0x2F, 0x06, 0xF1, 0xBD,
+        0x69, 0x6C, 0x4D, 0x13, 0x70, 0xBB, 0x50, 0x98, 0x04, 0x53, 0x44, 0xF7, 0x25,
+        0x35, 0x33, 0x10, 0x39, 0x42, 0x0E, 0x01, 0x70, 0x97, 0x70, 0x5D, 0x09,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_2_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3E, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_2_EXPECTED_SIGNATURE[] = {
+        0xE0, 0xAE, 0x74, 0xB8, 0x9C, 0x3D, 0x9F, 0xDB, 0xB7, 0x6D, 0x27, 0x05, 0xFC,
+        0x30, 0xCF, 0x45, 0xE2, 0x4B, 0x34, 0x45, 0xA6, 0x3F, 0xFE, 0xA9, 0x0F, 0x8D,
+        0x36, 0x97, 0xD1, 0xAD, 0xAF, 0x58, 0xA9, 0x4E, 0xC1, 0xFF, 0x3D, 0xD1, 0xF1,
+        0x21, 0xD6, 0x06, 0x02, 0x03, 0x26, 0x62, 0x2E, 0x52, 0x07, 0x0F, 0x16, 0xA7,
+        0x7B, 0x82, 0xFB, 0x04, 0xAE, 0x38, 0x09, 0xDC, 0x1B, 0x9A, 0x25, 0x07,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_3_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3E, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_3_EXPECTED_SIGNATURE[] = {
+        0x94, 0x1E, 0x90, 0x21, 0x28, 0xF8, 0xB6, 0x84, 0x89, 0x57, 0x93, 0x6E, 0x19,
+        0x29, 0x24, 0x35, 0x47, 0xE7, 0x78, 0x31, 0x15, 0xB3, 0x7B, 0x25, 0x9D, 0xD4,
+        0xBD, 0xF4, 0xD1, 0xC9, 0xF6, 0x96, 0x2B, 0x5A, 0xEB, 0x9E, 0x8D, 0xFA, 0x4F,
+        0xD8, 0x39, 0xDC, 0x86, 0x87, 0x6A, 0x07, 0xAD, 0xB6, 0x22, 0x5B, 0xB3, 0xB7,
+        0x3A, 0xBD, 0x85, 0x96, 0x0B, 0x36, 0x50, 0xF4, 0xB2, 0x11, 0xEE, 0x0D,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_4_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_4_EXPECTED_SIGNATURE[] = {
+        0x56, 0x47, 0x5C, 0x0A, 0x28, 0x0F, 0x48, 0x4F, 0x4C, 0x45, 0x74, 0x31, 0xB3,
+        0xDC, 0x9A, 0xA0, 0x95, 0x8A, 0xC2, 0x49, 0x46, 0xDD, 0xEA, 0xA9, 0x81, 0xE5,
+        0x26, 0x36, 0x08, 0x3F, 0x54, 0x38, 0xB0, 0x47, 0xB9, 0xA0, 0x82, 0x85, 0x7A,
+        0xB7, 0xB2, 0xCF, 0x26, 0x14, 0x5A, 0xB4, 0x72, 0x25, 0x58, 0x2F, 0x23, 0xC9,
+        0x93, 0xB0, 0xBF, 0x5B, 0x4B, 0x56, 0x92, 0xE7, 0x03, 0xB5, 0x5E, 0x0B,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_5_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_5_EXPECTED_SIGNATURE[] = {
+        0x82, 0x61, 0x16, 0x27, 0xCA, 0x2A, 0x1C, 0xB8, 0x77, 0xCC, 0x65, 0x39, 0x86,
+        0xEA, 0x04, 0xE9, 0x99, 0xB4, 0x74, 0xB5, 0xA5, 0xEA, 0xE6, 0x55, 0x12, 0x00,
+        0xFB, 0x83, 0x93, 0x79, 0x94, 0x45, 0xDD, 0x96, 0x59, 0x61, 0xC6, 0x43, 0x6D,
+        0x13, 0x0E, 0x3B, 0xD3, 0x9B, 0x0C, 0x70, 0xBA, 0xC9, 0x58, 0x9A, 0xCB, 0x3E,
+        0x08, 0xA5, 0x75, 0x1F, 0xE1, 0xA5, 0x4E, 0x51, 0xCC, 0xF0, 0x8F, 0x0C,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_6_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_6_EXPECTED_SIGNATURE[] = {
+        0x5E, 0x5E, 0xA7, 0xF3, 0xAB, 0xD7, 0xB7, 0xEB, 0x03, 0x2B, 0x50, 0x87, 0x91,
+        0xB2, 0xCB, 0x07, 0x04, 0xB1, 0x10, 0xFD, 0xD9, 0x9D, 0x67, 0x52, 0xDC, 0xAB,
+        0x59, 0x7B, 0x2E, 0xA1, 0xBB, 0xA6, 0x75, 0x9F, 0x56, 0xEB, 0x5B, 0x7C, 0x10,
+        0x2C, 0xE0, 0xFA, 0xB2, 0x46, 0x9B, 0xE4, 0x34, 0xD9, 0x02, 0x35, 0xBA, 0x9F,
+        0xE9, 0x7C, 0xE8, 0x77, 0x5F, 0x7B, 0xC5, 0x05, 0x79, 0x14, 0x80, 0x04,
+};
+
+static const witness_payload_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_PAYLOADS[] = {
+    {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_0_PAYLOAD,
+     .payload_len =
+         sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_0_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_0_EXPECTED_SIGNATURE},
+    {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_1_PAYLOAD,
+     .payload_len =
+         sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_1_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_1_EXPECTED_SIGNATURE},
+    {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_2_PAYLOAD,
+     .payload_len =
+         sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_2_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_2_EXPECTED_SIGNATURE},
+    {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_3_PAYLOAD,
+     .payload_len =
+         sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_3_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_3_EXPECTED_SIGNATURE},
+    {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_4_PAYLOAD,
+     .payload_len =
+         sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_4_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_4_EXPECTED_SIGNATURE},
+    {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_5_PAYLOAD,
+     .payload_len =
+         sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_5_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_5_EXPECTED_SIGNATURE},
+    {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_6_PAYLOAD,
+     .payload_len =
+         sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_6_PAYLOAD),
+     .expected_warning_bits = 0,
+     .expected_signature =
+         FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_6_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES = {
+    .name = "Unrestricted_tx_with_additional_witness_roles",
+    .raw_tx = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_RAW_TX,
+    .raw_tx_len = sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_RAW_TX),
+    .tx_body_cbor_hex =
+        "a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a03"
+        "0a",
+    .expected_hash_hex = "ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+    .signing_mode = 9,
+    .network_id = 1,
+    .protocol_magic = 764824073,
+    .num_inputs = 1,
+    .num_outputs = 0,
+    .num_witnesses = 7,
+    .witness_payloads =
+        FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_ADDITIONAL_WITNESS_ROLES_WITNESS_PAYLOADS,
+    .witness_payload_count = 7,
+    .num_certificates = 0,
+    .num_withdrawals = 0,
+    .num_mint_asset_groups = 0,
+    .include_ttl = true,
+    .include_validity_interval_start = false,
+    .include_aux_data_hash = false,
+    .aux_data_type = 0,
+    .aux_data_init_payload = NULL,
+    .aux_data_init_payload_len = 0,
+    .aux_data_delegations = NULL,
+    .aux_data_delegation_count = 0,
+    .include_script_data_hash = false,
+    .num_collateral_inputs = 0,
+    .num_required_signers = 0,
+    .include_network_id = false,
+    .include_collateral_output = false,
+    .include_total_collateral = false,
+    .num_reference_inputs = 0,
+    .num_voters = 0,
+    .include_treasury = false,
+    .treasury = 0,
+    .include_donation = false,
+    .donation = 0,
+    .aux_data_hash_hex = NULL,
+    .options = 0,
+    .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+    .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_NETWORK_NOT_VERIFIABLE) |
+                             ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING),
+};
+
+// Test 3: Sign_tx_with_258_tag_on_inputs
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITH_258_TAG_ON_INPUTS_RAW_TX[] = {
@@ -186,7 +511,7 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITH_258_TAG_ON_INPUTS = {
     .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_NETWORK_NOT_VERIFIABLE),
 };
 
-// Test 2: Sign_tx_without_change_address
+// Test 4: Sign_tx_without_change_address
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITHOUT_CHANGE_ADDRESS_RAW_TX[] = {
@@ -268,7 +593,7 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITHOUT_CHANGE_ADDRESS = {
     .expected_warning_bits = 0,
 };
 
-// Test 3: Sign_tx_with_change_base_address_with_staking_path
+// Test 5: Sign_tx_with_change_base_address_with_staking_path
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITH_CHANGE_BASE_ADDRESS_WITH_STAKING_PATH_RAW_TX[] = {
@@ -360,7 +685,7 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITH_CHANGE_BASE_ADDRESS_WITH_
     .expected_warning_bits = 0,
 };
 
-// Test 4: Sign_tx_with_change_base_address_with_staking_key_hash
+// Test 6: Sign_tx_with_change_base_address_with_staking_key_hash
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t
@@ -456,7 +781,7 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITH_CHANGE_BASE_ADDRESS_WITH_
     .expected_warning_bits = 0,
 };
 
-// Test 5: Sign_tx_with_enterprise_change_address
+// Test 7: Sign_tx_with_enterprise_change_address
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITH_ENTERPRISE_CHANGE_ADDRESS_RAW_TX[] = {
@@ -542,7 +867,7 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITH_ENTERPRISE_CHANGE_ADDRESS
     .expected_warning_bits = 0,
 };
 
-// Test 6: Sign_tx_with_pointer_change_address
+// Test 8: Sign_tx_with_pointer_change_address
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITH_POINTER_CHANGE_ADDRESS_RAW_TX[] = {
@@ -630,7 +955,7 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITH_POINTER_CHANGE_ADDRESS = 
     .expected_warning_bits = 0,
 };
 
-// Test 7: Sign_tx_with_nonreasonable_account_and_address
+// Test 9: Sign_tx_with_nonreasonable_account_and_address
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITH_NONREASONABLE_ACCOUNT_AND_ADDRESS_RAW_TX[] = {
@@ -719,7 +1044,7 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITH_NONREASONABLE_ACCOUNT_AND
     .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNUSUAL_KEY_DERIVATION_PATH),
 };
 
-// Test 8: Sign_tx_with_path_based_withdrawal
+// Test 10: Sign_tx_with_path_based_withdrawal
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITH_PATH_BASED_WITHDRAWAL_RAW_TX[] = {
@@ -824,7 +1149,202 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITH_PATH_BASED_WITHDRAWAL = {
     .expected_warning_bits = 0,
 };
 
-// Test 9: Sign_tx_with_unusual_path_based_withdrawal
+// Test 11: Unrestricted_tx_with_cross_account_withdrawal
+// Source: tests/standalone/input_files/signTx.py > shelley era tests
+//
+static const uint8_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_RAW_TX[] = {
+    0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF, 0x83,
+    0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1, 0xC0, 0xB7,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82, 0xD8, 0x18, 0x58, 0x21, 0x83, 0x58,
+    0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8, 0xB8, 0x5F, 0xEC, 0x29, 0x6F, 0x06, 0x85, 0xCA,
+    0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2, 0xE1, 0xA5, 0xD8, 0x9D, 0x92, 0xF4, 0x5F, 0xA0, 0x00, 0x1A,
+    0x0D, 0x0C, 0x25, 0x61, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2D, 0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6F, 0x02, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80,
+    0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_0_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_0_EXPECTED_SIGNATURE[] = {
+        0xD3, 0x5A, 0xC4, 0x2B, 0xB0, 0x23, 0xDB, 0x4F, 0xAA, 0x07, 0x20, 0x8E, 0xF5,
+        0x82, 0xB1, 0x26, 0x83, 0xA3, 0xDB, 0x37, 0xCC, 0x14, 0x77, 0x0C, 0xA8, 0x85,
+        0x95, 0xCA, 0x6A, 0x5C, 0x6B, 0xCE, 0x7D, 0xFC, 0xCE, 0xC0, 0x61, 0x07, 0x18,
+        0x84, 0x64, 0x5B, 0x5B, 0xD0, 0xF0, 0x45, 0x08, 0xD4, 0x69, 0xE2, 0xB8, 0x6D,
+        0xDD, 0x12, 0x5B, 0x38, 0x29, 0xEC, 0xEE, 0xE2, 0x59, 0xA4, 0x75, 0x0F,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_1_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_1_EXPECTED_SIGNATURE[] = {
+        0x97, 0x69, 0x79, 0x77, 0x75, 0xF6, 0x64, 0xBD, 0xAF, 0xE1, 0x72, 0xEB, 0xD1,
+        0x6B, 0xB4, 0x08, 0x37, 0x1F, 0xE5, 0x94, 0xD3, 0x8E, 0x10, 0xAC, 0xED, 0x2B,
+        0xC3, 0x4C, 0x86, 0x17, 0x6F, 0xED, 0x8A, 0x60, 0xD9, 0x8B, 0x74, 0xF2, 0x68,
+        0xEB, 0x57, 0x2F, 0xB5, 0xA9, 0xF8, 0xAC, 0xCC, 0xE1, 0x5F, 0x0E, 0xD1, 0xBC,
+        0x6A, 0x3F, 0x2C, 0xFE, 0x93, 0xBF, 0x64, 0x72, 0x3E, 0xA7, 0x7C, 0x00,
+};
+
+static const witness_payload_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_PAYLOADS[] = {
+        {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_0_EXPECTED_SIGNATURE},
+        {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_1_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_1_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_1_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL = {
+    .name = "Unrestricted_tx_with_cross_account_withdrawal",
+    .raw_tx = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_RAW_TX,
+    .raw_tx_len = sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_RAW_TX),
+    .tx_body_cbor_hex =
+        "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82"
+        "d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002d"
+        "d2e802182a030a05a1581de1876c29f8c45c3fa7d3af0ea45fb2564ace831f70e7d3d5b8c251739a186f",
+    .expected_hash_hex = "45e664bb635df179597c1d583ebf54bc11db756e4d8787cf04c0abb4af20a30a",
+    .signing_mode = 9,
+    .network_id = 1,
+    .protocol_magic = 764824073,
+    .num_inputs = 1,
+    .num_outputs = 1,
+    .num_witnesses = 2,
+    .witness_payloads =
+        FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_WITHDRAWAL_WITNESS_PAYLOADS,
+    .witness_payload_count = 2,
+    .num_certificates = 0,
+    .num_withdrawals = 1,
+    .num_mint_asset_groups = 0,
+    .include_ttl = true,
+    .include_validity_interval_start = false,
+    .include_aux_data_hash = false,
+    .aux_data_type = 0,
+    .aux_data_init_payload = NULL,
+    .aux_data_init_payload_len = 0,
+    .aux_data_delegations = NULL,
+    .aux_data_delegation_count = 0,
+    .include_script_data_hash = false,
+    .num_collateral_inputs = 0,
+    .num_required_signers = 0,
+    .include_network_id = false,
+    .include_collateral_output = false,
+    .include_total_collateral = false,
+    .num_reference_inputs = 0,
+    .num_voters = 0,
+    .include_treasury = false,
+    .treasury = 0,
+    .include_donation = false,
+    .donation = 0,
+    .aux_data_hash_hex = NULL,
+    .options = 0,
+    .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+    .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING),
+};
+
+// Test 12: Unrestricted_tx_with_key_hash_withdrawal
+// Source: tests/standalone/input_files/signTx.py > shelley era tests
+//
+static const uint8_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_RAW_TX[] = {
+    0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF,
+    0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1,
+    0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82, 0xD8, 0x18, 0x58,
+    0x21, 0x83, 0x58, 0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8, 0xB8, 0x5F, 0xEC, 0x29,
+    0x6F, 0x06, 0x85, 0xCA, 0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2, 0xE1, 0xA5, 0xD8, 0x9D, 0x92,
+    0xF4, 0x5F, 0xA0, 0x00, 0x1A, 0x0D, 0x0C, 0x25, 0x61, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2D,
+    0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0xDE, 0x00, 0x7A, 0xFD, 0x02, 0x8B, 0x50, 0x4C, 0x36, 0x68, 0x10, 0x2B, 0x12, 0x9B, 0x37,
+    0xA8, 0x6C, 0x09, 0xA2, 0x87, 0x2F, 0x76, 0x74, 0x1D, 0xC7, 0xA6, 0x8E, 0x21, 0x49, 0xC8,
+};
+
+static const uint8_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_WITNESS_0_PAYLOAD[] =
+    {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_WITNESS_0_EXPECTED_SIGNATURE[] = {
+        0x64, 0x99, 0x39, 0xCC, 0xE8, 0x9D, 0xB5, 0x88, 0x0E, 0xE5, 0x92, 0x28, 0x50,
+        0xE0, 0x01, 0x42, 0xD6, 0x1C, 0xC1, 0x30, 0x16, 0xC6, 0x04, 0xAB, 0x3E, 0x91,
+        0xCC, 0x5E, 0x2D, 0x7E, 0xE9, 0x41, 0x57, 0x28, 0xE5, 0xCB, 0x10, 0xA2, 0x7E,
+        0x77, 0xDA, 0xE8, 0x61, 0x01, 0xCE, 0x20, 0x06, 0x90, 0xAA, 0xF1, 0xFD, 0xB2,
+        0x06, 0xDC, 0xDB, 0xDF, 0x82, 0x5B, 0x48, 0x6B, 0xF3, 0x01, 0x4F, 0x08,
+};
+
+static const witness_payload_t
+    FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_WITNESS_PAYLOADS[] = {
+        {.payload = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_WITNESS_0_PAYLOAD,
+         .payload_len =
+             sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_WITNESS_0_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL = {
+    .name = "Unrestricted_tx_with_key_hash_withdrawal",
+    .raw_tx = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_RAW_TX,
+    .raw_tx_len = sizeof(FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_RAW_TX),
+    .tx_body_cbor_hex =
+        "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82"
+        "d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002d"
+        "d2e802182a030a05a1581de17afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c818de",
+    .expected_hash_hex = "8d93a557107878a25bea0c35c147ab5e1ad64610a7a577b4df611f42874625bf",
+    .signing_mode = 9,
+    .network_id = 1,
+    .protocol_magic = 764824073,
+    .num_inputs = 1,
+    .num_outputs = 1,
+    .num_witnesses = 1,
+    .witness_payloads = FIXTURE_SHELLEY_UNRESTRICTED_TX_WITH_KEY_HASH_WITHDRAWAL_WITNESS_PAYLOADS,
+    .witness_payload_count = 1,
+    .num_certificates = 0,
+    .num_withdrawals = 1,
+    .num_mint_asset_groups = 0,
+    .include_ttl = true,
+    .include_validity_interval_start = false,
+    .include_aux_data_hash = false,
+    .aux_data_type = 0,
+    .aux_data_init_payload = NULL,
+    .aux_data_init_payload_len = 0,
+    .aux_data_delegations = NULL,
+    .aux_data_delegation_count = 0,
+    .include_script_data_hash = false,
+    .num_collateral_inputs = 0,
+    .num_required_signers = 0,
+    .include_network_id = false,
+    .include_collateral_output = false,
+    .include_total_collateral = false,
+    .num_reference_inputs = 0,
+    .num_voters = 0,
+    .include_treasury = false,
+    .treasury = 0,
+    .include_donation = false,
+    .donation = 0,
+    .aux_data_hash_hex = NULL,
+    .options = 0,
+    .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+    .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING),
+};
+
+// Test 13: Sign_tx_with_unusual_path_based_withdrawal
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITH_UNUSUAL_PATH_BASED_WITHDRAWAL_RAW_TX[] = {
@@ -931,7 +1451,7 @@ static const tx_fixture_t FIXTURE_SHELLEY_SIGN_TX_WITH_UNUSUAL_PATH_BASED_WITHDR
     .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNUSUAL_KEY_DERIVATION_PATH),
 };
 
-// Test 10: Sign_tx_with_auxiliary_data_hash
+// Test 14: Sign_tx_with_auxiliary_data_hash
 // Source: tests/standalone/input_files/signTx.py > shelley era tests
 //
 static const uint8_t FIXTURE_SHELLEY_SIGN_TX_WITH_AUXILIARY_DATA_HASH_RAW_TX[] = {

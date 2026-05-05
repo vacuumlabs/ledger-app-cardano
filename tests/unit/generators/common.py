@@ -69,6 +69,9 @@ def write_file_safe(file_path: Path, content: str) -> None:
             tmp_file.write(content)
             temp_file_path = Path(tmp_file.name)
 
+        # tempfile.NamedTemporaryFile creates files with 0600; explicitly set g+rw
+        temp_file_path.chmod(0o660)
+
         # Atomically rename the temporary file to the final destination
         temp_file_path.rename(file_path)
 

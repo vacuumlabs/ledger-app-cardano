@@ -15,6 +15,29 @@
 
 #include "securityPolicy.h"
 
+static bool is_staking_credential_key_path_allowed(sign_tx_signingmode_t txSigningMode,
+                                                   const bip44_path_t *path) {
+    switch (txSigningMode) {
+        case SIGN_TX_SIGNINGMODE_ORDINARY:
+        case SIGN_TX_SIGNINGMODE_PLUTUS:
+            return bip44_isOrdinaryStakingKeyPath(path);
+
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            return bip44_isOrdinaryStakingKeyPath(path) || bip44_isMultisigStakingKeyPath(path);
+
+        case SIGN_TX_SIGNINGMODE_MULTISIG:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+            return false;
+
+        // LCOV_EXCL_START
+        default:
+            ASSERT(false);
+            return false;
+            // LCOV_EXCL_STOP
+    }
+}
+
 // stake key path has the same account as the payment key path
 static inline bool is_standard_base_address(const address_params_t *address_params) {
     ASSERT(isValidAddressParams(address_params));
@@ -363,8 +386,11 @@ bool shouldShowNetworkDetails(const tx_params_t *txParams) {
 
 static inline void set_missing_collateral_warning(warning_bits_t *w,
                                                   sign_tx_signingmode_t signingMode,
-                                                  uint32_t numCollateralInputs) {
-    const bool collateralExpected = (signingMode == SIGN_TX_SIGNINGMODE_PLUTUS);
+                                                  uint32_t numCollateralInputs,
+                                                  bool includesScriptDataHash) {
+    const bool collateralExpected =
+        (signingMode == SIGN_TX_SIGNINGMODE_PLUTUS) ||
+        (signingMode == SIGN_TX_SIGNINGMODE_UNRESTRICTED && includesScriptDataHash);
     if (collateralExpected && (numCollateralInputs == 0)) {
         warning_bits_set(w, WARNING_BIT_PLUTUS_MISSING_COLLATERAL);
     }
@@ -372,8 +398,11 @@ static inline void set_missing_collateral_warning(warning_bits_t *w,
 
 static inline void set_unknown_collateral_warning(warning_bits_t *w,
                                                   sign_tx_signingmode_t signingMode,
+                                                  uint32_t numCollateralInputs,
                                                   bool includesTotalCollateral) {
-    const bool collateralExpected = (signingMode == SIGN_TX_SIGNINGMODE_PLUTUS);
+    const bool collateralExpected =
+        (signingMode == SIGN_TX_SIGNINGMODE_PLUTUS) ||
+        (signingMode == SIGN_TX_SIGNINGMODE_UNRESTRICTED && numCollateralInputs > 0);
     if (collateralExpected && (!includesTotalCollateral)) {
         warning_bits_set(w, WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL);
     }
@@ -469,6 +498,11 @@ security_policy_t policyForSignTxInit(const tx_params_t *txParams, warning_bits_
         case SIGN_TX_SIGNINGMODE_PLUTUS:
             break;
 
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            DENY_UNLESS(is_expert_mode());
+            warning_bits_set(w, WARNING_BIT_UNRESTRICTED_SIGNING);
+            break;
+
         // LCOV_EXCL_START
         default:
             ASSERT(false);
@@ -483,8 +517,14 @@ security_policy_t policyForSignTxInit(const tx_params_t *txParams, warning_bits_
                                        txParams->num_withdrawals,
                                        txParams->txSigningMode);
     set_network_unusual_warning(w, txParams->networkId, txParams->protocolMagic);
-    set_missing_collateral_warning(w, txParams->txSigningMode, txParams->num_collateral_inputs);
-    set_unknown_collateral_warning(w, txParams->txSigningMode, txParams->includeTotalCollateral);
+    set_missing_collateral_warning(w,
+                                   txParams->txSigningMode,
+                                   txParams->num_collateral_inputs,
+                                   txParams->includeScriptDataHash);
+    set_unknown_collateral_warning(w,
+                                   txParams->txSigningMode,
+                                   txParams->num_collateral_inputs,
+                                   txParams->includeTotalCollateral);
     set_missing_script_data_hash_warning(w,
                                          txParams->txSigningMode,
                                          txParams->includeScriptDataHash);
@@ -534,6 +574,10 @@ security_policy_t policyForSignTxInput(sign_tx_signingmode_t txSigningMode,
             // user should check inputs because they are not interchangeable for Plutus scripts
             SHOW_IF(is_expert_mode());
             HIDE();
+            break;
+
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            SHOW();
             break;
 
         case SIGN_TX_SIGNINGMODE_ORDINARY:
@@ -631,10 +675,18 @@ static bool contains_forbidden_plutus_elements(const tx_output_description_t *ou
             case SIGN_TX_SIGNINGMODE_ORDINARY:
             case SIGN_TX_SIGNINGMODE_MULTISIG:
             case SIGN_TX_SIGNINGMODE_PLUTUS:
+            case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
                 break;
 
-            default:
+            case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
+            case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
                 return true;
+
+            // LCOV_EXCL_START
+            default:
+                ASSERT(false);
+                return true;
+                // LCOV_EXCL_STOP
         }
     }
 
@@ -678,6 +730,7 @@ static security_policy_t policyForSignTxOutputAddressBytes(const tx_output_descr
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             // utxo on a Plutus script address without datum hash is unspendable
             // but we can't DENY because it is valid for native scripts
             if (needsMissingDatumWarning(&output->destination, output->includeDatum)) {
@@ -698,7 +751,8 @@ static security_policy_t policyForSignTxOutputAddressBytes(const tx_output_descr
 
 static bool is_address_params_suitable_for_tx_output(const address_params_t *params,
                                                      const uint8_t networkId,
-                                                     const uint32_t protocolMagic) {
+                                                     const uint32_t protocolMagic,
+                                                     bool enforceSingleAccount) {
 #define CHECK(cond) \
     if (!(cond)) return false
     CHECK(isValidAddressParams(params));
@@ -729,7 +783,9 @@ static bool is_address_params_suitable_for_tx_output(const address_params_t *par
         // for missing datum (see policyForSignTxOutputAddressBytes)
         CHECK(determinePaymentChoice(params->type) == PAYMENT_PATH);
         ASSERT(addressParams_getPaymentPartType(params) == PAYMENT_PART_KEY_PATH);
-        CHECK(!violatesSingleAccountOrStoreIt(&params->paymentKeyPath));
+        if (enforceSingleAccount) {
+            CHECK(!violatesSingleAccountOrStoreIt(&params->paymentKeyPath));
+        }
     }
 
     return true;
@@ -744,11 +800,14 @@ static security_policy_t policyForSignTxOutputAddressParams(const tx_output_desc
                                                             warning_bits_t *w) {
     POLICY_INIT();
     ASSERT(output != NULL);
-    (void) w;
     ASSERT(output->destination.type == DESTINATION_DEVICE_OWNED);
     const address_params_t *params = &output->destination.params;
 
-    DENY_UNLESS(is_address_params_suitable_for_tx_output(params, networkId, protocolMagic));
+    const bool enforceSingleAccount = (txSigningMode != SIGN_TX_SIGNINGMODE_UNRESTRICTED);
+    DENY_UNLESS(is_address_params_suitable_for_tx_output(params,
+                                                         networkId,
+                                                         protocolMagic,
+                                                         enforceSingleAccount));
 
     DENY_IF(contains_forbidden_plutus_elements(output, txSigningMode));
 
@@ -788,6 +847,16 @@ static security_policy_t policyForSignTxOutputAddressParams(const tx_output_desc
             // Note: if we relax this, some of the above restrictions may apply
             SHOW_IF(is_expert_mode());
             HIDE();
+            break;
+        }
+
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED: {
+            // Keep warning-triggered display explicit even though unrestricted currently shows.
+            SHOW_IF(mark_unusual_key_derivation(w, &params->paymentKeyPath));
+            if (addressParams_getStakingPartType(params) == STAKING_PART_KEY_PATH) {
+                SHOW_IF(mark_unusual_key_derivation(w, &params->stakingKeyPath));
+            }
+            SHOW();
             break;
         }
 
@@ -976,7 +1045,8 @@ static security_policy_t policyForSignTxCollateralOutputAddressBytes(
     DENY_IF(output->includeDatum);
     DENY_IF(output->includeRefScript);
 
-    DENY_IF(txSigningMode != SIGN_TX_SIGNINGMODE_PLUTUS);
+    DENY_UNLESS(txSigningMode == SIGN_TX_SIGNINGMODE_PLUTUS ||
+                txSigningMode == SIGN_TX_SIGNINGMODE_UNRESTRICTED);
 
     SHOW();
 }
@@ -995,7 +1065,12 @@ static security_policy_t policyForSignTxCollateralOutputAddressParams(
     ASSERT(output->destination.type == DESTINATION_DEVICE_OWNED);
     const address_params_t *params = &output->destination.params;
 
-    DENY_UNLESS(is_address_params_suitable_for_tx_output(params, networkId, protocolMagic));
+    const bool enforceSingleAccount = (txSigningMode != SIGN_TX_SIGNINGMODE_UNRESTRICTED);
+    DENY_UNLESS(is_address_params_suitable_for_tx_output(params,
+                                                         networkId,
+                                                         protocolMagic,
+                                                         enforceSingleAccount));
+
     DENY_UNLESS(is_address_suitable_for_collateral_output(output));
 
     DENY_IF(output->includeDatum);
@@ -1018,6 +1093,15 @@ static security_policy_t policyForSignTxCollateralOutputAddressParams(
                 // collateral output ADA must be shown, so the whole output must be shown
                 SHOW();
             }
+            break;
+
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            // Keep warning-triggered display explicit even though unrestricted currently shows.
+            SHOW_IF(mark_unusual_key_derivation(w, &params->paymentKeyPath));
+            if (addressParams_getStakingPartType(params) == STAKING_PART_KEY_PATH) {
+                SHOW_IF(mark_unusual_key_derivation(w, &params->stakingKeyPath));
+            }
+            SHOW();
             break;
 
         // LCOV_EXCL_START
@@ -1065,6 +1149,7 @@ security_policy_t policyForSignTxCollateralOutputAddress(const tx_output_descrip
 }
 
 security_policy_t policyForSignTxCollateralOutputAdaAmount(security_policy_t outputPolicy,
+                                                           sign_tx_signingmode_t txSigningMode,
                                                            bool isTotalCollateralPresent,
                                                            warning_bits_t *w) {
     POLICY_INIT();
@@ -1078,13 +1163,26 @@ security_policy_t policyForSignTxCollateralOutputAdaAmount(security_policy_t out
         HIDE();
     }
 
-    // ADA amount is calculable from total collateral
-    // but only expert users are to be bothered by a possible collateral loss
-    SHOW_IF(!isTotalCollateralPresent && is_expert_mode());
-    HIDE();
+    switch (txSigningMode) {
+        case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            // ADA amount is calculable from total collateral
+            // but only expert users are to be bothered by a possible collateral loss
+            SHOW_IF(!isTotalCollateralPresent && is_expert_mode());
+            HIDE();
+            break;
+
+        // LCOV_EXCL_START
+        default:
+            ASSERT(false);
+            // LCOV_EXCL_STOP
+    }
+
+    DENY();  // should not be reached
 }
 
 security_policy_t policyForSignTxCollateralOutputTokens(security_policy_t outputPolicy,
+                                                        sign_tx_signingmode_t txSigningMode,
                                                         const tx_output_description_t *output,
                                                         warning_bits_t *w) {
     POLICY_INIT();
@@ -1099,12 +1197,25 @@ security_policy_t policyForSignTxCollateralOutputTokens(security_policy_t output
         HIDE();
     }
 
-    // for non-change outputs, control over the collateral tokens is potentially transferred to
-    // another party, so we should show them in the expert mode
-    // (non-expert users are supposed to not be interested in any collateral loss)
-    const bool lossOfControl = (output->destination.type != DESTINATION_DEVICE_OWNED);
-    SHOW_IF(lossOfControl && is_expert_mode());
-    HIDE();
+    switch (txSigningMode) {
+        case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED: {
+            // for non-change outputs, control over the collateral tokens is potentially transferred
+            // to another party, so we should show them in the expert mode (non-expert users are
+            // supposed to not be interested in any collateral loss)
+            const bool lossOfControl = (output->destination.type != DESTINATION_DEVICE_OWNED);
+            SHOW_IF(lossOfControl && is_expert_mode());
+            HIDE();
+            break;
+        }
+
+        // LCOV_EXCL_START
+        default:
+            ASSERT(false);
+            // LCOV_EXCL_STOP
+    }
+
+    DENY();  // should not be reached
 }
 
 // ======================================= Fee =======================================
@@ -1119,13 +1230,14 @@ security_policy_t policyForSignTxFee(sign_tx_signingmode_t txSigningMode,
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             // always show the fee if it is paid by the signer
             if (fee > HIGH_FEE_WARNING_THRESHOLD) {
                 warning_bits_set(w, WARNING_BIT_HIGH_FEE);
             }
             SHOW();
-
             break;
+
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
             // fees are paid by the operator and are thus irrelevant for owners
             HIDE();
@@ -1173,6 +1285,7 @@ static bool _forbiddenCredential(sign_tx_signingmode_t txSigningMode,
             break;
 
         case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             // everything allowed, txs are too complex for a HW wallet to understand
             // and there might be third-party key hashes in the tx
             break;
@@ -1215,8 +1328,25 @@ static security_policy_t _policyForSignTxCertificateStakeCredential(
 
     switch (stakeCredential->type) {
         case EXT_CREDENTIAL_KEY_PATH:
-            DENY_UNLESS(bip44_isOrdinaryStakingKeyPath(&stakeCredential->keyPath));
-            DENY_IF(violatesSingleAccountOrStoreIt(&stakeCredential->keyPath));
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    DENY_UNLESS(is_staking_credential_key_path_allowed(txSigningMode,
+                                                                       &stakeCredential->keyPath));
+                    break;
+
+                case SIGN_TX_SIGNINGMODE_ORDINARY:
+                case SIGN_TX_SIGNINGMODE_MULTISIG:
+                case SIGN_TX_SIGNINGMODE_PLUTUS:
+                    DENY_UNLESS(is_staking_credential_key_path_allowed(txSigningMode,
+                                                                       &stakeCredential->keyPath));
+                    DENY_IF(violatesSingleAccountOrStoreIt(&stakeCredential->keyPath));
+                    break;
+
+                // LCOV_EXCL_START
+                default:
+                    ASSERT(false);
+                    // LCOV_EXCL_STOP
+            }
             break;
         case EXT_CREDENTIAL_KEY_HASH:
         case EXT_CREDENTIAL_SCRIPT_HASH:
@@ -1240,7 +1370,21 @@ static inline security_policy_t _policyForSignTxCertificateDRep(sign_tx_signingm
     switch (drep->type) {
         case EXT_DREP_KEY_PATH:
             DENY_UNLESS(bip44_isDRepKeyPath(&drep->keyPath));
-            DENY_IF(violatesSingleAccountOrStoreIt(&drep->keyPath));
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    break;
+
+                case SIGN_TX_SIGNINGMODE_ORDINARY:
+                case SIGN_TX_SIGNINGMODE_MULTISIG:
+                case SIGN_TX_SIGNINGMODE_PLUTUS:
+                    DENY_IF(violatesSingleAccountOrStoreIt(&drep->keyPath));
+                    break;
+
+                // LCOV_EXCL_START
+                default:
+                    ASSERT(false);
+                    // LCOV_EXCL_STOP
+            }
             break;
 
         case EXT_DREP_KEY_HASH:
@@ -1346,7 +1490,21 @@ security_policy_t policyForSignTxCertificateCommitteeAuth(sign_tx_signingmode_t 
     switch (coldCredential->type) {
         case EXT_CREDENTIAL_KEY_PATH:
             DENY_UNLESS(bip44_isCommitteeColdKeyPath(&coldCredential->keyPath));
-            DENY_IF(violatesSingleAccountOrStoreIt(&coldCredential->keyPath));
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    break;
+
+                case SIGN_TX_SIGNINGMODE_ORDINARY:
+                case SIGN_TX_SIGNINGMODE_MULTISIG:
+                case SIGN_TX_SIGNINGMODE_PLUTUS:
+                    DENY_IF(violatesSingleAccountOrStoreIt(&coldCredential->keyPath));
+                    break;
+
+                // LCOV_EXCL_START
+                default:
+                    ASSERT(false);
+                    // LCOV_EXCL_STOP
+            }
             break;
 
         case EXT_CREDENTIAL_KEY_HASH:
@@ -1388,7 +1546,21 @@ security_policy_t policyForSignTxCertificateCommitteeResign(sign_tx_signingmode_
     switch (coldCredential->type) {
         case EXT_CREDENTIAL_KEY_PATH:
             DENY_UNLESS(bip44_isCommitteeColdKeyPath(&coldCredential->keyPath));
-            DENY_IF(violatesSingleAccountOrStoreIt(&coldCredential->keyPath));
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    break;
+
+                case SIGN_TX_SIGNINGMODE_ORDINARY:
+                case SIGN_TX_SIGNINGMODE_MULTISIG:
+                case SIGN_TX_SIGNINGMODE_PLUTUS:
+                    DENY_IF(violatesSingleAccountOrStoreIt(&coldCredential->keyPath));
+                    break;
+
+                // LCOV_EXCL_START
+                default:
+                    ASSERT(false);
+                    // LCOV_EXCL_STOP
+            }
             break;
 
         case EXT_CREDENTIAL_KEY_HASH:
@@ -1415,7 +1587,21 @@ security_policy_t policyForSignTxCertificateDRep(sign_tx_signingmode_t txSigning
     switch (dRepCredential->type) {
         case EXT_CREDENTIAL_KEY_PATH:
             DENY_UNLESS(bip44_isDRepKeyPath(&dRepCredential->keyPath));
-            DENY_IF(violatesSingleAccountOrStoreIt(&dRepCredential->keyPath));
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    break;
+
+                case SIGN_TX_SIGNINGMODE_ORDINARY:
+                case SIGN_TX_SIGNINGMODE_MULTISIG:
+                case SIGN_TX_SIGNINGMODE_PLUTUS:
+                    DENY_IF(violatesSingleAccountOrStoreIt(&dRepCredential->keyPath));
+                    break;
+
+                // LCOV_EXCL_START
+                default:
+                    ASSERT(false);
+                    // LCOV_EXCL_STOP
+            }
             break;
 
         case EXT_CREDENTIAL_KEY_HASH:
@@ -1441,8 +1627,8 @@ security_policy_t policyForSignTxCertificateStakePoolRetirement(
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             DENY_UNLESS(poolCredential->type == EXT_CREDENTIAL_KEY_PATH);
-            // the path hash should be a valid pool cold key path
             DENY_UNLESS(bip44_isPoolColdKeyPath(&poolCredential->keyPath));
             SHOW();
             break;
@@ -1495,6 +1681,7 @@ security_policy_t policyForSignTxStakePoolRegistrationInit(sign_tx_signingmode_t
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             DENY();
             break;
 
@@ -1709,11 +1896,19 @@ security_policy_t policyForSignTxWithdrawal(sign_tx_signingmode_t txSigningMode,
                   "Withdrawal in pool registration mode");
     switch (stakeCredential->type) {
         case EXT_CREDENTIAL_KEY_PATH:
-            DENY_UNLESS(bip44_isOrdinaryStakingKeyPath(&stakeCredential->keyPath));
-            DENY_IF(violatesSingleAccountOrStoreIt(&stakeCredential->keyPath));
             switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    DENY_UNLESS(is_staking_credential_key_path_allowed(txSigningMode,
+                                                                       &stakeCredential->keyPath));
+                    SHOW_IF(mark_unusual_key_derivation(w, &stakeCredential->keyPath));
+                    SHOW();
+                    break;
+
                 case SIGN_TX_SIGNINGMODE_ORDINARY:
                 case SIGN_TX_SIGNINGMODE_PLUTUS:
+                    DENY_UNLESS(is_staking_credential_key_path_allowed(txSigningMode,
+                                                                       &stakeCredential->keyPath));
+                    DENY_IF(violatesSingleAccountOrStoreIt(&stakeCredential->keyPath));
                     SHOW_IF(mark_unusual_key_derivation(w, &stakeCredential->keyPath));
                     SHOW_IF(is_expert_mode());
                     HIDE();
@@ -1735,6 +1930,10 @@ security_policy_t policyForSignTxWithdrawal(sign_tx_signingmode_t txSigningMode,
 
         case EXT_CREDENTIAL_KEY_HASH:
             switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    SHOW();
+                    break;
+
                 case SIGN_TX_SIGNINGMODE_PLUTUS:
                     SHOW_IF(is_expert_mode());
                     HIDE();
@@ -1764,6 +1963,10 @@ security_policy_t policyForSignTxWithdrawal(sign_tx_signingmode_t txSigningMode,
 
         case EXT_CREDENTIAL_SCRIPT_HASH:
             switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    SHOW();
+                    break;
+
                 case SIGN_TX_SIGNINGMODE_MULTISIG:
                 case SIGN_TX_SIGNINGMODE_PLUTUS:
                     SHOW_IF(is_expert_mode());
@@ -1838,6 +2041,7 @@ security_policy_t policyForSignTxMintInit(const sign_tx_signingmode_t txSigningM
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             SHOW();
             break;
 
@@ -1862,6 +2066,10 @@ security_policy_t policyForSignTxScriptDataHash(const sign_tx_signingmode_t txSi
         case SIGN_TX_SIGNINGMODE_PLUTUS:
             SHOW_IF(is_expert_mode());
             HIDE();
+            break;
+
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            SHOW();
             break;
 
         // LCOV_EXCL_START
@@ -1902,6 +2110,10 @@ security_policy_t policyForSignTxCollateralInput(const sign_tx_signingmode_t txS
             HIDE();
             break;
 
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            SHOW();
+            break;
+
         // LCOV_EXCL_START
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
@@ -1923,7 +2135,7 @@ security_policy_t policyForSignTxCollateralInput(const sign_tx_signingmode_t txS
 
 // ======================================= Required Signers =======================================
 
-static bool is_required_signer_allowed(bip44_path_t *path) {
+static bool is_required_signer_allowed(bip44_path_t *path, bool allowPoolColdKey) {
     switch (bip44_classifyPath(path)) {
         case PATH_ORDINARY_ACCOUNT:
         case PATH_ORDINARY_PAYMENT_KEY:
@@ -1945,6 +2157,8 @@ static bool is_required_signer_allowed(bip44_path_t *path) {
             return true;
 
         case PATH_POOL_COLD_KEY:
+            return allowPoolColdKey;
+
         case PATH_CVOTE_ACCOUNT:
         case PATH_CVOTE_KEY:
         case PATH_INVALID:
@@ -1963,9 +2177,10 @@ security_policy_t policyForSignTxRequiredSigner(const sign_tx_signingmode_t txSi
                                                 warning_bits_t *w) {
     POLICY_INIT();
     switch (txSigningMode) {
-        case SIGN_TX_SIGNINGMODE_PLUTUS:
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
+        case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             // OK
             break;
 
@@ -1978,14 +2193,46 @@ security_policy_t policyForSignTxRequiredSigner(const sign_tx_signingmode_t txSi
 
     switch (requiredSigner->type) {
         case REQUIRED_SIGNER_WITH_HASH:
-            SHOW_IF(is_expert_mode());
-            HIDE();
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    SHOW();
+                    break;
+
+                case SIGN_TX_SIGNINGMODE_PLUTUS:
+                case SIGN_TX_SIGNINGMODE_ORDINARY:
+                case SIGN_TX_SIGNINGMODE_MULTISIG:
+                    SHOW_IF(is_expert_mode());
+                    HIDE();
+                    break;
+
+                // LCOV_EXCL_START
+                default:
+                    ASSERT(false);
+                    // LCOV_EXCL_STOP
+            }
             break;
 
         case REQUIRED_SIGNER_WITH_PATH:
-            DENY_UNLESS(is_required_signer_allowed(&requiredSigner->keyPath));
-            SHOW_IF(is_expert_mode());
-            HIDE();
+            switch (txSigningMode) {
+                case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+                    DENY_UNLESS(is_required_signer_allowed(&requiredSigner->keyPath, true));
+                    SHOW_IF(mark_unusual_key_derivation(w, &requiredSigner->keyPath));
+                    SHOW();
+                    break;
+
+                case SIGN_TX_SIGNINGMODE_PLUTUS:
+                case SIGN_TX_SIGNINGMODE_ORDINARY:
+                case SIGN_TX_SIGNINGMODE_MULTISIG:
+                    DENY_UNLESS(is_required_signer_allowed(&requiredSigner->keyPath, false));
+                    SHOW_IF(is_expert_mode());
+                    HIDE();
+                    break;
+
+                // LCOV_EXCL_START
+                default:
+                    ASSERT(false);
+                    // LCOV_EXCL_STOP
+            }
             break;
 
         // LCOV_EXCL_START
@@ -2023,6 +2270,10 @@ security_policy_t policyForSignTxReferenceInput(const sign_tx_signingmode_t txSi
             HIDE();
             break;
 
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            SHOW();
+            break;
+
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
@@ -2044,10 +2295,10 @@ security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigning
                                                  ext_voter_t *voter,
                                                  warning_bits_t *w) {
     POLICY_INIT();
-    // gov action id and vote can be arbitrary
-    // we only restrict voter because that determines witnesses
-    // certain combinations of tx signing mode and credential type are not allowed
-    // either because they don't make sense or are dangerous
+    // Gov action id and vote can be arbitrary.
+    // We only restrict voter because that determines witnesses.
+    // Certain combinations of tx signing mode and credential type are not allowed
+    // either because they don't make sense or are dangerous.
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_ORDINARY:
             switch (voter->type) {
@@ -2065,18 +2316,21 @@ security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigning
                     DENY_UNLESS(bip44_isCommitteeHotKeyPath(&voter->keyPath));
                     DENY_IF(violatesSingleAccountOrStoreIt(&voter->keyPath));
                     SHOW_IF(mark_unusual_key_derivation(w, &voter->keyPath));
+                    SHOW();
                     break;
 
                 case EXT_VOTER_DREP_KEY_PATH:
                     DENY_UNLESS(bip44_isDRepKeyPath(&voter->keyPath));
                     DENY_IF(violatesSingleAccountOrStoreIt(&voter->keyPath));
                     SHOW_IF(mark_unusual_key_derivation(w, &voter->keyPath));
+                    SHOW();
                     break;
 
                 case EXT_VOTER_STAKE_POOL_KEY_PATH:
                     // Pool cold keys are exempt from single-account constraint.
                     DENY_UNLESS(bip44_isPoolColdKeyPath(&voter->keyPath));
                     SHOW_IF(mark_unusual_key_derivation(w, &voter->keyPath));
+                    SHOW();
                     break;
 
                 // LCOV_EXCL_START
@@ -2101,6 +2355,7 @@ security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigning
                 case EXT_VOTER_COMMITTEE_HOT_SCRIPT_HASH:
                 case EXT_VOTER_DREP_SCRIPT_HASH:
                     // scripts are OK
+                    SHOW();
                     break;
 
                 // LCOV_EXCL_START
@@ -2111,8 +2366,39 @@ security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigning
             break;
 
         case SIGN_TX_SIGNINGMODE_PLUTUS:
-            // everything allowed, txs are too complex for a HW wallet to understand
-            // and there might be third-party key hashes in the tx
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            switch (voter->type) {
+                case EXT_VOTER_COMMITTEE_HOT_KEY_PATH:
+                    DENY_UNLESS(bip44_isCommitteeHotKeyPath(&voter->keyPath));
+                    SHOW_IF(mark_unusual_key_derivation(w, &voter->keyPath));
+                    SHOW();
+                    break;
+
+                case EXT_VOTER_DREP_KEY_PATH:
+                    DENY_UNLESS(bip44_isDRepKeyPath(&voter->keyPath));
+                    SHOW_IF(mark_unusual_key_derivation(w, &voter->keyPath));
+                    SHOW();
+                    break;
+
+                case EXT_VOTER_STAKE_POOL_KEY_PATH:
+                    DENY_UNLESS(bip44_isPoolColdKeyPath(&voter->keyPath));
+                    SHOW_IF(mark_unusual_key_derivation(w, &voter->keyPath));
+                    SHOW();
+                    break;
+
+                case EXT_VOTER_COMMITTEE_HOT_KEY_HASH:
+                case EXT_VOTER_COMMITTEE_HOT_SCRIPT_HASH:
+                case EXT_VOTER_DREP_KEY_HASH:
+                case EXT_VOTER_DREP_SCRIPT_HASH:
+                case EXT_VOTER_STAKE_POOL_KEY_HASH:
+                    SHOW();
+                    break;
+
+                // LCOV_EXCL_START
+                default:
+                    ASSERT(false);
+                    // LCOV_EXCL_STOP
+            }
             break;
 
         // LCOV_EXCL_START
@@ -2122,7 +2408,7 @@ security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigning
             // LCOV_EXCL_STOP
     }
 
-    SHOW();
+    DENY();  // should not be reached
 }
 
 // ======================================= Treasury =======================================
@@ -2160,9 +2446,12 @@ security_policy_t policyForSignTxDisplayTxHash(sign_tx_signingmode_t signingMode
             SHOW_IF(is_expert_mode());
             HIDE();
             break;
+
         case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             SHOW();
             break;
+
         // LCOV_EXCL_START
         default:
             LEDGER_ASSERT(false, "Unknown tx signing mode for tx hash display policy");
@@ -2292,6 +2581,34 @@ static inline security_policy_t _plutusWitnessPolicy(const bip44_path_t *path,
     }
 }
 
+static inline security_policy_t _unrestrictedWitnessPolicy(const bip44_path_t *path,
+                                                           bool mintPresent MARK_UNUSED,
+                                                           warning_bits_t *w) {
+    POLICY_INIT();
+    ASSERT(path != NULL);
+    switch (bip44_classifyPath(path)) {
+        case PATH_ORDINARY_PAYMENT_KEY:
+        case PATH_ORDINARY_STAKING_KEY:
+        case PATH_MULTISIG_PAYMENT_KEY:
+        case PATH_MULTISIG_STAKING_KEY:
+        case PATH_DREP_KEY:
+        case PATH_COMMITTEE_COLD_KEY:
+        case PATH_COMMITTEE_HOT_KEY:
+        case PATH_POOL_COLD_KEY:
+            SHOW_IF(mark_unusual_key_derivation(w, path));
+            SHOW();
+            break;
+
+        case PATH_MINT_KEY:
+            SHOW();
+            break;
+
+        default:
+            DENY();
+            break;
+    }
+}
+
 static inline security_policy_t _poolRegistrationOwnerWitnessPolicy(
     const bip44_path_t *witnessPath,
     const bip44_path_t *poolOwnerPath,
@@ -2388,6 +2705,9 @@ security_policy_t policyForSignTxWitness(sign_tx_signingmode_t txSigningMode,
 
         case SIGN_TX_SIGNINGMODE_PLUTUS:
             RETURN(_plutusWitnessPolicy(witnessPath, mintPresent, w));
+
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            RETURN(_unrestrictedWitnessPolicy(witnessPath, mintPresent, w));
 
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
             RETURN(_poolRegistrationOwnerWitnessPolicy(witnessPath, poolOwnerPath, w));
@@ -2644,6 +2964,13 @@ static const warning_definition_t WARNING_DEFINITIONS[WARNING_BIT_COUNT] = {
             .bit = WARNING_BIT_HIGH_FEE,
             .title = "High fee",
             .description = "Transaction fee exceeds typical threshold",
+        },
+    [WARNING_BIT_UNRESTRICTED_SIGNING] =
+        {
+            .bit = WARNING_BIT_UNRESTRICTED_SIGNING,
+            .title = "Unrestricted signing",
+            .description =
+                "Careful! A witness might sign many elements, some given by script hashes.",
         },
 };
 

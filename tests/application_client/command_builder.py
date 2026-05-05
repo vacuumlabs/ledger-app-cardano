@@ -120,7 +120,8 @@ class TransactionSigningMode(IntEnum):
     POOL_REGISTRATION_OPERATOR = 0x05
     MULTISIG = 0x06
     PLUTUS = 0x07
-    AUTO = 0x08
+    UNRESTRICTED = 0x09
+    AUTO = 0xEE
 
 
 class TxAuxiliaryDataType(IntEnum):

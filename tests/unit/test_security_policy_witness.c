@@ -250,6 +250,26 @@ static void test_plutus_witness_pool_cold_key_denied(void **state) {
     assert_int_equal(policy, POLICY_DENY);
 }
 
+static void test_unrestricted_witness_pool_cold_key_allowed(void **state) {
+    (void) state;
+    reset_context();
+    bip44_path_t path = make_pool_cold_key_path();
+    warning_bits_t w = 0;
+    security_policy_t policy =
+        policyForSignTxWitness(SIGN_TX_SIGNINGMODE_UNRESTRICTED, false, &path, false, NULL, &w);
+    assert_int_equal(policy, POLICY_SHOW);
+}
+
+static void test_unrestricted_witness_mint_key_allowed_without_mint(void **state) {
+    (void) state;
+    reset_context();
+    bip44_path_t path = make_mint_path();
+    warning_bits_t w = 0;
+    security_policy_t policy =
+        policyForSignTxWitness(SIGN_TX_SIGNINGMODE_UNRESTRICTED, false, &path, false, NULL, &w);
+    assert_int_equal(policy, POLICY_SHOW);
+}
+
 // ======================================================================
 // 2. Swap witness policy: isSwap=true branch of policyForSignTxWitness
 //
@@ -479,6 +499,8 @@ int main(void) {
         cmocka_unit_test(test_plutus_witness_committee_hot_path_not_denied),
         cmocka_unit_test(test_plutus_witness_mint_path_not_denied_when_mint_present),
         cmocka_unit_test(test_plutus_witness_pool_cold_key_denied),
+        cmocka_unit_test(test_unrestricted_witness_pool_cold_key_allowed),
+        cmocka_unit_test(test_unrestricted_witness_mint_key_allowed_without_mint),
         // Swap witness: mode gating and path allowlist
         cmocka_unit_test(test_swap_witness_non_ordinary_mode_denied),
         cmocka_unit_test(test_swap_witness_staking_path_denied),

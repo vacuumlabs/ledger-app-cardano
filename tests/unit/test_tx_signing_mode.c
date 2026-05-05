@@ -35,6 +35,7 @@ static void test_is_valid_accepts_all_concrete_modes(void **state) {
     assert_true(is_valid_tx_signing_mode(SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR));
     assert_true(is_valid_tx_signing_mode(SIGN_TX_SIGNINGMODE_MULTISIG));
     assert_true(is_valid_tx_signing_mode(SIGN_TX_SIGNINGMODE_PLUTUS));
+    assert_true(is_valid_tx_signing_mode(SIGN_TX_SIGNINGMODE_UNRESTRICTED));
 }
 
 static void test_is_valid_accepts_auto(void **state) {
@@ -47,7 +48,7 @@ static void test_is_valid_rejects_unknown_values(void **state) {
     assert_false(is_valid_tx_signing_mode(0));
     assert_false(is_valid_tx_signing_mode(1));
     assert_false(is_valid_tx_signing_mode(2));
-    assert_false(is_valid_tx_signing_mode(9));
+    assert_false(is_valid_tx_signing_mode(8));
     assert_false(is_valid_tx_signing_mode(0xFF));
 }
 
@@ -68,6 +69,10 @@ static void test_resolve_noop_on_concrete_mode(void **state) {
     p = make_params(SIGN_TX_SIGNINGMODE_MULTISIG);
     assert_true(resolve_auto_tx_signing_mode(&p));
     assert_int_equal(p.txSigningMode, SIGN_TX_SIGNINGMODE_MULTISIG);
+
+    p = make_params(SIGN_TX_SIGNINGMODE_UNRESTRICTED);
+    assert_true(resolve_auto_tx_signing_mode(&p));
+    assert_int_equal(p.txSigningMode, SIGN_TX_SIGNINGMODE_UNRESTRICTED);
 }
 
 // ---------------------------------------------------------------------------

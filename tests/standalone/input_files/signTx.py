@@ -135,6 +135,7 @@ class SignTxTestCase:
     )
     blind_signing_mode: BlindSigningMode = BlindSigningMode.DISABLED
     ragger_expect: Optional[SignTxRaggerExpect] = None
+    required_expert_mode: Optional[bool] = None
 
 
 # pylint: disable=line-too-long
@@ -258,6 +259,15 @@ destinations: dict[str, TxOutputDestination] = {
             netDesc=Mainnet,
             addrType=AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
             spendingValue="m/1852'/1815'/0'/0/0",
+            stakingValue="m/1852'/1815'/1'/2/0",
+        ),
+    ),
+    "internalBaseWithCrossAccountPaymentPath": TxOutputDestination(
+        TxOutputDestinationType.DEVICE_OWNED,
+        AddressParams(
+            netDesc=Mainnet,
+            addrType=AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
+            spendingValue="m/1852'/1815'/1'/0/0",
             stakingValue="m/1852'/1815'/1'/2/0",
         ),
     ),
@@ -1609,6 +1619,94 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
         ),
     ),
     SignTxTestCase(
+        name="Unrestricted_tx_with_mint_witness_without_mint",
+        tx=Transaction(
+            network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a"
+        ),
+        additionalWitnessPaths=("m/1855'/1815'/0'",),
+        # This intentionally has no mint field: unrestricted mode allows mint witnesses
+        # independently of the transaction body, and this keeps the fixture small.
+        expected_warnings=(
+            WarningBit.WARNING_BIT_NETWORK_NOT_VERIFIABLE,
+            WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="513bf587cfee17e9a1c5ae8c198655725d46a5de707f646619b15e5a11fd3512374f3f6029d3af97104ccfbd00a01e481319c3f66a717f4106e13e1dd2729d04",
+                ),
+                Witness(
+                    path="m/1855'/1815'/0'",
+                    witnessSignatureHex="ae920ae3b0605a81ce2f326458ec90e2a1530ad6bf34cc40f6619d820c005dd61353e052d0c9cbeff3889f18b89e9d23d866bd4ddc131f6ca0f26b1c8ef1be05",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_additional_witness_roles",
+        # Covers unrestricted-only witness policy differences in one small tx:
+        # ordinary staking witnesses are shown instead of hidden, and multisig,
+        # governance DRep, committee hot, and committee cold witnesses are allowed.
+        tx=Transaction(
+            network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a"
+        ),
+        additionalWitnessPaths=(
+            "m/1852'/1815'/0'/2/0",
+            "m/1854'/1815'/0'/0/0",
+            "m/1854'/1815'/0'/2/0",
+            "m/1852'/1815'/0'/3/0",
+            "m/1852'/1815'/0'/4/0",
+            "m/1852'/1815'/0'/5/0",
+        ),
+        expected_warnings=(
+            WarningBit.WARNING_BIT_NETWORK_NOT_VERIFIABLE,
+            WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="ffd4d009f554ba4fd8ed1f1d703244819861a9d34fd4753bcf3ff32f043ce188",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="513bf587cfee17e9a1c5ae8c198655725d46a5de707f646619b15e5a11fd3512374f3f6029d3af97104ccfbd00a01e481319c3f66a717f4106e13e1dd2729d04",
+                ),
+                Witness(
+                    path="m/1852'/1815'/0'/2/0",
+                    witnessSignatureHex="add85abac775f9fe51c8a86c2382130c7c877983616b788dd44b1387e367c0d78866ff0caa9df15d1ba71db90e19e0ae39db9a365bb0c7c3601f9c507b630b06",
+                ),
+                Witness(
+                    path="m/1854'/1815'/0'/0/0",
+                    witnessSignatureHex="33d93aebe3f67620f9f5022ac273af3ac85f2ebd494d697e54a96bfd6b4e7a5f20aca3c5278b2a51a44f596f43e5f3bb81fb16268856799e9add9e53573d2c05",
+                ),
+                Witness(
+                    path="m/1854'/1815'/0'/2/0",
+                    witnessSignatureHex="96457acf26ea6e9dcda6555649455acd2ad6f2775221891a8ec26508e666272ff89e518e59948b6cededede60b92063e6a6271fc62957238b50ac68fd73aa809",
+                ),
+                Witness(
+                    path="m/1852'/1815'/0'/3/0",
+                    witnessSignatureHex="f25830ee5fa77fe5bf17b12382eeee59ad7c3348a8019f95b259cdd58d93d9d8df060a2e8ce16959a6c85bdcfb14d9bb8bf84e4f93b7cabcce368c0d9991ec06",
+                ),
+                Witness(
+                    path="m/1852'/1815'/0'/4/0",
+                    witnessSignatureHex="ed093504e413c725fa8d29f714e13f3ec1a94a80646e74f349d33ac66c9c263543dea948f742dd5b24157b1f2985263b70618c405521ebd9b634c6b2bc33f209",
+                ),
+                Witness(
+                    path="m/1852'/1815'/0'/5/0",
+                    witnessSignatureHex="cee88186e1d7412e8c9e99e92fe54596aa67e510fdb13cb67565c72f609c3bc3a6017a72f9e8f936af5e56d899080356d3c66178f8e09250e1ec2aeacf4b2105",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
         name="Sign_tx_with_258_tag_on_inputs",
         tx=Transaction(
             network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10
@@ -1794,6 +1892,75 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
                 Witness(
                     path="m/1852'/1815'/0'/2/0",
                     witnessSignatureHex="bffb31237f4e53ff53a1f9f473ccb92229ab185cb3af98d50827a594a19ebb7c5b22fcc2b058daa4d37d8cd54e8daa198d6ebccd8a57f48d00bef8171874d502",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_cross_account_withdrawal",
+        # Covers unrestricted-only withdrawal policy: staking key paths are not
+        # constrained to a single account.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            withdrawals=[
+                Withdrawal(
+                    CredentialParams(
+                        CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/2/0"
+                    ),
+                    111,
+                ),
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a05a1581de1876c29f8c45c3fa7d3af0ea45fb2564ace831f70e7d3d5b8c251739a186f"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="690887f787f968e9ccca36337c7262a17ecf46034f23b56a941f7054f06dca61",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/1'/2/0",
+                    witnessSignatureHex="61a71ab6973d12214adb026cad05577ac6375eed8c33a82b4a074a078a3d823ac937c98f93d4e14174dae084aadf84dc01122348c868a8d9cbb08060c429c807",
+                ),
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="84ab32919b8d085383cdf7a03110471af1bdc11f8bebf6f898d76fe3a487c363863d340b8c0892655acbb8356318b0db1bd22c5864c6969ff300b2bd021a810a",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_key_hash_withdrawal",
+        # Covers unrestricted-only withdrawal policy: key-hash withdrawals are shown
+        # instead of denied as in ordinary mode.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            withdrawals=[
+                Withdrawal(
+                    CredentialParams(
+                        CredentialParamsType.KEY_HASH,
+                        "7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
+                    ),
+                    222,
+                ),
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a05a1581de17afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c818de"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="8d93a557107878a25bea0c35c147ab5e1ad64610a7a577b4df611f42874625bf",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="7192083628ceb7c265c03468316c3199eea57d63d812cc7e5a8e60e0dabe637e7d97b6128e029213a8f2cd3bd514015393951a5aa5dc683f35a840b2f8aa450e",
                 ),
             ),
         ),
@@ -2035,6 +2202,51 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
         unit_test_expect=SignTxUnitTestExpect(
             txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a04828304581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b70a82008200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c"
         ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="53b518cce4d9bab251070eca413b3429c58447f151a440e96af6b410b4a15a63",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="290c6f3a4d1f92be16f0998bacb1cca51ab470ac38167f3f2eedaa9b885b93e09c8085c43d7257db9d3956a9022c89be2139d1b20d754fdabe6fd2a2229ecd00",
+                ),
+                Witness(
+                    path="m/1853'/1815'/0'/0'",
+                    witnessSignatureHex="cad96c990b0717382240101165b882053e03d476d70f3fe13f8cd4913bd346e9368ed16d56513abbd3843b0b577985684c3a84afc62d668a3ff09c38265cbe0c",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_pool_retirement_and_stake_registration",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            certificates=[
+                Certificate(
+                    CertificateType.STAKE_POOL_RETIREMENT,
+                    PoolRetirementParams(
+                        CredentialParams(
+                            CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/0'"
+                        ),
+                        10,
+                    ),
+                ),
+                Certificate(
+                    CertificateType.STAKE_REGISTRATION,
+                    StakeRegistrationParams(
+                        CredentialParams(
+                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
+                        )
+                    ),
+                ),
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a04828304581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b70a82008200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,),
         ragger_expect=SignTxRaggerExpect(
             txHashHex="53b518cce4d9bab251070eca413b3429c58447f151a440e96af6b410b4a15a63",
             witnesses=(
@@ -2617,6 +2829,87 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Witness(
                     path="m/1852'/1815'/0'/3/0",
                     witnessSignatureHex="c5d2e1b839bc398ea0b9241c787145bf5732b10d377d05096a7460d626588bf935df7d8595aec030c0b8ce518be691e3f6d6bac155545391b0286e8dcdef6f0f",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_cross_account_governance_certificates",
+        # Bundles unrestricted certificate policy relaxations:
+        # - multisig staking key path can be a stake credential,
+        # - DRep and committee cold key paths are not constrained to a single account,
+        # - both DRep helper paths and direct DRep certificate paths are exercised.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            certificates=[
+                Certificate(
+                    CertificateType.VOTE_DELEGATION,
+                    VoteDelegationParams(
+                        CredentialParams(
+                            CredentialParamsType.KEY_PATH, "m/1854'/1815'/0'/2/0"
+                        ),
+                        DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/1'/3/0"),
+                    ),
+                ),
+                Certificate(
+                    CertificateType.AUTHORIZE_COMMITTEE_HOT,
+                    AuthorizeCommitteeParams(
+                        CredentialParams(
+                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/4/0"
+                        ),
+                        CredentialParams(
+                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"
+                        ),
+                    ),
+                ),
+                Certificate(
+                    CertificateType.RESIGN_COMMITTEE_COLD,
+                    ResignCommitteeParams(
+                        CredentialParams(
+                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/2'/4/0"
+                        )
+                    ),
+                ),
+                Certificate(
+                    CertificateType.DREP_REGISTRATION,
+                    DRepRegistrationParams(
+                        CredentialParams(
+                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/3/0"
+                        ),
+                        19,
+                    ),
+                ),
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a048483098200581cf699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f738200581c01b07d6a6b1df4b593b0ef6d3b47e99c38f4ac9ee53de4d5dee5768f830e8200581ceb95b29b4827b7890339e478c37a2e64a40b182a14957f7f71dc411d8200581cd098c6a0a621f3343abe55877ee88fd5a83363e3c7887b3c48839092830f8200581c6128578d3c229c7b8068e799e5313031b7c06688167be6a21b60c784f684108200581c01b07d6a6b1df4b593b0ef6d3b47e99c38f4ac9ee53de4d5dee5768f13f6"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="4879f1a1887e684f4815cfe00da61b02a4d1ceaf2ffd4f12a64c9a14690762ab",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="1a76678a584604ba421ce1a2225c55ddd57a4fcbcc4417a463a1e69d00bdb449d22250418674760d5bdc1f5c7e3484f0e1243e5e8e549ec17c613f33d283a908",
+                ),
+                Witness(
+                    path="m/1854'/1815'/0'/2/0",
+                    witnessSignatureHex="ccb20d0929874f51759bc1dbbf630763b527a7c71b0ef2bd35a18a25408653ff2f8160caad278a99a4b30a841038722f5cb0ef953564a5f5671a668a6c0c6f07",
+                ),
+                Witness(
+                    path="m/1852'/1815'/1'/4/0",
+                    witnessSignatureHex="865eb0691fbebf2109cad8d9f9e158f5d0c75fa45506a7a142c5b97682e72d637b3c2d09ff15fd20bc28297deb9ed1d1720df8bf4df02416b0790f3b9ae01103",
+                ),
+                Witness(
+                    path="m/1852'/1815'/2'/4/0",
+                    witnessSignatureHex="57e3d740262c61d966c4ec04feb0b5a6a2c252ae29cdf40dad42031084bb29085b65f154cb77158bd47c202c65d4ead1cece9b1728eae96ede687a2a33720c07",
+                ),
+                Witness(
+                    path="m/1852'/1815'/1'/3/0",
+                    witnessSignatureHex="d4c280f86c145bc5e6e1ae04ba1a49f720a2ef5134245408ea05acccb9bdd9a50e4ade1d6cab096bc967cf0526ac2dec8db4ed87b8230078d411370c504e450c",
                 ),
             ),
         ),
@@ -4100,6 +4393,37 @@ testsConwayVotingProcedures: List[SignTxTestCase] = [
         ),
     ),
     SignTxTestCase(
+        name="Unrestricted_tx_with_stake_pool_key_path_voter",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            votingProcedures=[
+                VoterVotes(
+                    Voter(VoterType.STAKE_POOL_KEY_PATH, "m/1853'/1815'/0'/0'"), [vote3]
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18204581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b7a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7038201f6"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="626c3047fe740fcbd8326df376678419c1fca029e195c94ee3097d38f28df1ed",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="f6c6754e75fa4af00104a583b0af87424f74f54c4faa590ac946d01c6cafce743f1f06bf759abbd120384c937890e5313f317d6120092f236f9a375487413908",
+                ),
+                Witness(
+                    path="m/1853'/1815'/0'/0'",
+                    witnessSignatureHex="c9fefa1a94a88775c123c23b484bd0de70c6c10c5fe949260d6c8f87cf99ffba101b1455cf2442a8933bd90966aa62cfa9070071e29f67b165d59bda264a6501",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
         name="Sign_tx_with_voting_procedures_COMMITTEE_KEY_HASH_voter",
         tx=Transaction(
             network=Mainnet,
@@ -4302,6 +4626,127 @@ testsConwayVotingProcedures: List[SignTxTestCase] = [
                 Witness(
                     path="m/1852'/1815'/0'/0/0",
                     witnessSignatureHex="54bc23f6e21647a9a2c88297d4b776725fb540d5c5d27b485e579787bfd67a44bea18ffef8f3e1606d5487115d152a4f161828e9a9bc43fa9975ad73c706410b",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_stake_pool_key_hash_voter",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            votingProcedures=[
+                VoterVotes(
+                    Voter(
+                        VoterType.STAKE_POOL_KEY_HASH,
+                        "7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
+                    ),
+                    [vote1],
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18204581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b703820282727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="623dd691a60d25e379424eceae1052acff119013c56bd2b73e8e1e822d3292bd",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="54bc23f6e21647a9a2c88297d4b776725fb540d5c5d27b485e579787bfd67a44bea18ffef8f3e1606d5487115d152a4f161828e9a9bc43fa9975ad73c706410b",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_committee_key_path_voter",
+        # Covers the unrestricted-only committee key-path voter (split from the
+        # multi-voter fixture below so the key-path hash ordering is testable
+        # in isolation, independent of cross-seed canonical-order differences).
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            votingProcedures=[
+                VoterVotes(
+                    Voter(VoterType.COMMITTEE_KEY_PATH, "m/1852'/1815'/0'/5/0"),
+                    [vote1_unique],
+                ),
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a18200581cd098c6a0a621f3343abe55877ee88fd5a83363e3c7887b3c48839092a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b703820282727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="d800124d3f848414fd3c8a66cad22fa1c9f15ea1ffe74fa4037ba471055aed92",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="4edcc50a262f540953aa57f60f0800e0a4e74dc9ba972e92bd76a5e11301302f718cdfa61fd3071531358b222c20ffcb8f5927d3f8137d3f6ecba05955a12d07",
+                ),
+                Witness(
+                    path="m/1852'/1815'/0'/5/0",
+                    witnessSignatureHex="85b8d351e65a16fc129b90b09673b4796bc4136ce9d18a6c55530e01289f894e89812ff191e14dff082a34a83e5cf1c44b610152de9815c9b7f6f5f07b760307",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_committee_and_drep_voter_types",
+        # Covers unrestricted voter policy for hash/script voters: committee
+        # key-hash, committee script-hash, DRep key-hash, and DRep script-hash.
+        # The committee key-path voter is exercised separately above.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            votingProcedures=[
+                VoterVotes(
+                    Voter(
+                        VoterType.COMMITTEE_KEY_HASH,
+                        "7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
+                    ),
+                    [vote2_unique],
+                ),
+                VoterVotes(
+                    Voter(
+                        VoterType.COMMITTEE_SCRIPT_HASH,
+                        "8afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
+                    ),
+                    [vote3_unique],
+                ),
+                VoterVotes(
+                    Voter(
+                        VoterType.DREP_KEY_HASH,
+                        "ba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1",
+                    ),
+                    [vote1],
+                ),
+                VoterVotes(
+                    Voter(
+                        VoterType.DREP_SCRIPT_HASH,
+                        "ca41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1",
+                    ),
+                    [vote2],
+                ),
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a13a48200581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7048200f68201581c8afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7058201f68202581cba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b703820282727777772e76616375756d6c6162732e636f6d58201afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef8203581cca41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1a18258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7038200f6"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="cf16068b6aa8aee9250aeaebcdee067bb9b139b7ee5d283a81e761e27fcdd20f",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="ff78c725c76e5471cdbb8a7e445dc28c8c102ff2e70281f2f4add58c083d160e440ddb2a18fb1d7da7fcd186af44d4adf21b787bd745854d9ec07ef4762c2b03",
                 ),
             ),
         ),
@@ -5819,6 +6264,153 @@ testsBabbage: List[SignTxTestCase] = [
             ),
         ),
     ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_collateral_and_reference_inputs",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["internalBaseWithStakingPathMap"]],
+            scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            collateralInputs=[inputs["utxoShelley"]],
+            referenceInputs=[inputs["utxoShelley"], inputs["utxoShelley"]],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a700818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca79302182a030a0b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70012828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7008258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700"
+        ),
+        expected_warnings=(
+            WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,
+            WarningBit.WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL,
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="21257105cb5cfbf1b40e3b44e650dda4e7114e43dcdd6c336d7cf62c7a0b8d09",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="e60f97e9bb99d4733896fce22dafbc435c87863b1d36026d9dfc006a9a50518d03d22f47f892e2d1b8dac016f38282885559d8604c227da009f58f9f6ba08503",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash",
+        # Covers two unrestricted display differences in one Babbage transaction:
+        # script-hash withdrawals and script data hash are shown without expert gating.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            withdrawals=[
+                Withdrawal(
+                    CredentialParams(
+                        CredentialParamsType.SCRIPT_HASH,
+                        "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                    ),
+                    333,
+                )
+            ],
+            scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a05a1581df129fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd19014d0b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7"
+        ),
+        expected_warnings=(
+            WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,
+            WarningBit.WARNING_BIT_PLUTUS_MISSING_COLLATERAL,
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="4f6ed19a9e0eb2013936245cc0dff913800bfc6cd5938919797f92be0e20f202",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="03f22bc85b2b43829960e1d792182d66c8f1b692dc5920d2f4403014ca71bf02c10d0d6170be9bd3df700914bd0b19f06aafabbc7600a0de988a177450b1320e",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_cross_account_outputs_and_missing_collateral",
+        # Covers unrestricted output/collateral-output differences:
+        # - device-owned output payment paths are not single-account constrained,
+        # - device-owned collateral return output payment paths use the same relaxation,
+        # - script data hash without collateral inputs still raises the collateral warning.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[
+                outputs["internalBaseWithStakingPathMap"],
+                TxOutputBabbage(
+                    destinations["internalBaseWithCrossAccountPaymentPath"],
+                    1234,
+                ),
+            ],
+            scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            collateralOutput=TxOutputBabbage(
+                destinations["internalBaseWithCrossAccountPaymentPath"],
+                1000,
+            ),
+            totalCollateral=10,
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a700818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca793a200583901724038f8b030597ed190929f13fea3d557138b48c74cafd30d4b6c42876c29f8c45c3fa7d3af0ea45fb2564ace831f70e7d3d5b8c251739a011904d202182a030a0b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b710a200583901724038f8b030597ed190929f13fea3d557138b48c74cafd30d4b6c42876c29f8c45c3fa7d3af0ea45fb2564ace831f70e7d3d5b8c251739a011903e8110a"
+        ),
+        expected_warnings=(
+            WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,
+            WarningBit.WARNING_BIT_PLUTUS_MISSING_COLLATERAL,
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="c560ebb3d6a5f4d2f36dbc20ffc3ffa273c81e57f0a19f28b6c8427b8ef446e9",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="96d5c54af6e409094a9efdeba48ad554f9e588cd38295364da8751c515b9266c343bcd352280f85a88ae43cafacaaf73b2a8b6b0a9f8cc5e14e3f674c2755105",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Unrestricted_tx_with_required_signers_and_collateral_without_script_data",
+        # Covers unrestricted-only required-signer policy:
+        # - required signer hash is shown,
+        # - pool cold key path is allowed as a required signer,
+        # and covers collateral inputs without script data hash (no missing-script-data warning).
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalByronMainnet"]],
+            collateralInputs=[inputs["utxoShelley"]],
+            requiredSigners=[
+                RequiredSigner(
+                    TxRequiredSignerType.HASH,
+                    "7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
+                ),
+                RequiredSigner(TxRequiredSignerType.PATH, "m/1853'/1815'/0'/0'"),
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a0d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000e82581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b7"
+        ),
+        expected_warnings=(
+            WarningBit.WARNING_BIT_UNRESTRICTED_SIGNING,
+            WarningBit.WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL,
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="68a8d8048fe4784eca90d0fc4a3ebf3e798be2361b0dd4811fe407d6b44de5e6",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="61942704478ccca00bde2f260f4135555f241e44ef2f0a767ae895f2d3bdcc726e134898743f67aebd2e3bf512877601fcd4f5671e94f46992f848b0b2a90607",
+                ),
+                Witness(
+                    path="m/1853'/1815'/0'/0'",
+                    witnessSignatureHex="95df21b03ec2d592c668ad0b93dc3e91207a15eb60cb25bfc55dd05a342e4026205cd891e3554f78e925c3395ac18ef5a99d6d49926bb88636a255a930b42609",
+                ),
+            ),
+        ),
+    ),
     # total collateral and collateral return output
     SignTxTestCase(
         name="Sign_tx_with_change_output_as_map_and_total_collateral",
@@ -6433,6 +7025,18 @@ requiredSignerDenyTestCases: List[SignTxTestCase] = [
 # Denies signTx
 # =================
 transactionInitDenyTestCases: List[SignTxTestCase] = [
+    SignTxTestCase(
+        name="Deny_unrestricted_tx_without_expert_mode",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        deny_before_review=True,
+        required_expert_mode=False,
+    ),
     SignTxTestCase(
         name="Deny_ordinary_tx_with_collateral_inputs",
         tx=Transaction(
@@ -7542,6 +8146,38 @@ addressParamsDenyTestCases: List[SignTxTestCase] = [
 
 certificateDenyTestCases: List[SignTxTestCase] = [
     SignTxTestCase(
+        name="Pool_registration_in_Unrestricted_Tx",
+        tx=Transaction(
+            network=NetworkDesc(networkId=1, protocol=764824073),
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["inlineByronMainnet3003112"]],
+            certificates=[
+                Certificate(
+                    type=CertificateType.STAKE_POOL_REGISTRATION,
+                    params=PoolRegistrationParams(
+                        poolKey=PoolKey(
+                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
+                        ),
+                        vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
+                        pledge=0,
+                        cost=0,
+                        margin=Margin(numerator=0, denominator=1),
+                        rewardAccount=PoolKey(
+                            type=PoolKeyType.THIRD_PARTY,
+                            key="f123456789012345678901234567890123456789012345678901234567",
+                        ),
+                        poolOwners=[],
+                        relays=[],
+                        metadata=None,
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.UNRESTRICTED,
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        required_expert_mode=True,
+    ),
+    SignTxTestCase(
         name="Pool_registration_in_Ordinary_Tx",
         tx=Transaction(
             network=NetworkDesc(networkId=1, protocol=764824073),
@@ -8028,7 +8664,7 @@ withdrawalDenyTestCases: List[SignTxTestCase] = [
             ],
         ),
         signingMode=TransactionSigningMode.ORDINARY,
-        expected_swo=StatusWord.SWO_TX_PARSING_FAIL_WITHDRAWALS,
+        expected_swo=StatusWord.SWO_TX_PARSING_FAIL_CANONICAL_ORDER,
         unsuitable_in_ragger_reason="Seed-dependent: canonical ordering depends on derived reward addresses",
     ),
     SignTxTestCase(

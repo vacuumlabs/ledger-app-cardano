@@ -227,12 +227,17 @@ void ui_display_transaction(void) {
                   tx_body_ctx()->review_mode);
 
     const char *review_subtitle = NULL;
+    const char *review_title = "Review transaction";
     switch (G_context.tx_info.tx_params.txSigningMode) {
         case SIGN_TX_SIGNINGMODE_PLUTUS:
             review_subtitle = "Plutus execution";
             break;
         case SIGN_TX_SIGNINGMODE_MULTISIG:
             review_subtitle = "Multisig transaction";
+            break;
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            review_title = "Unrestricted transaction";
+            review_subtitle = "Review all details";
             break;
         default:
             break;
@@ -249,7 +254,7 @@ void ui_display_transaction(void) {
         nbgl_useCaseAdvancedReview(TYPE_TRANSACTION,
                                    g_pairsList,
                                    &ICON_APP_CARDANO,
-                                   "Review transaction",
+                                   review_title,
                                    review_subtitle,
                                    "Sign transaction",
                                    NULL,
@@ -259,7 +264,7 @@ void ui_display_transaction(void) {
         // Streaming: first chunk already rendered.
         nbgl_useCaseAdvancedReviewStreamingStart(TYPE_TRANSACTION,
                                                  &ICON_APP_CARDANO,
-                                                 "Review transaction",
+                                                 review_title,
                                                  review_subtitle,
                                                  warningPtr,
                                                  tx_streaming_start_choice);

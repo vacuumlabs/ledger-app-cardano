@@ -399,6 +399,7 @@ def _run_sign_tx_test(
             TransactionSigningMode.POOL_REGISTRATION_OPERATOR,
             TransactionSigningMode.PLUTUS,
             TransactionSigningMode.AUTO,
+            TransactionSigningMode.UNRESTRICTED,
         )
         witness_has_non_hidden_review = (
             _is_unusual_witness_path_for_navigation(path)
@@ -526,6 +527,8 @@ def test_sign_tx(
             testCase.unsuitable_in_ragger_reason,
         ],
     )
+    if testCase.signingMode == TransactionSigningMode.UNRESTRICTED and not expert_mode:
+        pytest.skip("Unrestricted signing mode requires expert mode")
 
     # Force the requested expert-mode state via the on-device settings menu.
     settings_set(
@@ -595,6 +598,18 @@ def test_sign_tx_deny(
             testCase.unsuitable_in_ragger_reason,
         ],
     )
+    if testCase.required_expert_mode is not None:
+        settings_set(
+            device,
+            navigator,
+            {
+                SettingID.EXPERT_MODE: SettingValue.ENABLED
+                if testCase.required_expert_mode
+                else SettingValue.DISABLED,
+                SettingID.SILENT_PUBKEY_EXPORT: SettingValue.ENABLED,
+            },
+            backend=backend,
+        )
 
     nav_ctx = NavContext(device, navigator, scenario_navigator)
     client = CommandSender(backend)

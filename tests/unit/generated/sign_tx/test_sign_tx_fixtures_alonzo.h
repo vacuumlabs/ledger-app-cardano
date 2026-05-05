@@ -82,7 +82,7 @@ static const tx_fixture_t FIXTURE_ALONZO_SIGN_TX_AUTO_MODE_RESOLVES_TO_PLUTUS_VI
         "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a03"
         "0a0d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000f01",
     .expected_hash_hex = "4e94b319a7e5a28f333932b0e2337b7c16da22f5eacae684edf2b2fbca2bf2f7",
-    .signing_mode = 8,
+    .signing_mode = 238,
     .network_id = 1,
     .protocol_magic = 764824073,
     .num_inputs = 1,

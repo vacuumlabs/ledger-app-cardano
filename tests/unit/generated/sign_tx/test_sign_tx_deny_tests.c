@@ -91,6 +91,8 @@ typedef struct {
     size_t chunk_count;
     uint16_t expected_swo;
     bool expect_init_failure;
+    bool has_required_expert_mode;
+    bool required_expert_mode;
     const char *skip_reason;
 } sign_tx_deny_fixture_t;
 
@@ -105,6 +107,7 @@ static inline void tx_context_cleanup(void) {
 
 #define TEST_HEAP_SIZE (23 * 1024)
 static uint8_t test_heap[TEST_HEAP_SIZE];
+extern bool unit_test_expert_mode_enabled;
 
 // ----------------------------------------------------------------------
 // Fixture runner
@@ -113,6 +116,10 @@ static uint8_t test_heap[TEST_HEAP_SIZE];
 static void run_sign_tx_deny_fixture(const sign_tx_deny_fixture_t *fixture) {
     reset_context();
     assert_true(mem_utils_init(test_heap, sizeof(test_heap)));
+    const bool previous_expert_mode = unit_test_expert_mode_enabled;
+    if (fixture->has_required_expert_mode) {
+        unit_test_expert_mode_enabled = fixture->required_expert_mode;
+    }
 
     uint8_t init_raw[512];
     size_t init_len = hex_to_bytes(fixture->init_hex, init_raw, sizeof(init_raw));
@@ -129,6 +136,7 @@ static void run_sign_tx_deny_fixture(const sign_tx_deny_fixture_t *fixture) {
         assert_int_equal(g_last_swo, fixture->expected_swo);
         assert_int_equal(G_context.req_type, REQUEST_NONE);
         tx_context_cleanup();
+        unit_test_expert_mode_enabled = previous_expert_mode;
         return;
     }
 
@@ -171,6 +179,7 @@ static void run_sign_tx_deny_fixture(const sign_tx_deny_fixture_t *fixture) {
     assert_true(failure_seen);
     assert_int_equal(G_context.req_type, REQUEST_NONE);
     tx_context_cleanup();
+    unit_test_expert_mode_enabled = previous_expert_mode;
 }
 
 static void test_sign_tx_deny_fixture(void **state) {

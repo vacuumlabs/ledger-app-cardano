@@ -198,10 +198,14 @@ static void test_collateral_output_subpolicy_matrix(void **state) {
 
                     security_policy_t ada_policy =
                         policyForSignTxCollateralOutputAdaAmount(top_level_policy,
+                                                                 SIGN_TX_SIGNINGMODE_PLUTUS,
                                                                  total_collateral_present,
                                                                  &w);
                     security_policy_t tokens_policy =
-                        policyForSignTxCollateralOutputTokens(top_level_policy, &output, &w);
+                        policyForSignTxCollateralOutputTokens(top_level_policy,
+                                                              SIGN_TX_SIGNINGMODE_PLUTUS,
+                                                              &output,
+                                                              &w);
 
                     if (top_level_policy == POLICY_HIDE) {
                         assert_int_equal(ada_policy, POLICY_HIDE);

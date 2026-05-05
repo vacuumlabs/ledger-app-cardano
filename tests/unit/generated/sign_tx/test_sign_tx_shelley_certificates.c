@@ -206,6 +206,31 @@ static void test_sign_tx_with_pool_retirement_combined_with_stake_registration_r
         true);
 }
 
+static void test_unrestricted_tx_with_pool_retirement_and_stake_registration_deny_init_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_pool_retirement_and_stake_registration_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION,
+        true);
+}
+
+static void test_unrestricted_tx_with_pool_retirement_and_stake_registration_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_SHELLEY_CERTIFICATES_UNRESTRICTED_TX_WITH_POOL_RETIREMENT_AND_STAKE_REGISTRATION,
+        true);
+}
+
 static void test_sign_tx_with_pool_retirement_combined_with_stake_deregistration_expert_off(
     void **state) {
     (void) state;
@@ -281,6 +306,12 @@ int main(void) {
             test_sign_tx_with_pool_retirement_combined_with_stake_registration_expert_on),
         cmocka_unit_test(
             test_sign_tx_with_pool_retirement_combined_with_stake_registration_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_pool_retirement_and_stake_registration_deny_init_expert_off),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_pool_retirement_and_stake_registration_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_pool_retirement_and_stake_registration_reject_tx_expert_on),
         cmocka_unit_test(
             test_sign_tx_with_pool_retirement_combined_with_stake_deregistration_expert_off),
         cmocka_unit_test(

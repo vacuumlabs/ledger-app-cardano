@@ -344,6 +344,7 @@ static bool tx_process_collateral_return_output(buffer_t *output_buf,
 
         collateral_ada_policy =
             policyForSignTxCollateralOutputAdaAmount(output_policy,
+                                                     tx_params->txSigningMode,
                                                      tx_params->includeTotalCollateral,
                                                      warning_bits);
         APPLY_POLICY(collateral_ada_policy,
@@ -351,8 +352,10 @@ static bool tx_process_collateral_return_output(buffer_t *output_buf,
                      mode,
                      &output_desc);
 
-        collateral_tokens_policy =
-            policyForSignTxCollateralOutputTokens(output_policy, &output_desc, warning_bits);
+        collateral_tokens_policy = policyForSignTxCollateralOutputTokens(output_policy,
+                                                                         tx_params->txSigningMode,
+                                                                         &output_desc,
+                                                                         warning_bits);
     }
 
     // --- 3. Hash top-level ---

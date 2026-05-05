@@ -15,7 +15,7 @@
 //   - Source file and era
 //   - Original Ragger test name
 //
-// Total tests in this era: 20
+// Total tests in this era: 24
 
 #pragma once
 
@@ -1062,7 +1062,461 @@ static const tx_fixture_t
         .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL),
 };
 
-// Test 9: Sign_tx_with_change_output_as_map_and_total_collateral
+// Test 9: Unrestricted_tx_with_collateral_and_reference_inputs
+// Source: tests/standalone/input_files/signTx.py > babbage era tests
+//
+static const uint8_t FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_RAW_TX[] =
+    {
+        0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF,
+        0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1,
+        0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x02, 0x00, 0x01, 0x05, 0x80, 0x00, 0x07,
+        0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x22, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6C,
+        0xA7, 0x93, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB,
+        0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93,
+        0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1, 0xC0, 0xB7, 0x3B, 0x40, 0x26, 0x51, 0x11,
+        0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32,
+        0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00,
+        0x00, 0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0,
+        0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA,
+        0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C,
+        0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36,
+        0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_WITNESS_0_PAYLOAD[] = {
+        0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x01, 0x45, 0x37, 0xC0, 0x21, 0xB3, 0x3A, 0xFA, 0xA6, 0xBD, 0x89, 0x09, 0xCE,
+            0x00, 0x59, 0xFC, 0xEE, 0xD5, 0x5F, 0x6E, 0xE2, 0xDB, 0x1E, 0x39, 0xB8, 0x77,
+            0xDB, 0xDD, 0x34, 0x58, 0xD8, 0xAB, 0x9B, 0x1E, 0x63, 0x20, 0x58, 0x91, 0x65,
+            0x26, 0xCC, 0xF9, 0xB5, 0x7F, 0x30, 0xA6, 0xF1, 0x40, 0x06, 0xB3, 0x87, 0x5E,
+            0xE4, 0x00, 0xC5, 0x9B, 0x5D, 0x43, 0xDB, 0x3B, 0x0A, 0xFD, 0x5B, 0x08,
+};
+
+static const witness_payload_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_WITNESS_PAYLOADS[] = {
+        {.payload =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_WITNESS_0_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS = {
+    .name = "Unrestricted_tx_with_collateral_and_reference_inputs",
+    .raw_tx = FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_RAW_TX,
+    .raw_tx_len =
+        sizeof(FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_RAW_TX),
+    .tx_body_cbor_hex =
+        "a700818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181a2005839"
+        "0114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aa"
+        "b3127cc611ddbc4999def61c011a006ca79302182a030a0b58203b40265111d8bb3c3c608d95b3a0bf83461ace"
+        "32d79336579a1939b3aad1c0b70d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939"
+        "b3aad1c0b70012828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70082"
+        "58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700",
+    .expected_hash_hex = "4ce1c9129a74a3d15e5edee72520ee9c497020894548769b8bfa7f26b7f32db3",
+    .signing_mode = 9,
+    .network_id = 1,
+    .protocol_magic = 764824073,
+    .num_inputs = 1,
+    .num_outputs = 1,
+    .num_witnesses = 1,
+    .witness_payloads =
+        FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_COLLATERAL_AND_REFERENCE_INPUTS_WITNESS_PAYLOADS,
+    .witness_payload_count = 1,
+    .num_certificates = 0,
+    .num_withdrawals = 0,
+    .num_mint_asset_groups = 0,
+    .include_ttl = true,
+    .include_validity_interval_start = false,
+    .include_aux_data_hash = false,
+    .aux_data_type = 0,
+    .aux_data_init_payload = NULL,
+    .aux_data_init_payload_len = 0,
+    .aux_data_delegations = NULL,
+    .aux_data_delegation_count = 0,
+    .include_script_data_hash = true,
+    .num_collateral_inputs = 1,
+    .num_required_signers = 0,
+    .include_network_id = false,
+    .include_collateral_output = false,
+    .include_total_collateral = false,
+    .num_reference_inputs = 2,
+    .num_voters = 0,
+    .include_treasury = false,
+    .treasury = 0,
+    .include_donation = false,
+    .donation = 0,
+    .aux_data_hash_hex = NULL,
+    .options = 0,
+    .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+    .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING) |
+                             ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL),
+};
+
+// Test 10: Unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash
+// Source: tests/standalone/input_files/signTx.py > babbage era tests
+//
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_RAW_TX[] = {
+        0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0,
+        0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3,
+        0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82,
+        0xD8, 0x18, 0x58, 0x21, 0x83, 0x58, 0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8,
+        0xB8, 0x5F, 0xEC, 0x29, 0x6F, 0x06, 0x85, 0xCA, 0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2,
+        0xE1, 0xA5, 0xD8, 0x9D, 0x92, 0xF4, 0x5F, 0xA0, 0x00, 0x1A, 0x0D, 0x0C, 0x25, 0x61,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x2D, 0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x0A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x4D, 0x01, 0x29, 0xFB, 0x5F, 0xD4,
+        0xAA, 0x8C, 0xAD, 0xD6, 0x70, 0x5A, 0xCC, 0x82, 0x63, 0xCE, 0xE0, 0xFC, 0x62, 0xED,
+        0xCA, 0x5A, 0xC3, 0x8D, 0xB5, 0x93, 0xFE, 0xC2, 0xF9, 0xFD, 0x3B, 0x40, 0x26, 0x51,
+        0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF, 0x83, 0x46, 0x1A,
+        0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1, 0xC0, 0xB7,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_WITNESS_0_PAYLOAD
+        [] = {
+            0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x40, 0xE8, 0xA7, 0xAE, 0xC2, 0x59, 0xF5, 0x29, 0x50, 0x04, 0x83, 0xE7, 0x1B,
+            0xD6, 0x49, 0xED, 0x09, 0xAF, 0x68, 0x0F, 0x33, 0x7E, 0x98, 0x8C, 0xB8, 0x97,
+            0x02, 0xE1, 0xD7, 0x36, 0x9A, 0xBF, 0x6C, 0x6D, 0x23, 0x29, 0xDA, 0xD6, 0x69,
+            0xA8, 0x32, 0x9E, 0x91, 0x1C, 0x78, 0xA4, 0xBF, 0x27, 0x53, 0xC7, 0x6D, 0xCA,
+            0x26, 0x1E, 0x12, 0x43, 0x26, 0x82, 0x30, 0x47, 0x6E, 0xF3, 0x5A, 0x0D,
+};
+
+static const witness_payload_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_WITNESS_PAYLOADS[] = {
+        {.payload =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_WITNESS_0_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH = {
+        .name = "Unrestricted_tx_with_script_hash_withdrawal_and_script_data_hash",
+        .raw_tx =
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_RAW_TX,
+        .raw_tx_len = sizeof(
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_RAW_TX),
+        .tx_body_cbor_hex =
+            "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258"
+            "2b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25"
+            "611a002dd2e802182a030a05a1581df129fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9"
+            "fd19014d0b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+        .expected_hash_hex = "4f6ed19a9e0eb2013936245cc0dff913800bfc6cd5938919797f92be0e20f202",
+        .signing_mode = 9,
+        .network_id = 1,
+        .protocol_magic = 764824073,
+        .num_inputs = 1,
+        .num_outputs = 1,
+        .num_witnesses = 1,
+        .witness_payloads =
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_SCRIPT_HASH_WITHDRAWAL_AND_SCRIPT_DATA_HASH_WITNESS_PAYLOADS,
+        .witness_payload_count = 1,
+        .num_certificates = 0,
+        .num_withdrawals = 1,
+        .num_mint_asset_groups = 0,
+        .include_ttl = true,
+        .include_validity_interval_start = false,
+        .include_aux_data_hash = false,
+        .aux_data_type = 0,
+        .aux_data_init_payload = NULL,
+        .aux_data_init_payload_len = 0,
+        .aux_data_delegations = NULL,
+        .aux_data_delegation_count = 0,
+        .include_script_data_hash = true,
+        .num_collateral_inputs = 0,
+        .num_required_signers = 0,
+        .include_network_id = false,
+        .include_collateral_output = false,
+        .include_total_collateral = false,
+        .num_reference_inputs = 0,
+        .num_voters = 0,
+        .include_treasury = false,
+        .treasury = 0,
+        .include_donation = false,
+        .donation = 0,
+        .aux_data_hash_hex = NULL,
+        .options = 0,
+        .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+        .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING) |
+                                 ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_MISSING_COLLATERAL),
+};
+
+// Test 11: Unrestricted_tx_with_cross_account_outputs_and_missing_collateral
+// Source: tests/standalone/input_files/signTx.py > babbage era tests
+//
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_RAW_TX[] = {
+        0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF,
+        0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1,
+        0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x02, 0x00, 0x01, 0x05, 0x80, 0x00, 0x07,
+        0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x22, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x6C,
+        0xA7, 0x93, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x3B, 0x02, 0x00, 0x01, 0x05, 0x80, 0x00,
+        0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x22, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+        0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x04, 0xD2, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8,
+        0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7,
+        0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x3B, 0x02, 0x00,
+        0x01, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x01, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00,
+        0x07, 0x17, 0x80, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0xE8, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x0A,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_WITNESS_0_PAYLOAD
+        [] = {
+            0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x68, 0x76, 0x7C, 0xAF, 0x27, 0x53, 0x94, 0x85, 0xD8, 0x8E, 0x0A, 0x33, 0x70,
+            0xFB, 0xAD, 0x43, 0x8D, 0x76, 0xB5, 0x18, 0x96, 0xCF, 0xA0, 0x79, 0xBE, 0x59,
+            0xC5, 0x07, 0xF4, 0xF7, 0x32, 0x64, 0xEA, 0xE4, 0x92, 0x88, 0x00, 0x43, 0xB6,
+            0x6C, 0x75, 0xC0, 0x9D, 0xA1, 0x27, 0x37, 0x6C, 0x43, 0xD0, 0x20, 0x82, 0x81,
+            0x70, 0x66, 0x3D, 0x59, 0x53, 0x7D, 0xB0, 0x41, 0xC9, 0x29, 0x34, 0x0F,
+};
+
+static const witness_payload_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_WITNESS_PAYLOADS[] = {
+        {.payload =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_WITNESS_0_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL = {
+        .name = "Unrestricted_tx_with_cross_account_outputs_and_missing_collateral",
+        .raw_tx =
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_RAW_TX,
+        .raw_tx_len = sizeof(
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_RAW_TX),
+        .tx_body_cbor_hex =
+            "a700818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182a200"
+            "58390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885a"
+            "adba30aab3127cc611ddbc4999def61c011a006ca793a200583901724038f8b030597ed190929f13fea3d5"
+            "57138b48c74cafd30d4b6c42876c29f8c45c3fa7d3af0ea45fb2564ace831f70e7d3d5b8c251739a011904"
+            "d202182a030a0b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b710a2"
+            "00583901724038f8b030597ed190929f13fea3d557138b48c74cafd30d4b6c42876c29f8c45c3fa7d3af0e"
+            "a45fb2564ace831f70e7d3d5b8c251739a011903e8110a",
+        .expected_hash_hex = "93bad9060c445df869640284ec1e16851571893f92997fe9545436dc832f611a",
+        .signing_mode = 9,
+        .network_id = 1,
+        .protocol_magic = 764824073,
+        .num_inputs = 1,
+        .num_outputs = 2,
+        .num_witnesses = 1,
+        .witness_payloads =
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_OUTPUTS_AND_MISSING_COLLATERAL_WITNESS_PAYLOADS,
+        .witness_payload_count = 1,
+        .num_certificates = 0,
+        .num_withdrawals = 0,
+        .num_mint_asset_groups = 0,
+        .include_ttl = true,
+        .include_validity_interval_start = false,
+        .include_aux_data_hash = false,
+        .aux_data_type = 0,
+        .aux_data_init_payload = NULL,
+        .aux_data_init_payload_len = 0,
+        .aux_data_delegations = NULL,
+        .aux_data_delegation_count = 0,
+        .include_script_data_hash = true,
+        .num_collateral_inputs = 0,
+        .num_required_signers = 0,
+        .include_network_id = false,
+        .include_collateral_output = true,
+        .include_total_collateral = true,
+        .num_reference_inputs = 0,
+        .num_voters = 0,
+        .include_treasury = false,
+        .treasury = 0,
+        .include_donation = false,
+        .donation = 0,
+        .aux_data_hash_hex = NULL,
+        .options = 0,
+        .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+        .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING) |
+                                 ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_MISSING_COLLATERAL),
+};
+
+// Test 12: Unrestricted_tx_with_required_signers_and_collateral_without_script_data
+// Source: tests/standalone/input_files/signTx.py > babbage era tests
+//
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_RAW_TX
+        [] = {
+            0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0,
+            0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3,
+            0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82,
+            0xD8, 0x18, 0x58, 0x21, 0x83, 0x58, 0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8,
+            0xB8, 0x5F, 0xEC, 0x29, 0x6F, 0x06, 0x85, 0xCA, 0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2,
+            0xE1, 0xA5, 0xD8, 0x9D, 0x92, 0xF4, 0x5F, 0xA0, 0x00, 0x1A, 0x0D, 0x0C, 0x25, 0x61,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x2D, 0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x0A, 0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3,
+            0xA0, 0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39,
+            0xB3, 0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x01, 0x7A, 0xFD, 0x02, 0x8B,
+            0x50, 0x4C, 0x36, 0x68, 0x10, 0x2B, 0x12, 0x9B, 0x37, 0xA8, 0x6C, 0x09, 0xA2, 0x87,
+            0x2F, 0x76, 0x74, 0x1D, 0xC7, 0xA6, 0x8E, 0x21, 0x49, 0xC8, 0x00, 0x04, 0x80, 0x00,
+            0x07, 0x3D, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_0_PAYLOAD
+        [] = {
+            0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x82, 0xB5, 0xA2, 0xA9, 0x51, 0xB7, 0x83, 0x28, 0xBF, 0x83, 0x4E, 0x0D, 0x75,
+            0x4B, 0xCD, 0x72, 0x31, 0x6A, 0xBA, 0xDF, 0x44, 0xE8, 0x79, 0x08, 0x91, 0xBD,
+            0xAA, 0xCB, 0x1C, 0xDA, 0x78, 0x89, 0x8B, 0x69, 0x45, 0x03, 0xC0, 0x7F, 0xA2,
+            0xB4, 0xD4, 0xCC, 0x69, 0xFE, 0xC1, 0x07, 0x52, 0x2D, 0xE4, 0x9F, 0x91, 0x18,
+            0x40, 0xA4, 0xD2, 0xA2, 0x67, 0xFF, 0x6D, 0x27, 0xD2, 0x41, 0xEB, 0x05,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_1_PAYLOAD
+        [] = {
+            0x04,
+            0x80,
+            0x00,
+            0x07,
+            0x3D,
+            0x80,
+            0x00,
+            0x07,
+            0x17,
+            0x80,
+            0x00,
+            0x00,
+            0x00,
+            0x80,
+            0x00,
+            0x00,
+            0x00,
+};
+
+static const uint8_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_1_EXPECTED_SIGNATURE
+        [] = {
+            0x84, 0x2E, 0x6A, 0xCC, 0x4B, 0xA7, 0xD3, 0xB2, 0x58, 0x7F, 0xD3, 0x48, 0x42,
+            0xAA, 0x37, 0xA3, 0x01, 0xCE, 0xEA, 0x79, 0x95, 0x8B, 0x8F, 0x25, 0xD2, 0x92,
+            0x53, 0xE1, 0xD8, 0x08, 0xFB, 0x4C, 0xAB, 0x74, 0xF1, 0xA6, 0xDA, 0x2E, 0x56,
+            0x56, 0xD0, 0xF9, 0x70, 0xB8, 0x4C, 0x3D, 0x1B, 0x06, 0x22, 0x8C, 0x21, 0xD4,
+            0xA5, 0x63, 0xF7, 0x23, 0xA0, 0x49, 0x65, 0xB6, 0xB4, 0xED, 0x71, 0x05,
+};
+
+static const witness_payload_t FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_PAYLOADS
+    [] = {
+        {.payload =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_0_EXPECTED_SIGNATURE},
+        {.payload =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_1_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_1_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_1_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t
+    FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA = {
+        .name = "Unrestricted_tx_with_required_signers_and_collateral_without_script_data",
+        .raw_tx =
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_RAW_TX,
+        .raw_tx_len = sizeof(
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_RAW_TX),
+        .tx_body_cbor_hex =
+            "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258"
+            "2b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25"
+            "611a002dd2e802182a030a0d818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939"
+            "b3aad1c0b7000e82581c7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8581cdbfee4"
+            "665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b7",
+        .expected_hash_hex = "49d67c167d33aa9bad549d6f47c552b41ef28e28c6ab8f131a88b799e20d2f08",
+        .signing_mode = 9,
+        .network_id = 1,
+        .protocol_magic = 764824073,
+        .num_inputs = 1,
+        .num_outputs = 1,
+        .num_witnesses = 2,
+        .witness_payloads =
+            FIXTURE_BABBAGE_UNRESTRICTED_TX_WITH_REQUIRED_SIGNERS_AND_COLLATERAL_WITHOUT_SCRIPT_DATA_WITNESS_PAYLOADS,
+        .witness_payload_count = 2,
+        .num_certificates = 0,
+        .num_withdrawals = 0,
+        .num_mint_asset_groups = 0,
+        .include_ttl = true,
+        .include_validity_interval_start = false,
+        .include_aux_data_hash = false,
+        .aux_data_type = 0,
+        .aux_data_init_payload = NULL,
+        .aux_data_init_payload_len = 0,
+        .aux_data_delegations = NULL,
+        .aux_data_delegation_count = 0,
+        .include_script_data_hash = false,
+        .num_collateral_inputs = 1,
+        .num_required_signers = 2,
+        .include_network_id = false,
+        .include_collateral_output = false,
+        .include_total_collateral = false,
+        .num_reference_inputs = 0,
+        .num_voters = 0,
+        .include_treasury = false,
+        .treasury = 0,
+        .include_donation = false,
+        .donation = 0,
+        .aux_data_hash_hex = NULL,
+        .options = 0,
+        .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+        .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNRESTRICTED_SIGNING) |
+                                 ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL),
+};
+
+// Test 13: Sign_tx_with_change_output_as_map_and_total_collateral
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -1156,7 +1610,7 @@ static const tx_fixture_t FIXTURE_BABBAGE_SIGN_TX_WITH_CHANGE_OUTPUT_AS_MAP_AND_
     .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_MISSING_COLLATERAL),
 };
 
-// Test 10: Sign_tx_with_nonstandard_device_owned_collateral_output_and_total_collateral
+// Test 14: Sign_tx_with_nonstandard_device_owned_collateral_output_and_total_collateral
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -1259,7 +1713,7 @@ static const tx_fixture_t
         .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_MISSING_COLLATERAL),
 };
 
-// Test 11: Sign_tx_with_nonstandard_staking_path_collateral_output_and_total_collateral
+// Test 15: Sign_tx_with_nonstandard_staking_path_collateral_output_and_total_collateral
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -1364,7 +1818,7 @@ static const tx_fixture_t
         .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_MISSING_COLLATERAL),
 };
 
-// Test 12: Sign_tx_with_change_output_as_map_and_collateral_output_as_array
+// Test 16: Sign_tx_with_change_output_as_map_and_collateral_output_as_array
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -1466,7 +1920,7 @@ static const tx_fixture_t
                                  ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL),
 };
 
-// Test 13: Sign_tx_with_change_collateral_output_as_map_without_total_collateral
+// Test 17: Sign_tx_with_change_collateral_output_as_map_without_total_collateral
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -1578,7 +2032,7 @@ static const tx_fixture_t
                                  ((warning_bits_t) 1 << WARNING_BIT_COLLATERAL_OUTPUT_WARNING),
 };
 
-// Test 14: Sign_tx_with_change_collateral_output_as_map_with_total_collateral
+// Test 18: Sign_tx_with_change_collateral_output_as_map_with_total_collateral
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -1687,7 +2141,7 @@ static const tx_fixture_t
         .expected_warning_bits = 0,
 };
 
-// Test 15: Sign_tx_with_thirdparty_collateral_output_as_map_without_total_collateral
+// Test 19: Sign_tx_with_thirdparty_collateral_output_as_map_without_total_collateral
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -1813,7 +2267,7 @@ static const tx_fixture_t
         .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL),
 };
 
-// Test 16: Sign_tx_with_thirdparty_collateral_output_as_map_with_total_collateral
+// Test 20: Sign_tx_with_thirdparty_collateral_output_as_map_with_total_collateral
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -1939,7 +2393,7 @@ static const tx_fixture_t
         .expected_warning_bits = 0,
 };
 
-// Test 17: Sign_tx_with_device_owned_output_with_datum_hash
+// Test 21: Sign_tx_with_device_owned_output_with_datum_hash
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t FIXTURE_BABBAGE_SIGN_TX_WITH_DEVICE_OWNED_OUTPUT_WITH_DATUM_HASH_RAW_TX[] = {
@@ -2030,7 +2484,7 @@ static const tx_fixture_t FIXTURE_BABBAGE_SIGN_TX_WITH_DEVICE_OWNED_OUTPUT_WITH_
     .expected_warning_bits = 0,
 };
 
-// Test 18: Sign_tx_Full_test_for_trezor_feature_parity_Babbage_elements_Plutus
+// Test 22: Sign_tx_Full_test_for_trezor_feature_parity_Babbage_elements_Plutus
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t
@@ -2152,7 +2606,7 @@ static const tx_fixture_t
         .expected_warning_bits = 0,
 };
 
-// Test 19: Sign_tx_Full_test_for_trezor_feature_parity_Babbage_elements_ordinary
+// Test 23: Sign_tx_Full_test_for_trezor_feature_parity_Babbage_elements_ordinary
 // Source: tests/standalone/input_files/signTx.py > babbage era tests
 //
 static const uint8_t

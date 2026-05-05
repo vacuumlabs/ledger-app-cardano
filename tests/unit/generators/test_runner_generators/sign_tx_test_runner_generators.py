@@ -30,6 +30,8 @@ AUX_TYPE_PATTERN = re.compile(r"\.aux_data_type\s*=\s*([A-Z0-9_]+|\d+)")
 BLIND_SIGNING_MODE_PATTERN = re.compile(
     r"\.blind_signing_mode\s*=\s*(BLIND_SIGNING_MODE_[A-Z_]+|\d+)"
 )
+SIGNING_MODE_PATTERN = re.compile(r"\.signing_mode\s*=\s*(\d+)")
+SIGN_TX_SIGNINGMODE_UNRESTRICTED = 9
 
 
 ERA_COMMENT_OVERRIDES = {
@@ -122,8 +124,16 @@ def fixture_has_blind_signing_hash_only_path(fixture_body: str) -> bool:
     return blind_signing_mode_match.group(1) == "BLIND_SIGNING_MODE_PROMPT_REVIEW_HASH"
 
 
+def fixture_is_unrestricted(fixture_body: str) -> bool:
+    signing_mode_match = SIGNING_MODE_PATTERN.search(fixture_body)
+    if signing_mode_match is None:
+        return False
+
+    return int(signing_mode_match.group(1)) == SIGN_TX_SIGNINGMODE_UNRESTRICTED
+
+
 def _build_test_functions(
-    fixtures: Sequence[tuple[str, str, bool, bool]],
+    fixtures: Sequence[tuple[str, str, bool, bool, bool]],
 ) -> tuple[list[str], list[str]]:
     functions: list[str] = []
     names: list[str] = []
@@ -132,12 +142,32 @@ def _build_test_functions(
         display_name,
         has_cvote_aux_data,
         has_blind_signing_hash_only_path,
+        is_unrestricted,
     ) in fixtures:
         func_suffix = sanitize_c_identifier(display_name, uppercase=False)
         if not func_suffix:
             raise ValueError(f"Unable to sanitize fixture name {display_name}")
         test_name = f"test_{func_suffix}"
-        for suffix, expert_flag in [("expert_off", "false"), ("expert_on", "true")]:
+        if is_unrestricted:
+            function_name = f"{test_name}_deny_init_expert_off"
+            functions.append(
+                "static void\n"
+                f"{function_name}(void **state) {{\n"
+                f"    (void) state;\n"
+                f"    run_fixture_init_deny_with_expert_mode(\n"
+                f"        &{fixture_name},\n"
+                f"        false,\n"
+                f"        SWO_SECURITY_CONDITION_NOT_SATISFIED);\n"
+                f"}}"
+            )
+            names.append(function_name)
+
+        expert_mode_variants = (
+            [("expert_on", "true")]
+            if is_unrestricted
+            else [("expert_off", "false"), ("expert_on", "true")]
+        )
+        for suffix, expert_flag in expert_mode_variants:
             function_name = f"{test_name}_{suffix}"
             functions.append(
                 "static void\n"
@@ -208,9 +238,9 @@ def _build_main_function(test_names: Sequence[str], test_c_file: str) -> str:
 
 def _extract_fixtures_from_header(
     fixture_path: Path,
-) -> list[tuple[str, str, bool, bool]]:
+) -> list[tuple[str, str, bool, bool, bool]]:
     content = read_file_safe(fixture_path)
-    fixtures: list[tuple[str, str, bool, bool]] = []
+    fixtures: list[tuple[str, str, bool, bool, bool]] = []
     for match in _FIXTURE_PATTERN.finditer(content):
         fixture_name = match.group(1)
         body = match.group(2)
@@ -224,6 +254,7 @@ def _extract_fixtures_from_header(
                 display_name,
                 fixture_has_cvote_aux_data(body),
                 fixture_has_blind_signing_hash_only_path(body),
+                fixture_is_unrestricted(body),
             )
         )
     return fixtures
@@ -293,8 +324,14 @@ def _generate_complete_test_file(
 
     test_functions, test_names = _build_test_functions(fixtures)
     expected_test_count = 0
-    for _, _, has_cvote_aux_data, has_blind_signing_hash_only_path in fixtures:
-        expected_test_count += 4
+    for (
+        _,
+        _,
+        has_cvote_aux_data,
+        has_blind_signing_hash_only_path,
+        _is_unrestricted,
+    ) in fixtures:
+        expected_test_count += 3 if _is_unrestricted else 4
         if has_cvote_aux_data:
             expected_test_count += 2
         if has_blind_signing_hash_only_path:

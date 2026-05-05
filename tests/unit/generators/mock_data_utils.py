@@ -12,6 +12,7 @@ and writes the result back in place.
 
 from __future__ import annotations
 
+from dataclasses import fields, is_dataclass
 import hashlib
 import re
 import sys
@@ -48,6 +49,7 @@ _ENTRY_START_PATTERN = re.compile(r"\{\s*\.path\s*=")
 _GENERATED_SIGN_TX_MESSAGE_NAME_PATTERN = re.compile(
     r"MOCK_SIGN_TX_TX_HASH_[A-F0-9]{64}"
 )
+_BIP32_PATH_PATTERN = re.compile(r"^m(?:/[0-9]+'?)+$")
 
 _BASE_INDENT = "    "
 _FIELD_INDENT = _BASE_INDENT + "      "
@@ -107,6 +109,71 @@ def parse_witness_path_to_words(witness_path: str) -> tuple[int, ...]:
             path_index |= 0x80000000
         path_words.append(path_index)
     return tuple(path_words)
+
+
+def format_path_words(path_words: tuple[int, ...]) -> str:
+    return "{ " + ", ".join(f"0x{word:08x}" for word in path_words) + " }"
+
+
+def _collect_bip32_path_strings(value: object, seen_object_ids: set[int]) -> set[str]:
+    if isinstance(value, str):
+        if _BIP32_PATH_PATTERN.fullmatch(value) is not None:
+            return {value}
+        return set()
+
+    if isinstance(value, (bytes, bytearray, int, float, bool, type(None))):
+        return set()
+
+    value_id = id(value)
+    if value_id in seen_object_ids:
+        return set()
+    seen_object_ids.add(value_id)
+
+    if isinstance(value, dict):
+        paths: set[str] = set()
+        for dict_key, dict_value in value.items():
+            paths.update(_collect_bip32_path_strings(dict_key, seen_object_ids))
+            paths.update(_collect_bip32_path_strings(dict_value, seen_object_ids))
+        return paths
+
+    if isinstance(value, (list, tuple, set, frozenset)):
+        paths = set()
+        for item in value:
+            paths.update(_collect_bip32_path_strings(item, seen_object_ids))
+        return paths
+
+    if is_dataclass(value):
+        paths = set()
+        for field in fields(value):
+            paths.update(
+                _collect_bip32_path_strings(getattr(value, field.name), seen_object_ids)
+            )
+        return paths
+
+    return set()
+
+
+def collect_required_sign_tx_public_key_paths() -> list[tuple[int, ...]]:
+    _, _, _, _load_sign_tx_tests = _load_sign_tx_generator_helpers()
+
+    path_words: list[tuple[int, ...]] = []
+    seen_path_words: set[tuple[int, ...]] = set()
+
+    sign_tx_data = _load_sign_tx_tests()
+    for sign_tx_test_cases in sign_tx_data["era_tests"].values():
+        for test_case in sign_tx_test_cases:
+            if getattr(test_case, "unit_test_expect", None) is None:
+                continue
+
+            path_strings = _collect_bip32_path_strings(test_case, set())
+            for path_string in sorted(path_strings):
+                parsed_path_words = parse_witness_path_to_words(path_string)
+                if parsed_path_words in seen_path_words:
+                    continue
+                seen_path_words.add(parsed_path_words)
+                path_words.append(parsed_path_words)
+
+    return path_words
 
 
 def collect_required_sign_tx_signature_keys() -> list[tuple[tuple[int, ...], bytes]]:
@@ -233,6 +300,28 @@ def regenerate_mock_data_with_options(*, verbose: bool, report_summary: bool) ->
     )
     if not path_entries:
         raise ValueError("No mock path entries were found")
+
+    def _path_words_from_entry(entry_text: str) -> tuple[int, ...]:
+        path_match = re.search(r"\.path\s*=\s*\{\s*([^}]+)\}", entry_text)
+        path_len_match = re.search(r"\.path_len\s*=\s*(\d+)", entry_text)
+        if not path_match or not path_len_match:
+            raise ValueError("Failed to parse path information in mock entry")
+        path_words = tuple(
+            int(hex_value, 16)
+            for hex_value in re.findall(r"0x[0-9a-fA-F]+", path_match.group(1))
+        )
+        return path_words[: int(path_len_match.group(1))]
+
+    existing_path_words = {_path_words_from_entry(entry) for entry in path_entries}
+    for required_path_words in collect_required_sign_tx_public_key_paths():
+        if required_path_words in existing_path_words:
+            continue
+        existing_path_words.add(required_path_words)
+        path_entries.append(
+            f"{{ .path = {format_path_words(required_path_words)}, "
+            f".path_len = {len(required_path_words)}, }}"
+        )
+
     if verbose:
         print(f"Regenerating {len(path_entries)} mock path entries...")
 
@@ -317,9 +406,6 @@ def regenerate_mock_data_with_options(*, verbose: bool, report_summary: bool) ->
             raise ValueError(f"Missing message buffer {message_name}")
         bip32_path = parse_bip32_path_from_c_array(path_array)
         return _derive_witness_signature(bip32_path, message_bytes)
-
-    def format_path_words(path_words: tuple[int, ...]) -> str:
-        return "{ " + ", ".join(f"0x{word:08x}" for word in path_words) + " }"
 
     generated_sign_tx_hashes: set[bytes] = set()
     supplemental_message_arrays: list[str] = []

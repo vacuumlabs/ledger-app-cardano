@@ -300,6 +300,31 @@ static void test_sign_tx_with_all_certificates_except_pool_registration_reject_t
         true);
 }
 
+static void test_unrestricted_tx_with_cross_account_governance_certificates_deny_init_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_init_deny_with_expert_mode(
+        &FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES,
+        false,
+        SWO_SECURITY_CONDITION_NOT_SATISFIED);
+}
+
+static void test_unrestricted_tx_with_cross_account_governance_certificates_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES,
+        true);
+}
+
+static void test_unrestricted_tx_with_cross_account_governance_certificates_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_CONWAY_UNRESTRICTED_TX_WITH_CROSS_ACCOUNT_GOVERNANCE_CERTIFICATES,
+        true);
+}
+
 static void test_sign_tx_with_authorize_committee_hot_certificates_expert_off(void **state) {
     (void) state;
     run_fixture_with_expert_mode(&FIXTURE_CONWAY_SIGN_TX_WITH_AUTHORIZE_COMMITTEE_HOT_CERTIFICATES,
@@ -584,6 +609,11 @@ int main(void) {
         cmocka_unit_test(test_sign_tx_with_all_certificates_except_pool_registration_expert_on),
         cmocka_unit_test(
             test_sign_tx_with_all_certificates_except_pool_registration_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_cross_account_governance_certificates_deny_init_expert_off),
+        cmocka_unit_test(test_unrestricted_tx_with_cross_account_governance_certificates_expert_on),
+        cmocka_unit_test(
+            test_unrestricted_tx_with_cross_account_governance_certificates_reject_tx_expert_on),
         cmocka_unit_test(test_sign_tx_with_authorize_committee_hot_certificates_expert_off),
         cmocka_unit_test(
             test_sign_tx_with_authorize_committee_hot_certificates_reject_tx_expert_off),

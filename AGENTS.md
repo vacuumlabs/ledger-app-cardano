@@ -34,7 +34,11 @@ For detailed analysis, see:
 - **Stack Discipline:** Ledger targets, especially Nano X, are sensitive to stack pressure. Use `__noinline_due_to_stack__` from `src/utils/utils.h` for helpers with large local buffers or helpers that commonly compose into stack-heavy call chains, particularly in address derivation / formatting and transaction parsing / formatting paths. Put the attribute on its own line immediately above the function declaration / definition. Prefer this over adding temporary global scratch buffers unless there is a stronger architectural reason.
 - **Temporary Buffers:** For short-lived byte buffers in tx/UI code, a tiny local helper such as `alloc_temp_buffer_or_fail()` using `APP_MEM_CALLOC`/`APP_MEM_FREE_AND_NULL` is acceptable when the allocation/free stay tightly scoped and improve stack usage.
 - **Imports:** Organize imports logically and avoid forward declarations.
-- **Use cheap fast model to gather context if possible (e.g. Haiku)**.
+- **Use cheap fast model for subagents:** When spawning agents for simple tasks (searching codebases, gathering context, reading files, repetitive straightforward small-scope changes), prefer cheaper/faster models (e.g. Haiku, Gemini Flash, DeepSeek Flash, GPT-5.4-mini) to save context and cost on the main model thread. Reserve the main model for reasoning-heavy tasks.
+
+### When the Model Makes a Mistake
+
+If you make a wrong decision, take a wrong approach, or the user has to stop and redirect you, append a 1–2 sentence note to a `## Lessons Learned` section at the bottom of this file summarizing: (1) what the mistake was, and (2) the correct behavior going forward. Keep entries terse and actionable — the goal is to prevent repeating the same error.
 
 ### What NOT to DO
 - **Do NOT modify `src/transaction/tx_hash_builder.c` or `src/addressUtils/bip44.c`** without explicit confirmation. They are trusted components.
@@ -109,3 +113,9 @@ Brief summary:
   expected results, treat it as an error. Do not omit the fixture, do not leave
   generated success fixtures with null expected outputs unnoticed, and do not skip
   assertions at runtime for that reason.
+
+## Lessons Learned
+
+- 2026-05-08: When a body-processing failure shows a `tx_handle_parse_error` with an exact SWO, cross-reference `cardano_swo.h` first to identify the error category before searching code paths.
+
+<!-- Append 1–2 sentence notes here when the model makes a mistake that should be avoided in the future. Format: date, brief description of mistake, and the correct behavior. -->

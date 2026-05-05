@@ -130,6 +130,7 @@ def _build_deny_fixtures() -> str:
         chunks: list[ChunkInfo]
         expected_swo: str
         expect_init_failure: bool
+        required_expert_mode: bool | None
         source_set: str
         source_file: str
 
@@ -218,6 +219,7 @@ def _build_deny_fixtures() -> str:
             chunks=chunks,
             expected_swo=expected_swo_name,
             expect_init_failure=expect_init_failure,
+            required_expert_mode=test_case.required_expert_mode,
             source_set=source_set,
             source_file="tests/standalone/input_files/signTx.py",
         )
@@ -320,6 +322,11 @@ def _build_deny_fixtures() -> str:
                 lines.append(
                     f"        .expect_init_failure = {'true' if fixture.expect_init_failure else 'false'},"
                 )
+                if fixture.required_expert_mode is not None:
+                    lines.append("        .has_required_expert_mode = true,")
+                    lines.append(
+                        f"        .required_expert_mode = {'true' if fixture.required_expert_mode else 'false'},"
+                    )
                 lines.append("        .skip_reason = NULL,")
                 lines.append("    },")
         lines.append("};")
