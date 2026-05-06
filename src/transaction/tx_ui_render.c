@@ -210,7 +210,6 @@ void tx_ui_plan_or_render_fee(const tx_processing_mode_t *mode, uint64_t parsed_
         tx_body_ctx()->total_ui_pairs += UI_PAIRS_FEE;
     } else if (mode->ui_render) {
         START_COUNT();
-        ui_pairs_force_new_page();
         UI_ADD_FORMAT1(UI_STATIC_LABEL("Fee"),
                        MAX_ADA_AMOUNT_STRING_LENGTH,
                        format_ada_amount,

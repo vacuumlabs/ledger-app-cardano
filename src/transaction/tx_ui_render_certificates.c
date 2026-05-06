@@ -201,7 +201,9 @@ static void render_deposit(uint64_t deposit) {
 }
 
 static void render_certificate_header(certificate_type_t type) {
-    ui_pairs_force_new_page();
+    if (G_context.tx_info.tx_params.num_certificates > CERTIFICATE_NEW_PAGE_COUNT_TRESHOLD) {
+        ui_pairs_force_new_page();
+    }
     UI_ADD_FORMAT1(UI_STATIC_LABEL("Certificate"),
                    MAX_CERTIFICATE_TYPE_LENGTH,
                    format_certificate_type,
