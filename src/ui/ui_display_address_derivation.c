@@ -209,8 +209,8 @@ void ui_deriveAddress_handleDisplay(security_policy_t policy, warning_bits_t war
 
     switch (policy) {
         case POLICY_SHOW:
-            ui_displayAddressReview("Display address",
-                                    "(not exported)",
+            ui_displayAddressReview("Verify Cardano address",
+                                    NULL,
                                     derive_address_review_choice,
                                     warnings);
             break;
