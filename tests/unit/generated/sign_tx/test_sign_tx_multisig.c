@@ -219,6 +219,110 @@ static void test_sign_tx_with_mint_key_witness_in_multisig_tx_reject_tx_expert_o
         true);
 }
 
+static void test_sign_tx_with_drep_registration_script_certificate_multisig_drep_witness_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        false);
+}
+
+static void
+test_sign_tx_with_drep_registration_script_certificate_multisig_drep_witness_reject_tx_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        false);
+}
+
+static void test_sign_tx_with_drep_registration_script_certificate_multisig_drep_witness_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        true);
+}
+
+static void
+test_sign_tx_with_drep_registration_script_certificate_multisig_drep_witness_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        true);
+}
+
+static void
+test_sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        false);
+}
+
+static void
+test_sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness_reject_tx_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        false);
+}
+
+static void
+test_sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        true);
+}
+
+static void
+test_sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        true);
+}
+
+static void test_sign_tx_with_drep_update_script_certificate_multisig_drep_witness_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        false);
+}
+
+static void
+test_sign_tx_with_drep_update_script_certificate_multisig_drep_witness_reject_tx_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        false);
+}
+
+static void test_sign_tx_with_drep_update_script_certificate_multisig_drep_witness_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        true);
+}
+
+static void
+test_sign_tx_with_drep_update_script_certificate_multisig_drep_witness_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS,
+        true);
+}
+
 // ======================================================================
 // Main
 // ======================================================================
@@ -259,6 +363,30 @@ int main(void) {
         cmocka_unit_test(test_sign_tx_with_mint_key_witness_in_multisig_tx_reject_tx_expert_off),
         cmocka_unit_test(test_sign_tx_with_mint_key_witness_in_multisig_tx_expert_on),
         cmocka_unit_test(test_sign_tx_with_mint_key_witness_in_multisig_tx_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_registration_script_certificate_multisig_drep_witness_expert_off),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_registration_script_certificate_multisig_drep_witness_reject_tx_expert_off),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_registration_script_certificate_multisig_drep_witness_expert_on),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_registration_script_certificate_multisig_drep_witness_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness_expert_off),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness_reject_tx_expert_off),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness_expert_on),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_update_script_certificate_multisig_drep_witness_expert_off),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_update_script_certificate_multisig_drep_witness_reject_tx_expert_off),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_update_script_certificate_multisig_drep_witness_expert_on),
+        cmocka_unit_test(
+            test_sign_tx_with_drep_update_script_certificate_multisig_drep_witness_reject_tx_expert_on),
     };
     return _cmocka_run_group_tests("test_sign_tx_multisig",
                                    tests,

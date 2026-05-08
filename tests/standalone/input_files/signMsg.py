@@ -511,6 +511,27 @@ signMsgTestCases = [
             addressFieldHex="e287fcd9cdeaa13934aeb66515f7933169160ff15f2fcf21c323199d",
         ),
     ),
+    # --- Multisig DRep key path ---
+    SignMsgTestCase(
+        name="Sign_msg_with_multisig_drep_key_path",
+        msgData=MessageData(
+            messageHex="deadbeef",
+            signingPath="m/1854'/1815'/0'/3/0",
+            hashPayload=False,
+            isAscii=False,
+            addressFieldType=MessageAddressFieldType.KEY_HASH,
+        ),
+        unit_test_expect=SignMsgExpectedResult(
+            signatureHex="e003148240de3d14ca94ccc6604411142145cf028476f4e8213f8dbc2567cdc59ad7f9eb8ebf585404058f32a35316b37bbbd3fedda277b5f615e42ab8a00404",
+            signingPublicKeyHex="2ead271505af50a1302dadc18d69452f2d7f1edf691265c3c9b004f1872068a6",
+            addressFieldHex="68eb1a3b7d7d467b6d128ce5b36a2f64e8abccc1d7c6b6048de545af",
+        ),
+        ragger_expect=SignMsgExpectedResult(
+            signatureHex="44d8837eec4e2c8392d67faef946516e1f85c9b71c958bb11b0e35a5246bf4a94eeb72a999c1fb9d086285cb115765f49e4b8fefd3536d3f0368e0d6c4a1c400",
+            signingPublicKeyHex="b7e837b7b4a8f1afe3bd2e180dddeabdf5b49207d16a06c8a3401a8b9da5ce7b",
+            addressFieldHex="6b4f6eae3468a43104e37424d34846331a1ac3950759ad5168a08c28",
+        ),
+    ),
     # --- Test with unusual BIP44 path (WARNING_BIT_UNUSUAL_KEY_DERIVATION_PATH) ---
     SignMsgTestCase(
         name="Sign_msg_unusual_path_with_high_address_index",

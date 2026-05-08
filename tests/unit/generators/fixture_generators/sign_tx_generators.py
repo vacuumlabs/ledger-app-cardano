@@ -207,6 +207,16 @@ def _is_reasonable_witness_path(path: str) -> bool:
             return _has_reasonable_account(path_words) and _has_reasonable_address(
                 path_words
             )
+        if len(path_words) == 5 and path_words[3] in (
+            _CARDANO_CHAIN_DREP_KEY,
+            _CARDANO_CHAIN_COMMITTEE_COLD_KEY,
+            _CARDANO_CHAIN_COMMITTEE_HOT_KEY,
+        ):
+            return (
+                _has_reasonable_account(path_words)
+                and _has_reasonable_address(path_words)
+                and path_words[4] == 0
+            )
         return False
 
     if purpose == (_PURPOSE_MINT | _HARDENED_BIP32):
@@ -603,6 +613,7 @@ def _load_sign_tx_tests() -> dict[str, Any]:
         testsConwayWithCertificates,
         testsConwayWithoutCertificates,
         testsConwayVotingProcedures,
+        testsConwayMultisig,
         testsMultidelegation,
         testsCatalystRegistration,
         testsCVoteRegistrationCIP36,
@@ -626,7 +637,7 @@ def _load_sign_tx_tests() -> dict[str, Any]:
         "conway": testsConwayWithCertificates,
         "conway_without_certificates": testsConwayWithoutCertificates,
         "conway_voting": testsConwayVotingProcedures,
-        "multisig": testsMultisig,
+        "multisig": testsMultisig + testsConwayMultisig,
         "alonzo_catalyst": testsCatalystRegistration,
         "alonzo_cip36": testsCVoteRegistrationCIP36,
         "pool_registration": poolRegistrationOwnerTestCases

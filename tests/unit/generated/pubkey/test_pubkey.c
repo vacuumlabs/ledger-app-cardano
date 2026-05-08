@@ -147,19 +147,24 @@ static void test_pubkey_confirm_export_pubkey_drep_key_path_0_24(void **state) {
     run_fixture(&PUBKEY_FIXTURES_TEST_PUBKEY_CONFIRM[24]);
 }
 
-static void test_pubkey_confirm_export_pubkey_committee_cold_key_path_0_25(void **state) {
+static void test_pubkey_confirm_export_pubkey_multisig_drep_key_path_0_25(void **state) {
     (void) state;
     run_fixture(&PUBKEY_FIXTURES_TEST_PUBKEY_CONFIRM[25]);
 }
 
-static void test_pubkey_confirm_export_pubkey_committee_hot_key_path_0_26(void **state) {
+static void test_pubkey_confirm_export_pubkey_committee_cold_key_path_0_26(void **state) {
     (void) state;
     run_fixture(&PUBKEY_FIXTURES_TEST_PUBKEY_CONFIRM[26]);
 }
 
-static void test_pubkey_confirm_export_pubkey_mint_key_path_0_27(void **state) {
+static void test_pubkey_confirm_export_pubkey_committee_hot_key_path_0_27(void **state) {
     (void) state;
     run_fixture(&PUBKEY_FIXTURES_TEST_PUBKEY_CONFIRM[27]);
+}
+
+static void test_pubkey_confirm_export_pubkey_mint_key_path_0_28(void **state) {
+    (void) state;
+    run_fixture(&PUBKEY_FIXTURES_TEST_PUBKEY_CONFIRM[28]);
 }
 
 static void test_pubkey_without_confirmation_export_pubkey_shelley_usual_path_0_0(void **state) {
@@ -270,9 +275,10 @@ int main(void) {
         cmocka_unit_test(test_pubkey_confirm_export_pubkey_cvote_keys_path_1_22),
         cmocka_unit_test(test_pubkey_confirm_export_pubkey_cvote_keys_path_3_23),
         cmocka_unit_test(test_pubkey_confirm_export_pubkey_drep_key_path_0_24),
-        cmocka_unit_test(test_pubkey_confirm_export_pubkey_committee_cold_key_path_0_25),
-        cmocka_unit_test(test_pubkey_confirm_export_pubkey_committee_hot_key_path_0_26),
-        cmocka_unit_test(test_pubkey_confirm_export_pubkey_mint_key_path_0_27),
+        cmocka_unit_test(test_pubkey_confirm_export_pubkey_multisig_drep_key_path_0_25),
+        cmocka_unit_test(test_pubkey_confirm_export_pubkey_committee_cold_key_path_0_26),
+        cmocka_unit_test(test_pubkey_confirm_export_pubkey_committee_hot_key_path_0_27),
+        cmocka_unit_test(test_pubkey_confirm_export_pubkey_mint_key_path_0_28),
         cmocka_unit_test(test_pubkey_without_confirmation_export_pubkey_shelley_usual_path_0_0),
         cmocka_unit_test(test_pubkey_without_confirmation_export_pubkey_shelley_usual_path_1_1),
         cmocka_unit_test(test_pubkey_without_confirmation_export_pubkey_shelley_usual_path_2_2),

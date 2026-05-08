@@ -43,6 +43,7 @@ from tests.standalone.input_files.signTx import (
     testsBabbage,
     testsConwayWithoutCertificates,
     testsConwayVotingProcedures,
+    testsConwayMultisig,
     testsMultidelegation,
     testsCatalystRegistration,
     testsCVoteRegistrationCIP36,
@@ -496,6 +497,7 @@ def _check_ragger_expect_sign_tx(
     + testsConwayWithCertificates
     + testsConwayWithoutCertificates
     + testsConwayVotingProcedures
+    + testsConwayMultisig
     + testsMultidelegation
     + testsCatalystRegistration
     + testsCVoteRegistrationCIP36

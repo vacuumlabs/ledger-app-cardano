@@ -175,6 +175,7 @@ static security_policy_t _policyForGetExtendedPublicKey_silent(const bip44_path_
             break;
 
         case PATH_ORDINARY_DREP_KEY:
+        case PATH_MULTISIG_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
         case PATH_MINT_KEY:
@@ -218,6 +219,7 @@ security_policy_t policyForGetExtendedPublicKey(const bip44_path_t *path, warnin
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
         case PATH_ORDINARY_DREP_KEY:
+        case PATH_MULTISIG_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
         case PATH_MINT_KEY:
@@ -2148,6 +2150,7 @@ static bool is_required_signer_allowed(bip44_path_t *path, bool allowPoolColdKey
             return true;
 
         case PATH_ORDINARY_DREP_KEY:
+        case PATH_MULTISIG_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
             // no known use case, but also no reason to deny
@@ -2525,6 +2528,7 @@ static inline security_policy_t _multisigWitnessPolicy(const bip44_path_t *path,
     switch (bip44_classifyPath(path)) {
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
+        case PATH_MULTISIG_DREP_KEY:
             // multisig key paths are allowed, but hiding them would make impossible for the user to
             // distinguish what funds are being spent (multisig UTXOs sharing a signer are not
             // necessarily interchangeable, because they may be governed by a different script)
@@ -2559,6 +2563,7 @@ static inline security_policy_t _plutusWitnessPolicy(const bip44_path_t *path,
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
         case PATH_ORDINARY_DREP_KEY:
+        case PATH_MULTISIG_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
             SHOW_IF(mark_unusual_key_derivation(w, path));
@@ -2592,6 +2597,7 @@ static inline security_policy_t _unrestrictedWitnessPolicy(const bip44_path_t *p
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
         case PATH_ORDINARY_DREP_KEY:
+        case PATH_MULTISIG_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
         case PATH_POOL_COLD_KEY:
@@ -3033,6 +3039,7 @@ security_policy_t policyForSignMsg(const bip44_path_t *witnessPath,
         case PATH_MULTISIG_STAKING_KEY:
         case PATH_MINT_KEY:
         case PATH_ORDINARY_DREP_KEY:
+        case PATH_MULTISIG_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
         case PATH_POOL_COLD_KEY:

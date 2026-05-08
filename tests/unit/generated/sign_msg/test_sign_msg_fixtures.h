@@ -1723,16 +1723,16 @@ static const sign_msg_expected_t
 };
 
 // ----------------------------------------------------------------------
-// Test 17: Sign_msg_unusual_path_with_high_address_index
+// Test 17: Sign_msg_with_multisig_drep_key_path
 // ----------------------------------------------------------------------
 
-// Source: tests/standalone/input_files/signMsg.py > Sign_msg_unusual_path_with_high_address_index
-static const uint8_t SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_INIT_APDU[] = {
-    0x00, 0x00, 0x00, 0x04, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x42, 0x41, 0x01, 0x01, 0x02,
+// Source: tests/standalone/input_files/signMsg.py > Sign_msg_with_multisig_drep_key_path
+static const uint8_t SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_INIT_APDU[] = {
+    0x00, 0x00, 0x00, 0x04, 0x05, 0x80, 0x00, 0x07, 0x3E, 0x80, 0x00, 0x07, 0x17, 0x80,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x02,
 };
 
-static const uint8_t SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNK_APDU_000[] = {
+static const uint8_t SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_CHUNK_APDU_000[] = {
     0x00,
     0x00,
     0x00,
@@ -1743,17 +1743,72 @@ static const uint8_t SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_
     0xEF,
 };
 
-static const sign_msg_chunk_t SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNKS[] =
+static const sign_msg_chunk_t SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_CHUNKS[] = {
+    {
+        .data = SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_CHUNK_APDU_000,
+        .data_len = sizeof(SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_CHUNK_APDU_000),
+    },
+};
+
+static const uint8_t SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_SIGNATURE[] = {
+    0xE0, 0x03, 0x14, 0x82, 0x40, 0xDE, 0x3D, 0x14, 0xCA, 0x94, 0xCC, 0xC6, 0x60, 0x44, 0x11, 0x14,
+    0x21, 0x45, 0xCF, 0x02, 0x84, 0x76, 0xF4, 0xE8, 0x21, 0x3F, 0x8D, 0xBC, 0x25, 0x67, 0xCD, 0xC5,
+    0x9A, 0xD7, 0xF9, 0xEB, 0x8E, 0xBF, 0x58, 0x54, 0x04, 0x05, 0x8F, 0x32, 0xA3, 0x53, 0x16, 0xB3,
+    0x7B, 0xBB, 0xD3, 0xFE, 0xDD, 0xA2, 0x77, 0xB5, 0xF6, 0x15, 0xE4, 0x2A, 0xB8, 0xA0, 0x04, 0x04,
+};
+
+static const uint8_t SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_PUBLIC_KEY[] = {
+    0x2E, 0xAD, 0x27, 0x15, 0x05, 0xAF, 0x50, 0xA1, 0x30, 0x2D, 0xAD, 0xC1, 0x8D, 0x69, 0x45, 0x2F,
+    0x2D, 0x7F, 0x1E, 0xDF, 0x69, 0x12, 0x65, 0xC3, 0xC9, 0xB0, 0x04, 0xF1, 0x87, 0x20, 0x68, 0xA6,
+};
+
+static const uint8_t SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_ADDRESS_FIELD[] = {
+    0x68, 0xEB, 0x1A, 0x3B, 0x7D, 0x7D, 0x46, 0x7B, 0x6D, 0x12, 0x8C, 0xE5, 0xB3, 0x6A,
+    0x2F, 0x64, 0xE8, 0xAB, 0xCC, 0xC1, 0xD7, 0xC6, 0xB6, 0x04, 0x8D, 0xE5, 0x45, 0xAF,
+};
+
+static const sign_msg_expected_t SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED = {
+    .signature = SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_SIGNATURE,
+    .signature_len = sizeof(SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_SIGNATURE),
+    .public_key = SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_PUBLIC_KEY,
+    .public_key_len = sizeof(SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_PUBLIC_KEY),
+    .address_field = SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_ADDRESS_FIELD,
+    .address_field_len =
+        sizeof(SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED_ADDRESS_FIELD),
+};
+
+// ----------------------------------------------------------------------
+// Test 18: Sign_msg_unusual_path_with_high_address_index
+// ----------------------------------------------------------------------
+
+// Source: tests/standalone/input_files/signMsg.py > Sign_msg_unusual_path_with_high_address_index
+static const uint8_t SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_INIT_APDU[] = {
+    0x00, 0x00, 0x00, 0x04, 0x05, 0x80, 0x00, 0x07, 0x3C, 0x80, 0x00, 0x07, 0x17, 0x80,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0x42, 0x41, 0x01, 0x01, 0x02,
+};
+
+static const uint8_t SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNK_APDU_000[] = {
+    0x00,
+    0x00,
+    0x00,
+    0x04,
+    0xDE,
+    0xAD,
+    0xBE,
+    0xEF,
+};
+
+static const sign_msg_chunk_t SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNKS[] =
     {
         {
-            .data = SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNK_APDU_000,
+            .data = SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNK_APDU_000,
             .data_len =
-                sizeof(SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNK_APDU_000),
+                sizeof(SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNK_APDU_000),
         },
 };
 
 static const uint8_t
-    SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_SIGNATURE[] = {
+    SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_SIGNATURE[] = {
         0xBC, 0x88, 0xD1, 0xFE, 0xDB, 0x2D, 0x72, 0xF0, 0x11, 0x99, 0x6B, 0xA8, 0xC1,
         0xB1, 0xE2, 0xB7, 0xC6, 0xE7, 0xAC, 0xF4, 0x48, 0x32, 0x90, 0xB7, 0x02, 0xFC,
         0x2B, 0x92, 0xF9, 0xA7, 0xE5, 0xAF, 0x69, 0x73, 0x92, 0x23, 0x23, 0xCE, 0xE9,
@@ -1762,31 +1817,31 @@ static const uint8_t
 };
 
 static const uint8_t
-    SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_PUBLIC_KEY[] = {
+    SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_PUBLIC_KEY[] = {
         0xAA, 0x86, 0x98, 0x4C, 0xA4, 0xB7, 0x8A, 0x1D, 0x52, 0x9A, 0xD8,
         0xDC, 0x88, 0x00, 0x91, 0x2B, 0x90, 0x91, 0x97, 0xAE, 0x0D, 0xB0,
         0x56, 0x3B, 0x98, 0xA4, 0xD0, 0xCB, 0x08, 0x56, 0x7D, 0xF7,
 };
 
 static const uint8_t
-    SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_ADDRESS_FIELD[] = {
+    SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_ADDRESS_FIELD[] = {
         0x6E, 0x69, 0x9A, 0x20, 0x44, 0x26, 0xB8, 0x22, 0xF1, 0x4A, 0x38, 0xDC, 0xEE, 0x4E,
         0x99, 0x1E, 0xF2, 0xBC, 0x6D, 0x59, 0xB6, 0x77, 0xEE, 0xCE, 0xDE, 0x5E, 0x22, 0x21,
 };
 
 static const sign_msg_expected_t
-    SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED = {
-        .signature = SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_SIGNATURE,
+    SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED = {
+        .signature = SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_SIGNATURE,
         .signature_len =
-            sizeof(SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_SIGNATURE),
+            sizeof(SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_SIGNATURE),
         .public_key =
-            SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_PUBLIC_KEY,
+            SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_PUBLIC_KEY,
         .public_key_len =
-            sizeof(SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_PUBLIC_KEY),
+            sizeof(SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_PUBLIC_KEY),
         .address_field =
-            SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_ADDRESS_FIELD,
+            SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_ADDRESS_FIELD,
         .address_field_len = sizeof(
-            SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_ADDRESS_FIELD),
+            SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED_ADDRESS_FIELD),
 };
 
 static const sign_msg_fixture_t SIGN_MSG_FIXTURES[] = {
@@ -2104,19 +2159,32 @@ static const sign_msg_fixture_t SIGN_MSG_FIXTURES[] = {
         .expected =
             &SIGN_MSG_016_SIGN_MSG_1000_BYTES_LONG_NONHASHED_HEX_MESSAGE_WITH_KEYHASH_AS_ADDRESS_FIELD_EXPECTED,
     },
+    // Source: tests/standalone/input_files/signMsg.py > Sign_msg_with_multisig_drep_key_path
+    {
+        .name = "Sign_msg_with_multisig_drep_key_path",
+        .init_data = SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_INIT_APDU,
+        .init_data_len = sizeof(SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_INIT_APDU),
+        .chunks = SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_CHUNKS,
+        .chunk_count = ARRAY_LEN(SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_CHUNKS),
+        .confirm_data = NULL,
+        .confirm_data_len = 0,
+        .check_expected = SWO_SUCCESS,
+        .expected_warning_bits = 0,
+        .expected = &SIGN_MSG_017_SIGN_MSG_WITH_MULTISIG_DREP_KEY_PATH_EXPECTED,
+    },
     // Source: tests/standalone/input_files/signMsg.py >
     // Sign_msg_unusual_path_with_high_address_index
     {
         .name = "Sign_msg_unusual_path_with_high_address_index",
-        .init_data = SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_INIT_APDU,
+        .init_data = SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_INIT_APDU,
         .init_data_len =
-            sizeof(SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_INIT_APDU),
-        .chunks = SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNKS,
-        .chunk_count = ARRAY_LEN(SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNKS),
+            sizeof(SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_INIT_APDU),
+        .chunks = SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNKS,
+        .chunk_count = ARRAY_LEN(SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_CHUNKS),
         .confirm_data = NULL,
         .confirm_data_len = 0,
         .check_expected = SWO_SUCCESS,
         .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_UNUSUAL_KEY_DERIVATION_PATH),
-        .expected = &SIGN_MSG_017_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED,
+        .expected = &SIGN_MSG_018_SIGN_MSG_UNUSUAL_PATH_WITH_HIGH_ADDRESS_INDEX_EXPECTED,
     },
 };

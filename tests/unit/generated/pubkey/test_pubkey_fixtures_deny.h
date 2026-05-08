@@ -137,14 +137,14 @@ static const uint8_t PUBKEY_DENY_005_EXPORT_PUBKEY_INVALID_MULTISIG_ACCOUNT_NOT_
 
 // ----------------------------------------------------------------------
 // Deny Test 6: Export_pubkey_invalid_multisig_chain
-// Path: m/1854'/1815'/0'/3/0
+// Path: m/1854'/1815'/0'/6/0
 // Source: tests/standalone/input_files/pubkey.py > deny tests >
 // Export_pubkey_invalid_multisig_chain
 // ----------------------------------------------------------------------
 
 static const uint8_t PUBKEY_DENY_006_EXPORT_PUBKEY_INVALID_MULTISIG_CHAIN_APDU[] = {
     0x05, 0x80, 0x00, 0x07, 0x3E, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00,
 };
 
 // ----------------------------------------------------------------------

@@ -15,7 +15,7 @@
 //   - Source file and era
 //   - Original Ragger test name
 //
-// Total tests in this era: 6
+// Total tests in this era: 9
 
 #pragma once
 
@@ -603,6 +603,298 @@ static const tx_fixture_t FIXTURE_MULTISIG_SIGN_TX_WITH_MINT_KEY_WITNESS_IN_MULT
     .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
     .expected_warning_bits = ((warning_bits_t) 1 << WARNING_BIT_NETWORK_UNUSUAL) |
                              ((warning_bits_t) 1 << WARNING_BIT_OUTPUT_MISSING_DATUM),
+};
+
+// Test 6: Sign_tx_with_drep_registration_script_certificate_multisig_drep_witness
+// Source: tests/standalone/input_files/signTx.py > multisig era tests
+//
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX
+        [] = {
+            0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0,
+            0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3,
+            0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82,
+            0xD8, 0x18, 0x58, 0x21, 0x83, 0x58, 0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8,
+            0xB8, 0x5F, 0xEC, 0x29, 0x6F, 0x06, 0x85, 0xCA, 0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2,
+            0xE1, 0xA5, 0xD8, 0x9D, 0x92, 0xF4, 0x5F, 0xA0, 0x00, 0x1A, 0x0D, 0x0C, 0x25, 0x61,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x2D, 0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x0A, 0x10, 0x01, 0x12, 0x2A, 0x94, 0x6B, 0x9A, 0xD3, 0xD2, 0xDD, 0xF0, 0x29, 0xD3,
+            0xA8, 0x28, 0xF0, 0x46, 0x8A, 0xEC, 0xE7, 0x68, 0x95, 0xF1, 0x5C, 0x9E, 0xFB, 0xD6,
+            0x9B, 0x42, 0x77, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x01,
+};
+
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD
+        [] = {
+            0x05, 0x80, 0x00, 0x07, 0x3E, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x46, 0x7E, 0x8B, 0x14, 0xD9, 0xD7, 0x83, 0x27, 0xD9, 0xF7, 0x9E, 0xFC, 0xD8,
+            0x92, 0x58, 0xCC, 0x92, 0x9F, 0x20, 0x35, 0x10, 0x25, 0xB9, 0x9B, 0xE9, 0x81,
+            0x48, 0xAA, 0x25, 0x29, 0xA2, 0x51, 0xC5, 0x14, 0xFD, 0x87, 0x4C, 0x7A, 0xB4,
+            0xB0, 0x6A, 0xD3, 0x6B, 0x52, 0x0B, 0xBF, 0x27, 0xB5, 0x22, 0xF1, 0x33, 0x1E,
+            0x31, 0x46, 0xCF, 0x80, 0xD4, 0x61, 0xA2, 0x4A, 0x78, 0xD6, 0xFC, 0x0F,
+};
+
+static const witness_payload_t FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_PAYLOADS
+    [] = {
+        {.payload =
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS = {
+        .name = "Sign_tx_with_drep_registration_script_certificate_multisig_drep_witness",
+        .raw_tx =
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX,
+        .raw_tx_len = sizeof(
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX),
+        .tx_body_cbor_hex =
+            "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258"
+            "2b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25"
+            "611a002dd2e802182a030a048184108201581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efb"
+            "d69b427713f6",
+        .expected_hash_hex = "112f91fff7f2cd59047f81801cf3b16c951f98b7e8d5b4fcd02b44eae674c9fa",
+        .signing_mode = 6,
+        .network_id = 1,
+        .protocol_magic = 764824073,
+        .num_inputs = 1,
+        .num_outputs = 1,
+        .num_witnesses = 1,
+        .witness_payloads =
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_REGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_PAYLOADS,
+        .witness_payload_count = 1,
+        .num_certificates = 1,
+        .num_withdrawals = 0,
+        .num_mint_asset_groups = 0,
+        .include_ttl = true,
+        .include_validity_interval_start = false,
+        .include_aux_data_hash = false,
+        .aux_data_type = 0,
+        .aux_data_init_payload = NULL,
+        .aux_data_init_payload_len = 0,
+        .aux_data_delegations = NULL,
+        .aux_data_delegation_count = 0,
+        .include_script_data_hash = false,
+        .num_collateral_inputs = 0,
+        .num_required_signers = 0,
+        .include_network_id = false,
+        .include_collateral_output = false,
+        .include_total_collateral = false,
+        .num_reference_inputs = 0,
+        .num_voters = 0,
+        .include_treasury = false,
+        .treasury = 0,
+        .include_donation = false,
+        .donation = 0,
+        .aux_data_hash_hex = NULL,
+        .options = 0,
+        .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+        .expected_warning_bits = 0,
+};
+
+// Test 7: Sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness
+// Source: tests/standalone/input_files/signTx.py > multisig era tests
+//
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX
+        [] = {
+            0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0,
+            0xBF, 0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3,
+            0xAA, 0xD1, 0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82,
+            0xD8, 0x18, 0x58, 0x21, 0x83, 0x58, 0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8,
+            0xB8, 0x5F, 0xEC, 0x29, 0x6F, 0x06, 0x85, 0xCA, 0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2,
+            0xE1, 0xA5, 0xD8, 0x9D, 0x92, 0xF4, 0x5F, 0xA0, 0x00, 0x1A, 0x0D, 0x0C, 0x25, 0x61,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x2D, 0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x0A, 0x11, 0x01, 0x12, 0x2A, 0x94, 0x6B, 0x9A, 0xD3, 0xD2, 0xDD, 0xF0, 0x29, 0xD3,
+            0xA8, 0x28, 0xF0, 0x46, 0x8A, 0xEC, 0xE7, 0x68, 0x95, 0xF1, 0x5C, 0x9E, 0xFB, 0xD6,
+            0x9B, 0x42, 0x77, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13,
+};
+
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD
+        [] = {
+            0x05, 0x80, 0x00, 0x07, 0x3E, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x2B, 0x8A, 0x23, 0x7F, 0x3F, 0x1F, 0xB8, 0x4E, 0xC6, 0xA6, 0x8F, 0x58, 0x93,
+            0x09, 0x6E, 0xEE, 0xAD, 0xD7, 0xCB, 0x5F, 0x8C, 0x28, 0x7E, 0xE3, 0x5C, 0x44,
+            0xC2, 0xFA, 0x83, 0xD8, 0x49, 0xE7, 0xA0, 0x04, 0xEA, 0x57, 0x69, 0x78, 0xD6,
+            0x5A, 0x9E, 0x88, 0x9F, 0x50, 0x7B, 0x12, 0xC4, 0x5F, 0xC8, 0x84, 0x95, 0x64,
+            0x6B, 0x2B, 0x0B, 0xEB, 0x45, 0x51, 0x3D, 0x41, 0x8F, 0x45, 0x58, 0x09,
+};
+
+static const witness_payload_t FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_PAYLOADS
+    [] = {
+        {.payload =
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS = {
+        .name = "Sign_tx_with_drep_deregistration_script_certificate_multisig_drep_witness",
+        .raw_tx =
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX,
+        .raw_tx_len = sizeof(
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX),
+        .tx_body_cbor_hex =
+            "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258"
+            "2b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25"
+            "611a002dd2e802182a030a048183118201581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efb"
+            "d69b427713",
+        .expected_hash_hex = "76322f534e070641f0e7cc26962aff0ba3a87f8a5fd7e7a4687c5ca01eb2c2d1",
+        .signing_mode = 6,
+        .network_id = 1,
+        .protocol_magic = 764824073,
+        .num_inputs = 1,
+        .num_outputs = 1,
+        .num_witnesses = 1,
+        .witness_payloads =
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_DEREGISTRATION_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_PAYLOADS,
+        .witness_payload_count = 1,
+        .num_certificates = 1,
+        .num_withdrawals = 0,
+        .num_mint_asset_groups = 0,
+        .include_ttl = true,
+        .include_validity_interval_start = false,
+        .include_aux_data_hash = false,
+        .aux_data_type = 0,
+        .aux_data_init_payload = NULL,
+        .aux_data_init_payload_len = 0,
+        .aux_data_delegations = NULL,
+        .aux_data_delegation_count = 0,
+        .include_script_data_hash = false,
+        .num_collateral_inputs = 0,
+        .num_required_signers = 0,
+        .include_network_id = false,
+        .include_collateral_output = false,
+        .include_total_collateral = false,
+        .num_reference_inputs = 0,
+        .num_voters = 0,
+        .include_treasury = false,
+        .treasury = 0,
+        .include_donation = false,
+        .donation = 0,
+        .aux_data_hash_hex = NULL,
+        .options = 0,
+        .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+        .expected_warning_bits = 0,
+};
+
+// Test 8: Sign_tx_with_drep_update_script_certificate_multisig_drep_witness
+// Source: tests/standalone/input_files/signTx.py > multisig era tests
+//
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX[] = {
+        0x3B, 0x40, 0x26, 0x51, 0x11, 0xD8, 0xBB, 0x3C, 0x3C, 0x60, 0x8D, 0x95, 0xB3, 0xA0, 0xBF,
+        0x83, 0x46, 0x1A, 0xCE, 0x32, 0xD7, 0x93, 0x36, 0x57, 0x9A, 0x19, 0x39, 0xB3, 0xAA, 0xD1,
+        0xC0, 0xB7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3B, 0x01, 0x00, 0x2B, 0x82, 0xD8, 0x18, 0x58,
+        0x21, 0x83, 0x58, 0x1C, 0x9E, 0x1C, 0x71, 0xDE, 0x65, 0x2E, 0xC8, 0xB8, 0x5F, 0xEC, 0x29,
+        0x6F, 0x06, 0x85, 0xCA, 0x39, 0x88, 0x78, 0x1C, 0x94, 0xA2, 0xE1, 0xA5, 0xD8, 0x9D, 0x92,
+        0xF4, 0x5F, 0xA0, 0x00, 0x1A, 0x0D, 0x0C, 0x25, 0x61, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2D,
+        0xD2, 0xE8, 0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x12, 0x01, 0x12, 0x2A, 0x94, 0x6B, 0x9A,
+        0xD3, 0xD2, 0xDD, 0xF0, 0x29, 0xD3, 0xA8, 0x28, 0xF0, 0x46, 0x8A, 0xEC, 0xE7, 0x68, 0x95,
+        0xF1, 0x5C, 0x9E, 0xFB, 0xD6, 0x9B, 0x42, 0x77, 0x01,
+};
+
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD
+        [] = {
+            0x05, 0x80, 0x00, 0x07, 0x3E, 0x80, 0x00, 0x07, 0x17, 0x80, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00,
+};
+
+static const uint8_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_EXPECTED_SIGNATURE
+        [] = {
+            0x85, 0xB2, 0x8B, 0x24, 0x85, 0xFE, 0x45, 0x48, 0xFA, 0x74, 0x04, 0x83, 0x98,
+            0xDE, 0x1A, 0x3E, 0x81, 0x2B, 0x55, 0xE8, 0x05, 0x56, 0x14, 0x34, 0xD3, 0x9D,
+            0x72, 0x80, 0x19, 0x82, 0xA1, 0x68, 0x35, 0xBA, 0xD0, 0x3C, 0x4E, 0xE9, 0xBF,
+            0xB9, 0xB7, 0x90, 0xB7, 0x18, 0xA1, 0xD8, 0x07, 0xC7, 0x28, 0x5D, 0xC1, 0x71,
+            0x87, 0xD1, 0x0A, 0xFF, 0x5F, 0x15, 0xE6, 0x0E, 0x6F, 0x61, 0x10, 0x0D,
+};
+
+static const witness_payload_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_PAYLOADS[] = {
+        {.payload =
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD,
+         .payload_len = sizeof(
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_PAYLOAD),
+         .expected_warning_bits = 0,
+         .expected_signature =
+             FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_0_EXPECTED_SIGNATURE},
+};
+
+static const tx_fixture_t
+    FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS = {
+        .name = "Sign_tx_with_drep_update_script_certificate_multisig_drep_witness",
+        .raw_tx =
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX,
+        .raw_tx_len = sizeof(
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_RAW_TX),
+        .tx_body_cbor_hex =
+            "a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70001818258"
+            "2b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25"
+            "611a002dd2e802182a030a048183128201581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efb"
+            "d69b4277f6",
+        .expected_hash_hex = "558e2375ca642822284a0301845525440dd11796f67b9a668ab9bf45c718d417",
+        .signing_mode = 6,
+        .network_id = 1,
+        .protocol_magic = 764824073,
+        .num_inputs = 1,
+        .num_outputs = 1,
+        .num_witnesses = 1,
+        .witness_payloads =
+            FIXTURE_MULTISIG_SIGN_TX_WITH_DREP_UPDATE_SCRIPT_CERTIFICATE_MULTISIG_DREP_WITNESS_WITNESS_PAYLOADS,
+        .witness_payload_count = 1,
+        .num_certificates = 1,
+        .num_withdrawals = 0,
+        .num_mint_asset_groups = 0,
+        .include_ttl = true,
+        .include_validity_interval_start = false,
+        .include_aux_data_hash = false,
+        .aux_data_type = 0,
+        .aux_data_init_payload = NULL,
+        .aux_data_init_payload_len = 0,
+        .aux_data_delegations = NULL,
+        .aux_data_delegation_count = 0,
+        .include_script_data_hash = false,
+        .num_collateral_inputs = 0,
+        .num_required_signers = 0,
+        .include_network_id = false,
+        .include_collateral_output = false,
+        .include_total_collateral = false,
+        .num_reference_inputs = 0,
+        .num_voters = 0,
+        .include_treasury = false,
+        .treasury = 0,
+        .include_donation = false,
+        .donation = 0,
+        .aux_data_hash_hex = NULL,
+        .options = 0,
+        .blind_signing_mode = BLIND_SIGNING_MODE_DISABLED,
+        .expected_warning_bits = 0,
 };
 
 #if defined(__clang__)

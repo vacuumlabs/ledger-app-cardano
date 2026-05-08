@@ -110,8 +110,9 @@ typedef enum {
     PATH_MULTISIG_STAKING_KEY,
 
     // DRep key
-    // m / 1852' / 1815' / account' / 3 / address_index
+    // m / 185[2/4]' / 1815' / account' / 3 / address_index
     PATH_ORDINARY_DREP_KEY,
+    PATH_MULTISIG_DREP_KEY,
 
     // constitutional committee hot key
     // m / 1852' / 1815' / account' / 4 / address_index

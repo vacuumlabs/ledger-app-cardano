@@ -117,5 +117,6 @@ Brief summary:
 ## Lessons Learned
 
 - 2026-05-08: When a body-processing failure shows a `tx_handle_parse_error` with an exact SWO, cross-reference `cardano_swo.h` first to identify the error category before searching code paths.
+- 2026-05-08: Never use `unsuitable_in_ragger_reason` as a skip mechanism for incomplete/stub tests. Tests added to input files must be run and allowed to fail legitimately — if a test isn't ready, don't add it to the input file. `unsuitable_in_ragger_reason` is only for genuine ragger-specific blockers (e.g. "Seed-dependent"). Also, new test case lists must be imported in the generator's `_load_sign_tx_tests()`. Generator-side logic that mirrors app policy (such as `_is_reasonable_witness_path`) must be kept in sync with the C code when new path types are added.
 
 <!-- Append 1–2 sentence notes here when the model makes a mistake that should be avoided in the future. Format: date, brief description of mistake, and the correct behavior. -->

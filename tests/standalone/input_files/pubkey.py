@@ -356,6 +356,17 @@ testsDRepKeys = [
             "m/1852'/1815'/0'/3/0", UNIT_TEST_MNEMONIC
         ),
     ),
+    PubKeyTestCase(
+        name="Export_pubkey_multisig_drep_key_path_0",
+        path="m/1854'/1815'/0'/3/0",
+        ragger_expect=PubKeyExpectedResult(
+            chainCodeHex="b85f39b418dc2ca1c9622b04caa3fa33f94879f38f1ea05f2498f8040b2a1c9e",
+            publicKeyHex="b7e837b7b4a8f1afe3bd2e180dddeabdf5b49207d16a06c8a3401a8b9da5ce7b",
+        ),
+        unit_test_expect=_derive_pubkey_expected_result(
+            "m/1854'/1815'/0'/3/0", UNIT_TEST_MNEMONIC
+        ),
+    ),
 ]
 
 testsCommitteeColdKeys = [
@@ -561,9 +572,9 @@ denyTestCases = [
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_multisig_chain",
-        path="m/1854'/1815'/0'/3/0",
+        path="m/1854'/1815'/0'/6/0",
         unit_test_expect=_derive_pubkey_expected_result(
-            "m/1854'/1815'/0'/3/0", UNIT_TEST_MNEMONIC
+            "m/1854'/1815'/0'/6/0", UNIT_TEST_MNEMONIC
         ),
     ),
     PubKeyTestCase(
