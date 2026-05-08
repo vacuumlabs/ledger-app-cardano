@@ -236,8 +236,7 @@ void ui_display_transaction(void) {
             review_subtitle = "Multisig transaction";
             break;
         case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
-            review_title = "Unrestricted transaction";
-            review_subtitle = "Review all details";
+            review_subtitle = "Unrestricted signing";
             break;
         default:
             break;
