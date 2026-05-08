@@ -13,7 +13,7 @@ security_policy_t policyForDerivePrivateKey(const bip44_path_t* path) {
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
 
-        case PATH_DREP_KEY:
+        case PATH_ORDINARY_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
 

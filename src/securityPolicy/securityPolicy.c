@@ -174,7 +174,7 @@ static security_policy_t _policyForGetExtendedPublicKey_silent(const bip44_path_
             HIDE();
             break;
 
-        case PATH_DREP_KEY:
+        case PATH_ORDINARY_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
         case PATH_MINT_KEY:
@@ -217,7 +217,7 @@ security_policy_t policyForGetExtendedPublicKey(const bip44_path_t *path, warnin
         case PATH_ORDINARY_STAKING_KEY:
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
-        case PATH_DREP_KEY:
+        case PATH_ORDINARY_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
         case PATH_MINT_KEY:
@@ -1369,7 +1369,7 @@ static inline security_policy_t _policyForSignTxCertificateDRep(sign_tx_signingm
             txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR);
     switch (drep->type) {
         case EXT_DREP_KEY_PATH:
-            DENY_UNLESS(bip44_isDRepKeyPath(&drep->keyPath));
+            DENY_UNLESS(bip44_isOrdinaryDRepKeyPath(&drep->keyPath));
             switch (txSigningMode) {
                 case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
                     break;
@@ -1586,7 +1586,7 @@ security_policy_t policyForSignTxCertificateDRep(sign_tx_signingmode_t txSigning
 
     switch (dRepCredential->type) {
         case EXT_CREDENTIAL_KEY_PATH:
-            DENY_UNLESS(bip44_isDRepKeyPath(&dRepCredential->keyPath));
+            DENY_UNLESS(bip44_isOrdinaryDRepKeyPath(&dRepCredential->keyPath));
             switch (txSigningMode) {
                 case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
                     break;
@@ -2147,7 +2147,7 @@ static bool is_required_signer_allowed(bip44_path_t *path, bool allowPoolColdKey
         case PATH_MULTISIG_STAKING_KEY:
             return true;
 
-        case PATH_DREP_KEY:
+        case PATH_ORDINARY_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
             // no known use case, but also no reason to deny
@@ -2320,7 +2320,7 @@ security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigning
                     break;
 
                 case EXT_VOTER_DREP_KEY_PATH:
-                    DENY_UNLESS(bip44_isDRepKeyPath(&voter->keyPath));
+                    DENY_UNLESS(bip44_isOrdinaryDRepKeyPath(&voter->keyPath));
                     DENY_IF(violatesSingleAccountOrStoreIt(&voter->keyPath));
                     SHOW_IF(mark_unusual_key_derivation(w, &voter->keyPath));
                     SHOW();
@@ -2375,7 +2375,7 @@ security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigning
                     break;
 
                 case EXT_VOTER_DREP_KEY_PATH:
-                    DENY_UNLESS(bip44_isDRepKeyPath(&voter->keyPath));
+                    DENY_UNLESS(bip44_isOrdinaryDRepKeyPath(&voter->keyPath));
                     SHOW_IF(mark_unusual_key_derivation(w, &voter->keyPath));
                     SHOW();
                     break;
@@ -2483,7 +2483,7 @@ static inline security_policy_t _ordinaryWitnessPolicy(const bip44_path_t *path,
             HIDE();
             break;
 
-        case PATH_DREP_KEY:
+        case PATH_ORDINARY_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
             // used to sign certificates and voting procedures
@@ -2558,7 +2558,7 @@ static inline security_policy_t _plutusWitnessPolicy(const bip44_path_t *path,
         case PATH_ORDINARY_STAKING_KEY:
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
-        case PATH_DREP_KEY:
+        case PATH_ORDINARY_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
             SHOW_IF(mark_unusual_key_derivation(w, path));
@@ -2591,7 +2591,7 @@ static inline security_policy_t _unrestrictedWitnessPolicy(const bip44_path_t *p
         case PATH_ORDINARY_STAKING_KEY:
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
-        case PATH_DREP_KEY:
+        case PATH_ORDINARY_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
         case PATH_POOL_COLD_KEY:
@@ -3032,7 +3032,7 @@ security_policy_t policyForSignMsg(const bip44_path_t *witnessPath,
         case PATH_MULTISIG_PAYMENT_KEY:
         case PATH_MULTISIG_STAKING_KEY:
         case PATH_MINT_KEY:
-        case PATH_DREP_KEY:
+        case PATH_ORDINARY_DREP_KEY:
         case PATH_COMMITTEE_COLD_KEY:
         case PATH_COMMITTEE_HOT_KEY:
         case PATH_POOL_COLD_KEY:
