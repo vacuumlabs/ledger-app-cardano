@@ -21,7 +21,7 @@
 //  -----------------------------------------------------------
 #define SETTING_INFO_NB 3
 static const char* const INFO_TYPES[SETTING_INFO_NB] = {"Version", "Developer", "Copyright"};
-static const char* const INFO_CONTENTS[SETTING_INFO_NB] = {APPVERSION, "Vacuumlabs", "(c) 2022 Ledger"};
+static const char* const INFO_CONTENTS[SETTING_INFO_NB] = {APPVERSION, "Vacuumlabs", "(c) 2026 Ledger"};
 
 // settings switches definitions
 enum { SILENT_PUBKEY_EXPORT_TOKEN = FIRST_USER_TOKEN, EXPERT_MODE_TOKEN, BLIND_SIGNING_TOKEN };
