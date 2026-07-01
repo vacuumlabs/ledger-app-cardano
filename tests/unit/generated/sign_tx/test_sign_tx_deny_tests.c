@@ -199,7 +199,7 @@ int main(void) {
     size_t skipped_count = 0;
 
     for (size_t i = 0; i < test_count; i++) {
-        tests[i] = (struct CMUnitTest) {
+        tests[i] = (struct CMUnitTest){
             .name = SIGN_TX_DENY_FIXTURES[i].name,
             .test_func = test_sign_tx_deny_fixture,
             .initial_state = (void *) &SIGN_TX_DENY_FIXTURES[i],
