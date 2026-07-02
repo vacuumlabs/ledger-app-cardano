@@ -4,10 +4,8 @@
 #include "vote_cast_hash_builder.h"
 #include "hash.h"
 
-// this tracing is rarely needed
-// so we want to keep it turned off to avoid polluting the trace log
-
-// #define TRACE_VOTECAST_HASH_BUILDER
+// Define TRACE_VOTECAST_HASH_BUILDER to enable this module's tracing;
+// it is off by default to avoid polluting the trace log.
 
 #ifdef TRACE_VOTECAST_HASH_BUILDER
 #define _TRACE(...)        TRACE(__VA_ARGS__)

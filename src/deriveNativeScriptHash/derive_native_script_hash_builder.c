@@ -5,7 +5,8 @@
 #include "derive_native_script_hash_builder.h"
 #include "cardano_constants.h"
 
-// #define TRACE_NATIVE_SCRIPT_HASH_BUILDER
+// Define TRACE_NATIVE_SCRIPT_HASH_BUILDER to enable this module's tracing;
+// it is off by default to avoid polluting the trace log.
 
 #ifdef TRACE_NATIVE_SCRIPT_HASH_BUILDER
 #define _TRACE(...)        TRACE(__VA_ARGS__)
