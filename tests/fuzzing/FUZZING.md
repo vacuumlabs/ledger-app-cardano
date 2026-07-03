@@ -265,6 +265,36 @@ The shared `corpus/` directory is optional and is used only for manual direct ru
 the fuzzing binaries. The SDK `local_run.sh` workflow manages per-fuzzer corpora under
 `out/<fuzzer>/corpus` automatically.
 
+## Dictionary and seed corpora
+
+The fuzzers ship with a shared **dictionary** and per-harness **seed corpora** to steer
+mutations toward valid APDU/CBOR structure instead of purely random bytes.
+
+### Dictionary
+`dict/cardano.dict` holds APDU (CLA/INS/P1/P2), BIP44 path, CBOR, and Cardano-constant
+tokens (values sourced from `src/apdu/dispatcher.h`, `src/cardano_constants.h`,
+`src/addressUtils/bip44.h`). It is applied automatically:
+- `run_all_fuzzers.sh` adds `-dict=dict/cardano.dict` to every run.
+- `.clusterfuzzlite/build.sh` copies it to `<fuzzer>.dict` in `$OUT`, which
+  OSS-Fuzz/ClusterFuzzLite auto-loads.
+- Manual run: `./build/fuzz_signTx -dict=dict/cardano.dict`.
+
+### Seed corpora
+`seeds/<fuzzer>/` holds real, valid APDUs extracted from the committed unit fixtures
+(`tests/unit/generated/`) by `generate_seed_corpus.py`. Regenerate after fixtures change:
+
+    python3 tests/fuzzing/generate_seed_corpus.py
+
+They are consumed automatically:
+- `run_all_fuzzers.sh` passes `seeds/<fuzzer>/` as an extra read-only corpus dir.
+- `.clusterfuzzlite/build.sh` zips each into `<fuzzer>_seed_corpus.zip` for OSS-Fuzz.
+
+Currently seeded: `fuzz_signTx`, `fuzz_all_handlers`, `fuzz_getPublicKeys`,
+`fuzz_deriveAddress`, `fuzz_signOpCert`, `fuzz_deriveNativeScriptHash`, `fuzz_cvote_aux_parser`
+(cvote uses the raw init payload with no APDU framing; sign_msg APDUs feed `fuzz_all_handlers`).
+Not yet seeded: the main sign_tx `tx_fixture_t` fixtures store CBOR rather than APDUs, so those
+aren't extracted.
+
 ## Notes
 
 - Fuzzing requires **Clang** compiler
