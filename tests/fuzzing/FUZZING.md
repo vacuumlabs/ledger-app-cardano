@@ -134,6 +134,7 @@ The SDK provides `local_run.sh` for building and running fuzzers with proper san
 and coverage support. This is the recommended method.
 
 ```bash
+export BOLOS_SDK=${FLEX_SDK} # Enforce a valid sdk path
 cd tests/fuzzing
 
 # Remove any stale build cache copied from a container run under /app.
@@ -141,6 +142,9 @@ rm -rf build
 
 # Select a supported SDK target explicitly when BOLOS_SDK has no .target file.
 export TARGET=stax  # or: export TARGET=flex
+
+# Install missing dependencies
+apt-get update -y && apt install clang lld -y
 
 # Build all fuzzers
 ${BOLOS_SDK}/fuzzing/local_run.sh \
