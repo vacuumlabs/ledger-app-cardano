@@ -246,10 +246,10 @@
     "decimals": 6
   },
   {
-    "assetSubject": "8a1cfae21368b8bebbbed9800fec304e95cce39a2a57dc35e2e3ebaa4d494c4b",
+    "assetSubject": "afbe91c0b44b3040e360057bf8354ead8c49c4979ae6ab7c4fbdc9eb4d494c4b7632",
     "name": "MILK",
     "ticker": "MILK",
-    "decimals": 0
+    "decimals": 6
   },
   {
     "assetSubject": "a89568bb399d0cdc38367e47831c95186f5c79e58174e08a182323964554424643546f6b656e",
@@ -450,10 +450,10 @@
     "decimals": 0
   },
   {
-    "assetSubject": "c7dcfa416c127f630b263c7e0fe0564430cfa9c56bba43e1a37c6915474f4b4559",
+    "assetSubject": "ab0dec21aa7d939ad124ffaf95faf8ed72b1018ff72fffd8f9974907474f4b4559",
     "name": "GoKey",
     "ticker": "GOKEY",
-    "decimals": 0
+    "decimals": 6
   },
   {
     "assetSubject": "97747aa3c33fdfe4b5faa7bb8b4534932c6d980cb13c14c5a547e7ca70757272414441",
@@ -631,8 +631,8 @@
   },
   {
     "assetSubject": "51a5e236c4de3af2b8020442e2a26f454fda3b04cb621c1294a0ef34424f4f4b",
-    "name": "BOOK",
-    "ticker": "BOOK",
+    "name": "STUFF",
+    "ticker": "STUFF",
     "decimals": 6
   },
   {
@@ -739,7 +739,7 @@
   },
   {
     "assetSubject": "2b28c81dbba6d67e4b5a997c6be1212cba9d60d33f82444ab8b1f21842414e4b",
-    "name": "Bankercoin",
+    "name": "Bank",
     "ticker": "BANK",
     "decimals": 0
   },
@@ -787,8 +787,8 @@
   },
   {
     "assetSubject": "75fcc276057db5fc48eae0e11453c773c8a54604c3086bf9d95ac1b743485259",
-    "name": "CherryLend",
-    "ticker": "CHRY",
+    "name": "Nova Finance",
+    "ticker": "NOVA",
     "decimals": 6
   },
   {
@@ -796,5 +796,267 @@
     "name": "USDM",
     "ticker": "USDM",
     "decimals": 6
+  },
+  {
+    "assetSubject": "1f3aec8bfe7ea4fe14c5f121e2a92e301afe414147860d557cac7e345553444378",
+    "name": "USDCx",
+    "ticker": "USDCx",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "7d9e4a0ee1a3f5d5ff8159ea91a83310cf2795ee7a87170c7aea05ae55534472",
+    "name": "USDr",
+    "ticker": "USDR",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "7d9e4a0ee1a3f5d5ff8159ea91a83310cf2795ee7a87170c7aea05ae7355534472",
+    "name": "sUSDr",
+    "ticker": "SUSDR",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "0691b2fecca1ac4f53cb6dfb00b7013e561d1f34403b957cbb5af1fa4e49474854",
+    "name": "NIGHT",
+    "ticker": "NIGHT",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "f13ac4d66b3ee19a6aa0f2a22298737bd907cc95121662fc971b5275535452494b45",
+    "name": "STRIKE",
+    "ticker": "STRIKE",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "fe7c786ab321f41c654ef6c1af7b3250a613c24e4213e0425a7ae45655534441",
+    "name": "USDA",
+    "ticker": "USDA",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "eb7a93ebc321647673490810f618b548d7c24aa64d30ae342dba70760014df10415343454e44",
+    "name": "Ascend",
+    "ticker": "ASCEND",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "9ff9a1b456f074e03be90631e1a5f9b6ed08eacabd0e7f95a11ffff10014df1041544c4153",
+    "name": "ATLAS",
+    "ticker": "ATLAS",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "e992ef75f2367e6ecd93716ae88eba0d005dd91fd3a21f650b6496b55355524745",
+    "name": "SURGE",
+    "ticker": "SURGE",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "e5a42a1a1d3d1da71b0449663c32798725888d2eb0843c4dabeca05a576f726c644d6f62696c65546f6b656e58",
+    "name": "World Mobile Token X",
+    "ticker": "WMTX",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "49e423161ef818adc475c783571cb479d5f15ad52a01a240eacc0d3b434f434b",
+    "name": "COCK",
+    "ticker": "COCK",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "e824c0011176f0926ad51f492bcc63ac6a03a589653520839dc7e3d9464554",
+    "name": "Artificial Superintelligence Alliance Token",
+    "ticker": "FET",
+    "decimals": 8
+  },
+  {
+    "assetSubject": "2d9db8a89f074aa045eab177f23a3395f62ced8b53499a9e4ad46c80464c4f57",
+    "name": "SURF",
+    "ticker": "SURF",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "5b26e685cc5c9ad630bde3e3cd48c694436671f3d25df53777ca60ef4e564c",
+    "name": "NuvolaDigital",
+    "ticker": "NVL",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "bf3e19192da77dfadc7c9065944e50ca7e1a439d90833e3ae58b720a44414e5a4f",
+    "name": "DANZO",
+    "ticker": "DANZO",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "1b99120f61cd9c30938661b5144a352857431a14b2334faef8a180c7424644526f636b6574436f696e",
+    "name": "BFD Rocket Coin",
+    "ticker": "BFD",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "31bdb2d8ed6e2623e121b6db134a1491f4252b9ea87d928eb5290026496e66696e69747920526973696e67",
+    "name": "Infinity Rising Token",
+    "ticker": "RISE",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "5deab590a137066fef0e56f06ef1b830f21bc5d544661ba570bdd2ae424f44454741",
+    "name": "BODEGA",
+    "ticker": "BODEGA",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "6d06570ddd778ec7c0cca09d381eca194e90c8cffa7582879735dbde584552",
+    "name": "Xerberus DAO LLC",
+    "ticker": "XER",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "c881c20e49dbaca3ff6cef365969354150983230c39520b917f5cf7c4e696b65",
+    "name": "NikePig",
+    "ticker": "NIKEPIG",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "2da97f55d49be13dabc8450a2eabab0412f3075a03f7519d32d469250014df1050554c5345",
+    "name": "PULSE",
+    "ticker": "PULSE",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "577f0b1342f8f8f4aed3388b80a8535812950c7a892495c0ecdf0f1e0014df10464c4454",
+    "name": "FLDT",
+    "ticker": "FLDT",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "63fa34b8a71996b3736bb2a0d5de4aad81722f6fa06536540b34c6124e41444f",
+    "name": "NADO",
+    "ticker": "NADO",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "017af5d958fffdf65f3e5b8b3ff5abefd210a03464a9fc48ea0f4a390014df10574c4b",
+    "name": "WALK",
+    "ticker": "WLK",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "8cfd6893f5f6c1cc954cec1a0a1460841b74da6e7803820dde62bb78524a56",
+    "name": "Rejuve Token",
+    "ticker": "RJV",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "b7c5cd554f3e83c8aa0900a0c9053284a5348244d23d0406c28eaf4d50414c4d0a",
+    "name": "PALM Economy Token",
+    "ticker": "PALM",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "7507734918533b3b896241b4704f3d4ce805256b01da6fcede43043642616279534e454b",
+    "name": "BabySNEK",
+    "ticker": "BBSNEK",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "4190b2941d9be04acc69c39739bd5acc66d60ccab480d8e20bc87e3763425443",
+    "name": "cBTC",
+    "ticker": "cBTC",
+    "decimals": 8
+  },
+  {
+    "assetSubject": "97075bf380e65f3c63fb733267adbb7d42eec574428a754d2abca55b436861726c6573207468652043686164",
+    "name": "Charles the Chad",
+    "ticker": "CHAD",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "4ffaa4ef3217df37c4995bb96066af4cb68dfcc66b9f2a10e0c333b95779726d73746f6e65",
+    "name": "Wyrmstone",
+    "ticker": "WYRM",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "10a49b996e2402269af553a8a96fb8eb90d79e9eca79e2b4223057b64745524f",
+    "name": "GERO",
+    "ticker": "GERO",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "5c1c91a65bedac56f245b8184b5820ced3d2f1540e521dc1060fa6834a454c4c59",
+    "name": "JELLY",
+    "ticker": "JELLY",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "375df3f2fb44d3c42b3381a09edd4ea2303a57ada32b5308c0774ee0544f4b45",
+    "name": "TOKE",
+    "ticker": "TOKE",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "9f452e23804df3040b352b478039357b506ad3b50d2ce0d7cbd5f806435456",
+    "name": "CTV Governance Token",
+    "ticker": "CTV",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "5aa591a3a324aef2e168a3819f619488fdd19451b4040fcfe2633eb86341503358",
+    "name": "cAP3X",
+    "ticker": "cAP3X",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "c448753e6dac6d4d3508e47f636122c715e3c8575955ae77307b305f696e76616461",
+    "name": "invada",
+    "ticker": "invada",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "590f6d119b214cdcf7ef7751f8b7f1de615ff8f6de097a5ce62b257b534841524c",
+    "name": "Sharl Huskens",
+    "ticker": "SHARL",
+    "decimals": 0
+  },
+  {
+    "assetSubject": "4fde92c2f6dbcfa2879b44f7453872b31394cfb2f70f1d4c411169ac427562626c65",
+    "name": "Bubble",
+    "ticker": "BUBBLE",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "8483844875ce4d61c2aa459240f277d32081ee08fe0ad16899a0f5810014df10544954414e",
+    "name": "TITAN",
+    "ticker": "TITAN",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "f6696363e9196289ef4f2b4bf34bc8acca5352cdc7509647afe6888f54454459",
+    "name": "TeddySwap",
+    "ticker": "TEDY",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "a2944573e99d2ed3055b808eaa264f0bf119e01fc6b18863067c63e44d454c44",
+    "name": "MELD",
+    "ticker": "MELD",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "ee0633e757fdd1423220f43688c74678abde1cead7ce265ba8a24fcd43424c50",
+    "name": "CBLP",
+    "ticker": "CBLP",
+    "decimals": 6
+  },
+  {
+    "assetSubject": "25c5de5f5b286073c593edfd77b48abc7a48e5a4f3d4cd9d428ff93555534443",
+    "name": "USDC",
+    "decimals": 8
+  },
+  {
+    "assetSubject": "25c5de5f5b286073c593edfd77b48abc7a48e5a4f3d4cd9d428ff935425443",
+    "name": "BTC",
+    "decimals": 8
   }
 ]
