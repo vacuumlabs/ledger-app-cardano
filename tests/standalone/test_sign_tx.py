@@ -447,9 +447,7 @@ def _check_ragger_expect_sign_tx(
         )
 
 
-@pytest.mark.parametrize("expert_mode", [False, True], ids=["non_expert", "expert"])
-@pytest.mark.parametrize(
-    "testCase",
+all_sign_tx_test_cases = (
     testsByron
     + testsMary
     + testsShelleyNoCertificates
@@ -469,9 +467,37 @@ def _check_ragger_expect_sign_tx(
     + testsCVoteRegistrationCIP36
     + testsMultisig
     + poolRegistrationOwnerTestCases
-    + poolRegistrationOperatorTestCases,
-    ids=idTestFunc,
+    + poolRegistrationOperatorTestCases
 )
+
+
+def _expert_modes_for(testCase: SignTxTestCase) -> list[bool]:
+    """Expert-mode variants to run for a given test case.
+
+    UNRESTRICTED signing is expert-only, so we only generate the ``expert`` item
+    for those cases. Previously both variants were generated and the ``non_expert``
+    one was skipped at runtime, which inflated the ragger skip count.
+    """
+    if testCase.signingMode == TransactionSigningMode.UNRESTRICTED:
+        return [True]
+    return [False, True]
+
+
+sign_tx_params = [(expert_mode, testCase) for testCase in all_sign_tx_test_cases for expert_mode in _expert_modes_for(testCase)]
+
+
+def _sign_tx_id(value: "bool | SignTxTestCase") -> str:
+    """Combined-parametrize id callable.
+
+    pytest invokes it once per argvalue and joins the results with ``-``, so this
+    preserves the historical ``<expert>-<case>`` node ids (e.g. ``expert-Byron_...``).
+    """
+    if isinstance(value, bool):
+        return "expert" if value else "non_expert"
+    return value.name
+
+
+@pytest.mark.parametrize("expert_mode,testCase", sign_tx_params, ids=_sign_tx_id)
 def test_sign_tx(
     device: Device,
     backend: BackendInterface,
@@ -495,8 +521,6 @@ def test_sign_tx(
             testCase.unsuitable_in_ragger_reason,
         ],
     )
-    if testCase.signingMode == TransactionSigningMode.UNRESTRICTED and not expert_mode:
-        pytest.skip("Unrestricted signing mode requires expert mode")
 
     # Force the requested expert-mode state via the on-device settings menu.
     settings_set(
