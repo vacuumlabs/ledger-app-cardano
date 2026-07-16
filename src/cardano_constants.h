@@ -40,6 +40,21 @@ _Static_assert(LOVELACE_MAX_SUPPLY < LOVELACE_INVALID, "LOVELACE_INVALID must ex
 #define REWARD_ACCOUNT_LENGTH (1 + ADDRESS_KEY_HASH_LENGTH)
 
 /**
+ * Governance identifiers (CIP-0129): 1-byte header followed by the 28-byte credential hash.
+ * Header: high nibble = key type, low nibble = credential type.
+ */
+#define GOVERNANCE_ID_KEY_TYPE_COMMITTEE_HOT  0x0
+#define GOVERNANCE_ID_KEY_TYPE_COMMITTEE_COLD 0x1
+#define GOVERNANCE_ID_KEY_TYPE_DREP           0x2
+#define GOVERNANCE_ID_CREDENTIAL_KEY_HASH     0x2
+#define GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH  0x3
+#define GOVERNANCE_ID_HEADER(keyType, credentialType) \
+    ((uint8_t) (((keyType) << 4) | (credentialType)))
+#define GOVERNANCE_ID_LENGTH                  (1 + SCRIPT_HASH_LENGTH)
+#define GOVERNANCE_ACTION_ID_LENGTH           (TX_HASH_LENGTH + 1)
+#define GOVERNANCE_ACTION_ID_MAX_BECH32_INDEX 255
+
+/**
  * Network IDs and protocol magics.
  */
 #define MAINNET_NETWORK_ID     1

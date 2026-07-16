@@ -73,6 +73,50 @@ static void render_credential(const ext_credential_t *credential,
     }
 }
 
+// Governance credentials are shown as CIP-0129 identifiers: bech32 over a 1-byte
+// header (key type + credential type) followed by the credential hash.
+static void render_governance_credential(const ext_credential_t *credential,
+                                         const char *key_path_label,
+                                         const char *key_hash_label,
+                                         const char *script_hash_label,
+                                         const char *bech32_prefix,
+                                         uint8_t key_type) {
+    ASSERT(credential != NULL);
+
+    switch (credential->type) {
+        case EXT_CREDENTIAL_KEY_PATH:
+            UI_ADD_FORMAT1(key_path_label,
+                           MAX_BIP44_PATH_STRING_LENGTH,
+                           format_bip44_path,
+                           &credential->keyPath);
+            break;
+        case EXT_CREDENTIAL_KEY_HASH:
+            ASSERT(credential->keyHash != NULL);
+            UI_ADD_FORMAT4(key_hash_label,
+                           MAX_BECH32_STRING_LENGTH,
+                           format_governance_identifier,
+                           bech32_prefix,
+                           GOVERNANCE_ID_HEADER(key_type, GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
+                           credential->keyHash,
+                           ADDRESS_KEY_HASH_LENGTH);
+            break;
+        case EXT_CREDENTIAL_SCRIPT_HASH:
+            ASSERT(credential->scriptHash != NULL);
+            UI_ADD_FORMAT4(script_hash_label,
+                           MAX_BECH32_STRING_LENGTH,
+                           format_governance_identifier,
+                           bech32_prefix,
+                           GOVERNANCE_ID_HEADER(key_type, GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
+                           credential->scriptHash,
+                           SCRIPT_HASH_LENGTH);
+            break;
+        // LCOV_EXCL_START
+        default:
+            LEDGER_ASSERT(false, "Unknown credential type");
+            // LCOV_EXCL_STOP
+    }
+}
+
 static void render_stake_credential(const ext_credential_t *credential) {
     render_credential(credential,
                       UI_STATIC_LABEL("Stake key"),
@@ -92,30 +136,30 @@ static void render_voter_credential(const ext_credential_t *credential) {
 }
 
 static void render_drep_credential(const ext_credential_t *credential) {
-    render_credential(credential,
-                      UI_STATIC_LABEL("DRep key"),
-                      UI_STATIC_LABEL("DRep key hash"),
-                      BECH32_PREFIX_DREP_KEY_HASH,
-                      UI_LABEL_BY_SCREEN("DRep script hash", "DRep script"),
-                      BECH32_PREFIX_DREP_SCRIPT_HASH);
+    render_governance_credential(credential,
+                                 UI_STATIC_LABEL("DRep key"),
+                                 UI_STATIC_LABEL("DRep key hash"),
+                                 UI_LABEL_BY_SCREEN("DRep script hash", "DRep script"),
+                                 BECH32_PREFIX_DREP,
+                                 GOVERNANCE_ID_KEY_TYPE_DREP);
 }
 
 static void render_committee_cold_credential(const ext_credential_t *credential) {
-    render_credential(credential,
-                      UI_LABEL_BY_SCREEN("Committee cold key", "Cmte c key"),
-                      UI_LABEL_BY_SCREEN("Committee cold key hash", "Cmte c key"),
-                      BECH32_PREFIX_COMMITTEE_COLD_KEY_HASH,
-                      UI_LABEL_BY_SCREEN("Committee cold script hash", "Cmte c scr"),
-                      BECH32_PREFIX_COMMITTEE_COLD_SCRIPT_HASH);
+    render_governance_credential(credential,
+                                 UI_LABEL_BY_SCREEN("Committee cold key", "Cmte c key"),
+                                 UI_LABEL_BY_SCREEN("Committee cold key hash", "Cmte c key"),
+                                 UI_LABEL_BY_SCREEN("Committee cold script hash", "Cmte c scr"),
+                                 BECH32_PREFIX_COMMITTEE_COLD,
+                                 GOVERNANCE_ID_KEY_TYPE_COMMITTEE_COLD);
 }
 
 static void render_committee_hot_credential(const ext_credential_t *credential) {
-    render_credential(credential,
-                      UI_LABEL_BY_SCREEN("Committee hot key", "Cmte hot key"),
-                      UI_LABEL_BY_SCREEN("Committee hot key hash", "Cmte hot key"),
-                      BECH32_PREFIX_COMMITTEE_HOT_KEY_HASH,
-                      UI_LABEL_BY_SCREEN("Committee hot script hash", "Cmte hot scr"),
-                      BECH32_PREFIX_COMMITTEE_HOT_SCRIPT_HASH);
+    render_governance_credential(credential,
+                                 UI_LABEL_BY_SCREEN("Committee hot key", "Cmte hot key"),
+                                 UI_LABEL_BY_SCREEN("Committee hot key hash", "Cmte hot key"),
+                                 UI_LABEL_BY_SCREEN("Committee hot script hash", "Cmte hot scr"),
+                                 BECH32_PREFIX_COMMITTEE_HOT,
+                                 GOVERNANCE_ID_KEY_TYPE_COMMITTEE_HOT);
 }
 
 static void render_drep(const ext_drep_t *drep, const char *label) {
@@ -128,19 +172,23 @@ static void render_drep(const ext_drep_t *drep, const char *label) {
             break;
         case EXT_DREP_KEY_HASH:
             ASSERT(drep->keyHash != NULL);
-            UI_ADD_FORMAT3(label,
+            UI_ADD_FORMAT4(label,
                            MAX_BECH32_STRING_LENGTH,
-                           format_bech32,
-                           BECH32_PREFIX_DREP_KEY_HASH,
+                           format_governance_identifier,
+                           BECH32_PREFIX_DREP,
+                           GOVERNANCE_ID_HEADER(GOVERNANCE_ID_KEY_TYPE_DREP,
+                                                GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
                            drep->keyHash,
                            ADDRESS_KEY_HASH_LENGTH);
             break;
         case EXT_DREP_SCRIPT_HASH:
             ASSERT(drep->scriptHash != NULL);
-            UI_ADD_FORMAT3(label,
+            UI_ADD_FORMAT4(label,
                            MAX_BECH32_STRING_LENGTH,
-                           format_bech32,
-                           BECH32_PREFIX_DREP_SCRIPT_HASH,
+                           format_governance_identifier,
+                           BECH32_PREFIX_DREP,
+                           GOVERNANCE_ID_HEADER(GOVERNANCE_ID_KEY_TYPE_DREP,
+                                                GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
                            drep->scriptHash,
                            SCRIPT_HASH_LENGTH);
             break;
