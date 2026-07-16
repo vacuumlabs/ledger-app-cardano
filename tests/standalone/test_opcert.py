@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -8,7 +7,6 @@ This module provides Ragger tests for Operational Certificate check
 """
 
 import pytest
-
 from ledgered.devices import Device
 from ragger.backend import BackendInterface
 from ragger.error import ExceptionRAPDU
@@ -16,23 +14,21 @@ from ragger.navigator import Navigator
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 
 from tests.application_client.command_builder import CLA, InsType, P1Type, P2Type
-from tests.application_client.status_words import StatusWord
 from tests.application_client.command_sender import CommandSender
 from tests.application_client.response_unpacker import unpack_sign_opcert_response
-
+from tests.application_client.status_words import StatusWord
 from tests.standalone.input_files.signOpCert import (
-    opCertTestCases,
+    OpCertDenyTestCase,
     OpCertTestCase,
     opCertDenyTestCases,
-    OpCertDenyTestCase,
+    opCertTestCases,
 )
-
 from tests.standalone.utils import (
+    NavContext,
+    assert_expected_deny_and_app_alive,
     idTestFunc,
     review_approve,
     verify_signature,
-    NavContext,
-    assert_expected_deny_and_app_alive,
 )
 
 
@@ -64,7 +60,7 @@ def test_opCert(
 
     signature = unpack_sign_opcert_response(response.data)
 
-    msg = bytes()
+    msg = b""
     msg += bytes.fromhex(testCase.opCert.kesPublicKeyHex)
     msg += testCase.opCert.issueCounter.to_bytes(8, "big")
     msg += testCase.opCert.kesPeriod.to_bytes(8, "big")
@@ -76,9 +72,7 @@ def test_opCert(
 def _check_ragger_expect_opcert(testCase: OpCertTestCase, signature: bytes) -> None:
     if testCase.ragger_expect is None:
         pytest.fail(f"Missing ragger_expect for opcert fixture {testCase.name!r}")
-    assert signature.hex() == testCase.ragger_expect.signatureHex, (
-        f"Signature mismatch for {testCase.name!r}"
-    )
+    assert signature.hex() == testCase.ragger_expect.signatureHex, f"Signature mismatch for {testCase.name!r}"
 
 
 @pytest.mark.parametrize("testCase", opCertDenyTestCases, ids=idTestFunc)

@@ -5,14 +5,12 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-
 from tests.unit.generators.common import (
     read_file_safe,
-    write_generated_c_file,
     sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_PUBKEY_DIR
-
 
 _FIXTURE_ARRAY_PATTERN = re.compile(
     r"^static\s+const\s+pubkey_fixture_t\s+(PUBKEY_FIXTURES_[A-Z0-9_]+)\s*\[\]\s*=\s*\{",
@@ -36,9 +34,7 @@ def _extract_fixture_array_names(header_content: str) -> list[str]:
     return [match.group(1) for match in _FIXTURE_ARRAY_PATTERN.finditer(header_content)]
 
 
-def _extract_fixtures_for_array(
-    header_content: str, array_name: str
-) -> list[FixtureDetails]:
+def _extract_fixtures_for_array(header_content: str, array_name: str) -> list[FixtureDetails]:
     array_pattern = re.compile(
         rf"static\s+const\s+pubkey_fixture_t\s+{re.escape(array_name)}\s*\[\]\s*=\s*\{{(.*?)\}};",
         re.DOTALL,
@@ -98,18 +94,14 @@ def _build_test_functions(arrays: list[FixtureArrayDetails]) -> tuple[str, list[
     test_function_names: list[str] = []
 
     for array in arrays:
-        array_suffix = array.array_name.replace(
-            "PUBKEY_FIXTURES_TEST_PUBKEY_", ""
-        ).lower()
+        array_suffix = array.array_name.replace("PUBKEY_FIXTURES_TEST_PUBKEY_", "").lower()
         for fixture in array.fixtures:
             sanitized = sanitize_c_identifier(
                 fixture.name,
                 uppercase=False,
                 handle_leading_digit=True,
             )
-            test_function_name = (
-                f"test_pubkey_{array_suffix}_{sanitized}_{fixture.index}"
-            )
+            test_function_name = f"test_pubkey_{array_suffix}_{sanitized}_{fixture.index}"
             test_functions.append(
                 f"static void {test_function_name}(void **state) {{\n"
                 f"    (void) state;\n"
@@ -122,9 +114,7 @@ def _build_test_functions(arrays: list[FixtureArrayDetails]) -> tuple[str, list[
 
 
 def _build_main_function(test_function_names: list[str]) -> str:
-    registrations = ",\n        ".join(
-        f"cmocka_unit_test({name})" for name in test_function_names
-    )
+    registrations = ",\n        ".join(f"cmocka_unit_test({name})" for name in test_function_names)
 
     return (
         "int main(void) {\n"

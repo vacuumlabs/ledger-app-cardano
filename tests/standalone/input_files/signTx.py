@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -7,22 +6,18 @@
 This module provides Ragger tests for Sign TX check
 """
 
-from typing import List, Optional, cast
 from dataclasses import dataclass, field
 from enum import Enum, auto
+from typing import cast
+
 import base58
 
 from tests.application_client.command_builder import (
-    AddressParams,
-    AddressType,
-    FakeNet,
-    NetworkDesc,
-    Mainnet,
-    Testnet,
-    Testnet_legacy,
     AccountRegistrationDelegationToDRepParams,
     AccountRegistrationDelegationToStakePoolAndDRepParams,
     AccountRegistrationDelegationToStakePoolParams,
+    AddressParams,
+    AddressType,
     AnchorParams,
     AssetGroup,
     AuthorizeCommitteeParams,
@@ -39,9 +34,12 @@ from tests.application_client.command_builder import (
     DRepParamsType,
     DRepRegistrationParams,
     DRepUpdateParams,
+    FakeNet,
     GovActionId,
+    Mainnet,
     Margin,
     MultiHostRelayParams,
+    NetworkDesc,
     PoolKey,
     PoolKeyType,
     PoolMetadataParams,
@@ -57,6 +55,8 @@ from tests.application_client.command_builder import (
     StakePoolAndDRepDelegationParams,
     StakeRegistrationConwayParams,
     StakeRegistrationParams,
+    Testnet,
+    Testnet_legacy,
     ThirdPartyAddressParams,
     Token,
     Transaction,
@@ -73,9 +73,9 @@ from tests.application_client.command_builder import (
     TxOutputDestinationType,
     TxOutputFormat,
     TxRequiredSignerType,
+    Vote,
     VoteDelegationParams,
     VoteOption,
-    Vote,
     Voter,
     VoterType,
     VoterVotes,
@@ -90,13 +90,13 @@ from tests.standalone.input_files.derive_address import pointer_to_str
 @dataclass(frozen=True)
 class Witness:
     path: str
-    witnessSignatureHex: Optional[str] = None
+    witnessSignatureHex: str | None = None
 
 
 @dataclass(kw_only=True, frozen=True)
 class SignTxRaggerExpect:
-    txHashHex: Optional[str] = None
-    witnesses: Optional[tuple[Witness, ...]] = None
+    txHashHex: str | None = None
+    witnesses: tuple[Witness, ...] | None = None
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -114,28 +114,20 @@ class BlindSigningMode(Enum):
 @dataclass(kw_only=True, frozen=True)
 class SignTxTestCase:
     name: str
-    tx: Optional[Transaction] = None
-    signingMode: Optional[TransactionSigningMode] = None
-    unit_test_expect: Optional[SignTxUnitTestExpect] = None
+    tx: Transaction | None = None
+    signingMode: TransactionSigningMode | None = None
+    unit_test_expect: SignTxUnitTestExpect | None = None
     options: bool = False
     additionalWitnessPaths: tuple[str, ...] = field(default_factory=tuple)
-    expected_swo: Optional[StatusWord] = StatusWord.SWO_SUCCESS
+    expected_swo: StatusWord | None = StatusWord.SWO_SUCCESS
     expected_warnings: tuple[WarningBit, ...] = field(default_factory=tuple)
-    expected_aux_warnings: tuple[WarningBit, ...] = field(
-        default_factory=tuple
-    )  # Warnings in auxiliary data (CVote) review
-    unsuitable_in_ragger_reason: Optional[str] = (
-        None  # If set, explains why this vector is unsuitable for direct ragger execution
-    )
-    deny_before_review: bool = (
-        False  # For deny tests that fail before review UI is displayed
-    )
-    tx_streaming: bool = (
-        False  # True when the tx body review uses NBGL streaming (multiple chunks)
-    )
+    expected_aux_warnings: tuple[WarningBit, ...] = field(default_factory=tuple)  # Warnings in auxiliary data (CVote) review
+    unsuitable_in_ragger_reason: str | None = None  # If set, explains why this vector is unsuitable for direct ragger execution
+    deny_before_review: bool = False  # For deny tests that fail before review UI is displayed
+    tx_streaming: bool = False  # True when the tx body review uses NBGL streaming (multiple chunks)
     blind_signing_mode: BlindSigningMode = BlindSigningMode.DISABLED
-    ragger_expect: Optional[SignTxRaggerExpect] = None
-    required_expert_mode: Optional[bool] = None
+    ragger_expect: SignTxRaggerExpect | None = None
+    required_expert_mode: bool | None = None
 
 
 # pylint: disable=line-too-long
@@ -164,12 +156,8 @@ inputs: dict[str, TxInput] = {
         "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
         "m/1852'/1815'/456'/0/0",
     ),
-    "utxoMultisig": TxInput(
-        "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7"
-    ),
-    "utxoNoPath": TxInput(
-        "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7"
-    ),
+    "utxoMultisig": TxInput("3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7"),
+    "utxoNoPath": TxInput("3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7"),
     "utxoWithPath0": TxInput(
         "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
         "m/1852'/1815'/0'/0/0",
@@ -179,11 +167,7 @@ inputs: dict[str, TxInput] = {
 destinations: dict[str, TxOutputDestination] = {
     "externalByronMainnet": TxOutputDestination(
         TxOutputDestinationType.THIRD_PARTY,
-        ThirdPartyAddressParams(
-            base58.b58decode(
-                "Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2"
-            ).hex()
-        ),
+        ThirdPartyAddressParams(base58.b58decode("Ae2tdPwUPEZCanmBz5g2GEwFqKTKpNJcGYPKfDxoNeKZ8bRHr8366kseiK2").hex()),
     ),
     "externalByronDaedalusMainnet": TxOutputDestination(
         TxOutputDestinationType.THIRD_PARTY,
@@ -195,11 +179,7 @@ destinations: dict[str, TxOutputDestination] = {
     ),
     "externalByronTestnet": TxOutputDestination(
         TxOutputDestinationType.THIRD_PARTY,
-        ThirdPartyAddressParams(
-            base58.b58decode(
-                "2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA"
-            ).hex()
-        ),
+        ThirdPartyAddressParams(base58.b58decode("2657WMsDfac6Cmfg4Varph2qyLKGi2K9E8jrtvjHVzfSjmbTMGy5sY3HpxCKsmtDA").hex()),
     ),
     "internalByronMainnet": TxOutputDestination(
         TxOutputDestinationType.DEVICE_OWNED,
@@ -332,9 +312,7 @@ destinations: dict[str, TxOutputDestination] = {
     "trezorParityDatumHash": TxOutputDestination(
         TxOutputDestinationType.THIRD_PARTY,
         # bech32 addr1w9rhu54nz94k9l5v6d9rzfs47h7dv7xffcwkekuxcx3evnqpvuxu0
-        ThirdPartyAddressParams(
-            "71477e52b3116b62fe8cd34a312615f5fcd678c94e1d6cdb86c1a3964c"
-        ),
+        ThirdPartyAddressParams("71477e52b3116b62fe8cd34a312615f5fcd678c94e1d6cdb86c1a3964c"),
     ),
     "externalShelleyBaseKeyhashScripthash": TxOutputDestination(
         TxOutputDestinationType.THIRD_PARTY,
@@ -418,41 +396,19 @@ destinations: dict[str, TxOutputDestination] = {
 }
 
 outputs: dict[str, TxOutput] = {
-    "externalByronMainnet": TxOutputAlonzo(
-        destinations["externalByronMainnet"], 3003112
-    ),
-    "externalByronDaedalusMainnet": TxOutputAlonzo(
-        destinations["externalByronDaedalusMainnet"], 3003112
-    ),
-    "externalByronTestnet": TxOutputAlonzo(
-        destinations["externalByronTestnet"], 3003112
-    ),
-    "internalByronMainnet": TxOutputAlonzo(
-        destinations["internalByronMainnet"], 3003112
-    ),
-    "internalBaseWithStakingPath": TxOutputAlonzo(
-        destinations["internalBaseWithStakingPath"], 7120787
-    ),
-    "internalBaseWithStakingPathBabbage": TxOutputBabbage(
-        destinations["internalBaseWithStakingPath"], 7120787
-    ),
-    "internalBaseWithStakingKeyHash": TxOutputAlonzo(
-        destinations["internalBaseWithStakingKeyHash"], 7120787
-    ),
+    "externalByronMainnet": TxOutputAlonzo(destinations["externalByronMainnet"], 3003112),
+    "externalByronDaedalusMainnet": TxOutputAlonzo(destinations["externalByronDaedalusMainnet"], 3003112),
+    "externalByronTestnet": TxOutputAlonzo(destinations["externalByronTestnet"], 3003112),
+    "internalByronMainnet": TxOutputAlonzo(destinations["internalByronMainnet"], 3003112),
+    "internalBaseWithStakingPath": TxOutputAlonzo(destinations["internalBaseWithStakingPath"], 7120787),
+    "internalBaseWithStakingPathBabbage": TxOutputBabbage(destinations["internalBaseWithStakingPath"], 7120787),
+    "internalBaseWithStakingKeyHash": TxOutputAlonzo(destinations["internalBaseWithStakingKeyHash"], 7120787),
     "internalEnterprise": TxOutputAlonzo(destinations["internalEnterprise"], 7120787),
     "internalPointer": TxOutputAlonzo(destinations["internalPointer"], 7120787),
-    "internalBaseWithStakingPathNonReasonable": TxOutputAlonzo(
-        destinations["internalBaseWithStakingPathNonReasonable"], 7120787
-    ),
-    "internalBaseWithStakingPathMap": TxOutputBabbage(
-        destinations["internalBaseWithStakingPathMap"], 7120787
-    ),
-    "externalShelleyBaseKeyhashKeyhash": TxOutputAlonzo(
-        destinations["externalShelleyBaseKeyhashKeyhash"], 1
-    ),
-    "externalShelleyBaseScripthashKeyhash": TxOutputAlonzo(
-        destinations["externalShelleyBaseScripthashKeyhash"], 1
-    ),
+    "internalBaseWithStakingPathNonReasonable": TxOutputAlonzo(destinations["internalBaseWithStakingPathNonReasonable"], 7120787),
+    "internalBaseWithStakingPathMap": TxOutputBabbage(destinations["internalBaseWithStakingPathMap"], 7120787),
+    "externalShelleyBaseKeyhashKeyhash": TxOutputAlonzo(destinations["externalShelleyBaseKeyhashKeyhash"], 1),
+    "externalShelleyBaseScripthashKeyhash": TxOutputAlonzo(destinations["externalShelleyBaseScripthashKeyhash"], 1),
     "multiassetOneToken": TxOutputAlonzo(
         destinations["multiassetThirdParty"],
         1234,
@@ -474,9 +430,7 @@ outputs: dict[str, TxOutput] = {
                 [
                     Token("", 3),
                     # fingerprint: asset17jd78wukhtrnmjh3fngzasxm8rck0l2r4hhyyt
-                    Token(
-                        "1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209", 1
-                    ),
+                    Token("1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209", 1),
                     # fingerprint: asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w
                     Token(
                         "0000000000000000000000000000000000000000000000000000000000000000",
@@ -501,9 +455,7 @@ outputs: dict[str, TxOutput] = {
                 [
                     Token("", 3),
                     # fingerprint: asset17jd78wukhtrnmjh3fngzasxm8rck0l2r4hhyyt
-                    Token(
-                        "1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209", 1
-                    ),
+                    Token("1e349c9bdea19fd6c147626a5260bc44b71635f398b67c59881df209", 1),
                     # fingerprint: asset1pkpwyknlvul7az0xx8czhl60pyel45rpje4z8w
                     Token(
                         "0000000000000000000000000000000000000000000000000000000000000000",
@@ -869,7 +821,7 @@ outputs: dict[str, TxOutput] = {
     ),
 }
 
-mints: dict[str, List[AssetGroup]] = {
+mints: dict[str, list[AssetGroup]] = {
     "mintWithDecimalPlaces": [
         AssetGroup(
             "6954264b15bc92d6d592febeac84f14645e1ed46ca5ebb9acdb5c15f",
@@ -994,23 +946,17 @@ relays: dict[str, Relay] = {
     ),
     "singleHostIPV6Relay": Relay(
         RelayType.SINGLE_HOST_IP_ADDR,
-        SingleHostIpAddrRelayParams(
-            3000, "54.228.75.155", "24ff:7801:33a2:e383:a5c4:340a:07c2:76e5"
-        ),
+        SingleHostIpAddrRelayParams(3000, "54.228.75.155", "24ff:7801:33a2:e383:a5c4:340a:07c2:76e5"),
     ),
     "singleHostIPV6OnlyRelay": Relay(
         RelayType.SINGLE_HOST_IP_ADDR,
-        SingleHostIpAddrRelayParams(
-            3000, None, "24ff:7801:33a2:e383:a5c4:340a:07c2:76e6"
-        ),
+        SingleHostIpAddrRelayParams(3000, None, "24ff:7801:33a2:e383:a5c4:340a:07c2:76e6"),
     ),
     "singleHostNameRelay": Relay(
         RelayType.SINGLE_HOST_HOSTNAME,
         SingleHostHostnameRelayParams(3000, "aaaa.bbbb.com"),
     ),
-    "multiHostNameRelay": Relay(
-        RelayType.MULTI_HOST, MultiHostRelayParams("aaaa.bbbc.com")
-    ),
+    "multiHostNameRelay": Relay(RelayType.MULTI_HOST, MultiHostRelayParams("aaaa.bbbc.com")),
 }
 
 certificates: dict[str, Certificate] = {
@@ -1236,15 +1182,11 @@ certificates: dict[str, Certificate] = {
     ),
     "poolRetirementParam": Certificate(
         CertificateType.STAKE_POOL_RETIREMENT,
-        PoolRetirementParams(
-            CredentialParams(CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/1'"), 42
-        ),
+        PoolRetirementParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/1'"), 42),
     ),
     "stakeRegistrationPathParam": Certificate(
         CertificateType.STAKE_REGISTRATION,
-        StakeRegistrationParams(
-            CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")
-        ),
+        StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
     ),
     "stakeRegistrationScriptHashParam": Certificate(
         CertificateType.STAKE_REGISTRATION,
@@ -1257,9 +1199,7 @@ certificates: dict[str, Certificate] = {
     ),
     "stakeDeregistrationParam": Certificate(
         CertificateType.STAKE_DEREGISTRATION,
-        StakeRegistrationParams(
-            CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")
-        ),
+        StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
     ),
     "poolRegistrationWrongMargin": Certificate(
         CertificateType.STAKE_POOL_REGISTRATION,
@@ -1372,9 +1312,7 @@ certificates: dict[str, Certificate] = {
             poolKeys["poolRewardAccountHash"],
             [poolKeys["stakingPathOwner0"]],
             [relays["singleHostIPV4Relay0"]],
-            PoolMetadataParams(
-                "\n", "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948"
-            ),
+            PoolMetadataParams("\n", "6bf124f217d0e5a0a8adb1dbd8540e1334280d49ab861127868339f43b3948"),
         ),
     ),
     "denyInvalid5": Certificate(
@@ -1388,9 +1326,7 @@ certificates: dict[str, Certificate] = {
             poolKeys["poolRewardAccountHash"],
             [poolKeys["stakingPathOwner0"]],
             [relays["singleHostIPV4Relay0"]],
-            PoolMetadataParams(
-                "", "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
-            ),
+            PoolMetadataParams("", "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"),
         ),
     ),
     "denyInvalid6": Certificate(
@@ -1502,7 +1438,7 @@ certificates: dict[str, Certificate] = {
 # =================
 # signTx
 # =================
-testsByron: List[SignTxTestCase] = [
+testsByron: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_thirdparty_Byron_mainnet_output",
         tx=Transaction(
@@ -1597,12 +1533,10 @@ testsByron: List[SignTxTestCase] = [
     ),
 ]
 
-testsShelleyNoCertificates: List[SignTxTestCase] = [
+testsShelleyNoCertificates: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_without_outputs",
-        tx=Transaction(
-            network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10
-        ),
+        tx=Transaction(network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10),
         signingMode=TransactionSigningMode.ORDINARY,
         unit_test_expect=SignTxUnitTestExpect(
             txBodyHex="a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a"
@@ -1620,9 +1554,7 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
     ),
     SignTxTestCase(
         name="Unrestricted_tx_with_mint_witness_without_mint",
-        tx=Transaction(
-            network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10
-        ),
+        tx=Transaction(network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10),
         signingMode=TransactionSigningMode.UNRESTRICTED,
         unit_test_expect=SignTxUnitTestExpect(
             txBodyHex="a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a"
@@ -1653,9 +1585,7 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
         # Covers unrestricted-only witness policy differences in one small tx:
         # ordinary staking witnesses are shown instead of hidden, and multisig,
         # governance DRep, committee hot, and committee cold witnesses are allowed.
-        tx=Transaction(
-            network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10
-        ),
+        tx=Transaction(network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10),
         signingMode=TransactionSigningMode.UNRESTRICTED,
         unit_test_expect=SignTxUnitTestExpect(
             txBodyHex="a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a"
@@ -1708,9 +1638,7 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
     ),
     SignTxTestCase(
         name="Sign_tx_with_258_tag_on_inputs",
-        tx=Transaction(
-            network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10
-        ),
+        tx=Transaction(network=Mainnet, inputs=[inputs["utxoShelley"]], outputs=[], fee=42, ttl=10),
         signingMode=TransactionSigningMode.ORDINARY,
         unit_test_expect=SignTxUnitTestExpect(
             txBodyHex="a400d90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a"
@@ -1871,9 +1799,7 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
             outputs=[outputs["externalByronMainnet"]],
             withdrawals=[
                 Withdrawal(
-                    CredentialParams(
-                        CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                    ),
+                    CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                     111,
                 )
             ],
@@ -1906,9 +1832,7 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
             outputs=[outputs["externalByronMainnet"]],
             withdrawals=[
                 Withdrawal(
-                    CredentialParams(
-                        CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/2/0"
-                    ),
+                    CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/2/0"),
                     111,
                 ),
             ],
@@ -1973,9 +1897,7 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
             outputs=[outputs["externalByronMainnet"]],
             withdrawals=[
                 Withdrawal(
-                    CredentialParams(
-                        CredentialParamsType.KEY_PATH, "m/1852'/1815'/456'/2/0"
-                    ),
+                    CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/456'/2/0"),
                     111,
                 )
             ],
@@ -2026,7 +1948,7 @@ testsShelleyNoCertificates: List[SignTxTestCase] = [
     ),
 ]
 
-testsShelleyWithCertificates: List[SignTxTestCase] = [
+testsShelleyWithCertificates: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_a_stake_registration_path_certificate_preConway",
         tx=Transaction(
@@ -2036,11 +1958,7 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
             certificates=[
                 Certificate(
                     CertificateType.STAKE_REGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
                 )
             ],
         ),
@@ -2067,11 +1985,7 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
             certificates=[
                 Certificate(
                     CertificateType.STAKE_DEREGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
                 )
             ],
         ),
@@ -2103,9 +2017,7 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_DELEGATION,
                     StakeDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                     ),
                 )
@@ -2138,19 +2050,11 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
             certificates=[
                 Certificate(
                     CertificateType.STAKE_DEREGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
                 ),
                 Certificate(
                     CertificateType.STAKE_DEREGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
                 ),
             ],
         ),
@@ -2182,19 +2086,13 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_RETIREMENT,
                     PoolRetirementParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/0'"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/0'"),
                         10,
                     ),
                 ),
                 Certificate(
                     CertificateType.STAKE_REGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
                 ),
             ],
         ),
@@ -2226,19 +2124,13 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_RETIREMENT,
                     PoolRetirementParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/0'"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/0'"),
                         10,
                     ),
                 ),
                 Certificate(
                     CertificateType.STAKE_REGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
                 ),
             ],
         ),
@@ -2271,19 +2163,13 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_RETIREMENT,
                     PoolRetirementParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/0'"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/0'"),
                         10,
                     ),
                 ),
                 Certificate(
                     CertificateType.STAKE_DEREGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0")),
                 ),
             ],
         ),
@@ -2311,7 +2197,7 @@ testsShelleyWithCertificates: List[SignTxTestCase] = [
     ),
 ]
 
-testsConwayWithCertificates: List[SignTxTestCase] = [
+testsConwayWithCertificates: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_a_stake_registration_path_certificate_Conway",
         tx=Transaction(
@@ -2322,9 +2208,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_REGISTRATION_CONWAY,
                     StakeRegistrationConwayParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         17,
                     ),
                 )
@@ -2358,9 +2242,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_DEREGISTRATION_CONWAY,
                     StakeRegistrationConwayParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         17,
                     ),
                 )
@@ -2394,18 +2276,14 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.VOTE_DELEGATION,
                     VoteDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                     ),
                 ),
                 Certificate(
                     CertificateType.VOTE_DELEGATION,
                     VoteDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         DRepParams(
                             DRepParamsType.KEY_HASH,
                             "7afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
@@ -2415,9 +2293,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.VOTE_DELEGATION,
                     VoteDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         DRepParams(
                             DRepParamsType.SCRIPT_HASH,
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
@@ -2427,18 +2303,14 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.VOTE_DELEGATION,
                     VoteDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         DRepParams(DRepParamsType.ABSTAIN),
                     ),
                 ),
                 Certificate(
                     CertificateType.VOTE_DELEGATION,
                     VoteDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         DRepParams(DRepParamsType.NO_CONFIDENCE),
                     ),
                 ),
@@ -2472,9 +2344,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_AND_DREP_DELEGATION,
                     StakePoolAndDRepDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                     ),
@@ -2482,9 +2352,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_AND_DREP_DELEGATION,
                     StakePoolAndDRepDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         DRepParams(
                             DRepParamsType.KEY_HASH,
@@ -2495,9 +2363,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_AND_DREP_DELEGATION,
                     StakePoolAndDRepDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         DRepParams(
                             DRepParamsType.SCRIPT_HASH,
@@ -2508,9 +2374,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_AND_DREP_DELEGATION,
                     StakePoolAndDRepDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         DRepParams(DRepParamsType.ABSTAIN),
                     ),
@@ -2518,9 +2382,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_AND_DREP_DELEGATION,
                     StakePoolAndDRepDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         DRepParams(DRepParamsType.NO_CONFIDENCE),
                     ),
@@ -2555,9 +2417,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL,
                     AccountRegistrationDelegationToStakePoolParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         1000000,
                     ),
@@ -2592,9 +2452,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP,
                     AccountRegistrationDelegationToDRepParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         1000000,
                     ),
@@ -2629,9 +2487,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP,
                     AccountRegistrationDelegationToStakePoolAndDRepParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         1000000,
@@ -2669,27 +2525,21 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_REGISTRATION_CONWAY,
                     StakeRegistrationConwayParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         17,
                     ),
                 ),
                 Certificate(
                     CertificateType.STAKE_DEREGISTRATION_CONWAY,
                     StakeRegistrationConwayParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         17,
                     ),
                 ),
                 Certificate(
                     CertificateType.STAKE_DELEGATION,
                     StakeDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                     ),
                 ),
@@ -2697,29 +2547,21 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.VOTE_DELEGATION,
                     VoteDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                     ),
                 ),
                 Certificate(
                     CertificateType.AUTHORIZE_COMMITTEE_HOT,
                     AuthorizeCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"
-                        ),
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"),
                     ),
                 ),
                 Certificate(
                     CertificateType.RESIGN_COMMITTEE_COLD,
                     ResignCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"),
                         AnchorParams(
                             "https://www.vacuumlabs.com/sampleAnchor",
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef",
@@ -2729,9 +2571,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.DREP_REGISTRATION,
                     DRepRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         19,
                         AnchorParams(
                             "https://www.vacuumlabs.com/sampleAnchor",
@@ -2742,18 +2582,14 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.DREP_DEREGISTRATION,
                     DRepRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         19,
                     ),
                 ),
                 Certificate(
                     CertificateType.DREP_UPDATE,
                     DRepUpdateParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         AnchorParams(
                             "https://www.vacuumlabs.com/sampleAnchor",
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef",
@@ -2763,9 +2599,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.STAKE_POOL_AND_DREP_DELEGATION,
                     StakePoolAndDRepDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                     ),
@@ -2773,9 +2607,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL,
                     AccountRegistrationDelegationToStakePoolParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         1000000,
                     ),
@@ -2783,9 +2615,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_DREP,
                     AccountRegistrationDelegationToDRepParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         1000000,
                     ),
@@ -2793,9 +2623,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP,
                     AccountRegistrationDelegationToStakePoolAndDRepParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         1000000,
@@ -2847,37 +2675,25 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.VOTE_DELEGATION,
                     VoteDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1854'/1815'/0'/2/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1854'/1815'/0'/2/0"),
                         DRepParams(DRepParamsType.KEY_PATH, "m/1852'/1815'/1'/3/0"),
                     ),
                 ),
                 Certificate(
                     CertificateType.AUTHORIZE_COMMITTEE_HOT,
                     AuthorizeCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/4/0"
-                        ),
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/4/0"),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"),
                     ),
                 ),
                 Certificate(
                     CertificateType.RESIGN_COMMITTEE_COLD,
-                    ResignCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/2'/4/0"
-                        )
-                    ),
+                    ResignCommitteeParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/2'/4/0")),
                 ),
                 Certificate(
                     CertificateType.DREP_REGISTRATION,
                     DRepRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/1'/3/0"),
                         19,
                     ),
                 ),
@@ -2924,20 +2740,14 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.AUTHORIZE_COMMITTEE_HOT,
                     AuthorizeCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"
-                        ),
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"),
                     ),
                 ),
                 Certificate(
                     CertificateType.AUTHORIZE_COMMITTEE_HOT,
                     AuthorizeCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"),
                         CredentialParams(
                             CredentialParamsType.KEY_HASH,
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
@@ -2947,9 +2757,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.AUTHORIZE_COMMITTEE_HOT,
                     AuthorizeCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"),
                         CredentialParams(
                             CredentialParamsType.SCRIPT_HASH,
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
@@ -2986,9 +2794,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.RESIGN_COMMITTEE_COLD,
                     ResignCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"),
                         AnchorParams(
                             f"{'x' * 128}",
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef",
@@ -2997,11 +2803,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 ),
                 Certificate(
                     CertificateType.RESIGN_COMMITTEE_COLD,
-                    ResignCommitteeParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0"
-                        )
-                    ),
+                    ResignCommitteeParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/4/0")),
                 ),
             ],
         ),
@@ -3079,9 +2881,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.DREP_REGISTRATION,
                     DRepRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         19,
                         AnchorParams(
                             "www.vacuumlabs.com",
@@ -3092,9 +2892,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.DREP_REGISTRATION,
                     DRepRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         19,
                     ),
                 ),
@@ -3128,9 +2926,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.DREP_DEREGISTRATION,
                     DRepRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         19,
                     ),
                 )
@@ -3164,9 +2960,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.DREP_UPDATE,
                     DRepUpdateParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         AnchorParams(
                             "www.vacuumlabs.com",
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef",
@@ -3175,11 +2969,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                 ),
                 Certificate(
                     CertificateType.DREP_UPDATE,
-                    DRepUpdateParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        )
-                    ),
+                    DRepUpdateParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0")),
                 ),
             ],
         ),
@@ -3225,9 +3015,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
                             CredentialParamsType.SCRIPT_HASH,
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8",
                         ),
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/5/0"),
                     ),
                 ),
                 Certificate(
@@ -3433,7 +3221,7 @@ testsConwayWithCertificates: List[SignTxTestCase] = [
     ),
 ]
 
-testsMultisig: List[SignTxTestCase] = [
+testsMultisig: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_without_change_address_with_Shelley_scripthash_output",
         tx=Transaction(
@@ -3622,7 +3410,7 @@ testsMultisig: List[SignTxTestCase] = [
     ),
 ]
 
-testsAllegra: List[SignTxTestCase] = [
+testsAllegra: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_no_ttl_and_no_validity_interval_start",
         tx=Transaction(
@@ -3670,7 +3458,7 @@ testsAllegra: List[SignTxTestCase] = [
     ),
 ]
 
-testsMary: List[SignTxTestCase] = [
+testsMary: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_a_multiasset_output",
         tx=Transaction(
@@ -3922,7 +3710,7 @@ testsMary: List[SignTxTestCase] = [
     ),
 ]
 
-testsAlonzoTrezorComparison: List[SignTxTestCase] = [
+testsAlonzoTrezorComparison: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_Full_test_for_trezor_feature_parity",
         tx=Transaction(
@@ -3973,9 +3761,7 @@ testsAlonzoTrezorComparison: List[SignTxTestCase] = [
             includeNetworkId=True,
             auxiliaryData=TxAuxiliaryData(
                 TxAuxiliaryDataType.ARBITRARY_HASH,
-                TxAuxiliaryDataHash(
-                    "58ec01578fcdfdc376f09631a7b2adc608eaf57e3720484c7ff37c13cff90fdf"
-                ),
+                TxAuxiliaryDataHash("58ec01578fcdfdc376f09631a7b2adc608eaf57e3720484c7ff37c13cff90fdf"),
             ),
             scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
         ),
@@ -4022,7 +3808,7 @@ testsAlonzoTrezorComparison: List[SignTxTestCase] = [
     ),
 ]
 
-testsBabbageTrezorComparison: List[SignTxTestCase] = [
+testsBabbageTrezorComparison: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_Full_test_for_trezor_feature_parity_Babbage_elements_Plutus",
         tx=Transaction(
@@ -4076,7 +3862,7 @@ testsBabbageTrezorComparison: List[SignTxTestCase] = [
     ),
 ]
 
-testsMultidelegation: List[SignTxTestCase] = [
+testsMultidelegation: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_multidelegation_keys_in_all_tx_elements",
         tx=Transaction(
@@ -4087,41 +3873,27 @@ testsMultidelegation: List[SignTxTestCase] = [
             certificates=[
                 Certificate(
                     CertificateType.STAKE_REGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/2"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/2")),
                 ),
                 Certificate(
                     CertificateType.STAKE_DEREGISTRATION,
-                    StakeRegistrationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/2"
-                        )
-                    ),
+                    StakeRegistrationParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/2")),
                 ),
                 Certificate(
                     CertificateType.STAKE_DELEGATION,
                     StakeDelegationParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/2"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/2"),
                         "f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973",
                     ),
                 ),
             ],
             withdrawals=[
                 Withdrawal(
-                    CredentialParams(
-                        CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/3"
-                    ),
+                    CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/3"),
                     1000,
                 )
             ],
-            requiredSigners=[
-                RequiredSigner(TxRequiredSignerType.PATH, "m/1852'/1815'/0'/2/4")
-            ],
+            requiredSigners=[RequiredSigner(TxRequiredSignerType.PATH, "m/1852'/1815'/0'/2/4")],
             scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
             includeNetworkId=True,
         ),
@@ -4162,7 +3934,7 @@ testsMultidelegation: List[SignTxTestCase] = [
     ),
 ]
 
-testsConwayWithoutCertificates: List[SignTxTestCase] = [
+testsConwayWithoutCertificates: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_treasury",
         tx=Transaction(
@@ -4279,7 +4051,7 @@ vote_empty_url = Vote(
     ),
 )
 
-votingDenyTestCases: List[SignTxTestCase] = [
+votingDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Ordinary_tx_with_committee_hot_key_hash_voter",
         tx=Transaction(
@@ -4418,18 +4190,14 @@ votingDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-testsConwayVotingProcedures: List[SignTxTestCase] = [
+testsConwayVotingProcedures: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_voting_procedures_COMMITTEE_KEY_PATH_voter",
         tx=Transaction(
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[outputs["externalByronMainnet"]],
-            votingProcedures=[
-                VoterVotes(
-                    Voter(VoterType.COMMITTEE_KEY_PATH, "m/1852'/1815'/0'/5/0"), [vote1]
-                )
-            ],
+            votingProcedures=[VoterVotes(Voter(VoterType.COMMITTEE_KEY_PATH, "m/1852'/1815'/0'/5/0"), [vote1])],
         ),
         signingMode=TransactionSigningMode.ORDINARY,
         unit_test_expect=SignTxUnitTestExpect(
@@ -4455,11 +4223,7 @@ testsConwayVotingProcedures: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[outputs["externalByronMainnet"]],
-            votingProcedures=[
-                VoterVotes(
-                    Voter(VoterType.DREP_KEY_PATH, "m/1852'/1815'/0'/3/0"), [vote2]
-                )
-            ],
+            votingProcedures=[VoterVotes(Voter(VoterType.DREP_KEY_PATH, "m/1852'/1815'/0'/3/0"), [vote2])],
         ),
         signingMode=TransactionSigningMode.ORDINARY,
         unit_test_expect=SignTxUnitTestExpect(
@@ -4485,11 +4249,7 @@ testsConwayVotingProcedures: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[outputs["externalByronMainnet"]],
-            votingProcedures=[
-                VoterVotes(
-                    Voter(VoterType.STAKE_POOL_KEY_PATH, "m/1853'/1815'/0'/0'"), [vote3]
-                )
-            ],
+            votingProcedures=[VoterVotes(Voter(VoterType.STAKE_POOL_KEY_PATH, "m/1853'/1815'/0'/0'"), [vote3])],
         ),
         signingMode=TransactionSigningMode.ORDINARY,
         unit_test_expect=SignTxUnitTestExpect(
@@ -4515,11 +4275,7 @@ testsConwayVotingProcedures: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[outputs["externalByronMainnet"]],
-            votingProcedures=[
-                VoterVotes(
-                    Voter(VoterType.STAKE_POOL_KEY_PATH, "m/1853'/1815'/0'/0'"), [vote3]
-                )
-            ],
+            votingProcedures=[VoterVotes(Voter(VoterType.STAKE_POOL_KEY_PATH, "m/1853'/1815'/0'/0'"), [vote3])],
         ),
         signingMode=TransactionSigningMode.UNRESTRICTED,
         unit_test_expect=SignTxUnitTestExpect(
@@ -5028,7 +4784,7 @@ testsConwayVotingProcedures: List[SignTxTestCase] = [
 # DRep certificates with script-hash credentials in multisig/plutus signing modes,
 # exercising PATH_MULTISIG_DREP_KEY as a witness
 # ==========================================
-testsConwayMultisig: List[SignTxTestCase] = [
+testsConwayMultisig: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_drep_registration_script_certificate_multisig_drep_witness",
         tx=Transaction(
@@ -5135,7 +4891,7 @@ testsConwayMultisig: List[SignTxTestCase] = [
 # =================
 # signTxCVote
 # =================
-testsCatalystRegistration: List[SignTxTestCase] = [
+testsCatalystRegistration: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_Catalyst_registration_metadata_with_base_address",
         tx=Transaction(
@@ -5202,7 +4958,7 @@ testsCatalystRegistration: List[SignTxTestCase] = [
     ),
 ]
 
-testsCVoteRegistrationCIP36: List[SignTxTestCase] = [
+testsCVoteRegistrationCIP36: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_CIP36_registration_with_vote_key_hex",
         tx=Transaction(
@@ -5386,9 +5142,7 @@ testsCVoteRegistrationCIP36: List[SignTxTestCase] = [
                             "4b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c",
                             9,
                         ),
-                        CIP36VoteDelegation(
-                            CIP36VoteDelegationType.PATH, "m/1694'/1815'/0'/0/1", 0
-                        ),
+                        CIP36VoteDelegation(CIP36VoteDelegationType.PATH, "m/1694'/1815'/0'/0/1", 0),
                     ],
                 ),
             ),
@@ -5428,9 +5182,7 @@ testsCVoteRegistrationCIP36: List[SignTxTestCase] = [
                             "4b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c",
                             9,
                         ),
-                        CIP36VoteDelegation(
-                            CIP36VoteDelegationType.PATH, "m/1694'/1815'/101'/0/1", 0
-                        ),
+                        CIP36VoteDelegation(CIP36VoteDelegationType.PATH, "m/1694'/1815'/101'/0/1", 0),
                     ],
                 ),
             ),
@@ -5536,7 +5288,7 @@ def _make_tx_many_outputs(output_count: int) -> Transaction:
 _tx_streaming_many_outputs = _make_tx_many_outputs(90)
 _tx_blind_signing_prompt_many_outputs = _make_tx_many_outputs(10)
 
-testsAlonzo: List[SignTxTestCase] = [
+testsAlonzo: list[SignTxTestCase] = [
     # Same tx as Sign_tx_with_collateral_inputs_shelley but with AUTO_TRANSACTION mode.
     # The tx body, hash, and witness are identical — only the init APDU signing mode byte differs.
     SignTxTestCase(
@@ -5642,9 +5394,7 @@ testsAlonzo: List[SignTxTestCase] = [
                 Certificate(
                     CertificateType.DREP_UPDATE,
                     DRepUpdateParams(
-                        CredentialParams(
-                            CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"
-                        ),
+                        CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/3/0"),
                         AnchorParams(
                             "",
                             "1afd028b504c3668102b129b37a86c09a2872f76741dc7a68e2149c8deadbeef",
@@ -5988,9 +5738,7 @@ testsAlonzo: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[outputs["externalByronMainnet"]],
-            requiredSigners=[
-                RequiredSigner(TxRequiredSignerType.PATH, "m/1855'/1815'/0'")
-            ],
+            requiredSigners=[RequiredSigner(TxRequiredSignerType.PATH, "m/1855'/1815'/0'")],
         ),
         signingMode=TransactionSigningMode.PLUTUS,
         unit_test_expect=SignTxUnitTestExpect(
@@ -6066,7 +5814,7 @@ testsAlonzo: List[SignTxTestCase] = [
     ),
 ]
 
-testsStreaming: List[SignTxTestCase] = [
+testsStreaming: list[SignTxTestCase] = [
     # Streaming test: 700 required signers to exceed MAX_UI_PAIRS (255) and trigger streaming NBGL review.
     # Per hash-type signer: 1 byte (type) + 28 bytes (hash) = 29 bytes raw; 1 UI pair.
     # Fixed overhead: 1 input (36B) + fee (8B) + TTL (8B) = 52 bytes.
@@ -6084,10 +5832,7 @@ testsStreaming: List[SignTxTestCase] = [
         unit_test_expect=SignTxUnitTestExpect(
             txBodyHex=(
                 "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a0e9902bc"
-                + "".join(
-                    f"581c{i:0>8x}646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514"
-                    for i in range(700)
-                )
+                + "".join(f"581c{i:0>8x}646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514" for i in range(700))
                 + "0f01"
             )
         ),
@@ -6112,10 +5857,7 @@ testsStreaming: List[SignTxTestCase] = [
         unit_test_expect=SignTxUnitTestExpect(
             txBodyHex=(
                 "a600818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a0e990100"
-                + "".join(
-                    f"581c{i:0>8x}646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514"
-                    for i in range(256)
-                )
+                + "".join(f"581c{i:0>8x}646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514" for i in range(256))
                 + "0f01"
             )
         ),
@@ -6274,7 +6016,7 @@ testsStreaming: List[SignTxTestCase] = [
     ),
 ]
 
-testsBabbage: List[SignTxTestCase] = [
+testsBabbage: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_with_short_inline_datum_in_output_with_tokens",
         tx=Transaction(
@@ -6891,7 +6633,7 @@ testsBabbage: List[SignTxTestCase] = [
 # =================
 # signTxPoolRegistration
 # =================
-poolRegistrationOwnerTestCases: List[SignTxTestCase] = [
+poolRegistrationOwnerTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_Witness_valid_multiple_mixed_owners_all_relays_pool_registration",
         tx=Transaction(
@@ -6964,9 +6706,7 @@ poolRegistrationOwnerTestCases: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoNoPath"]],
             outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
-            certificates=[
-                certificates["poolRegistrationMixedOwnersIpv4SingleHostRelays"]
-            ],
+            certificates=[certificates["poolRegistrationMixedOwnersIpv4SingleHostRelays"]],
         ),
         signingMode=TransactionSigningMode.POOL_REGISTRATION_OWNER,
         unit_test_expect=SignTxUnitTestExpect(
@@ -7061,9 +6801,7 @@ poolRegistrationOwnerTestCases: List[SignTxTestCase] = [
         unit_test_expect=SignTxUnitTestExpect(
             txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad81581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c818400190bb84436e44b9af682605820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
         ),
-        expected_warnings=(
-            WarningBit.WARNING_BIT_POOL_REGISTRATION_EMPTY_METADATA_URL,
-        ),
+        expected_warnings=(WarningBit.WARNING_BIT_POOL_REGISTRATION_EMPTY_METADATA_URL,),
         ragger_expect=SignTxRaggerExpect(
             txHashHex="7d7f6b89a241f2b36c549d5f0c354006ea37bbbec8ff52ff4214d195f497bf18",
             witnesses=(
@@ -7098,7 +6836,7 @@ poolRegistrationOwnerTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-poolRegistrationOperatorTestCases: List[SignTxTestCase] = [
+poolRegistrationOperatorTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Sign_tx_Witness_pool_registration_as_operator_with_no_owners_and_no_relays",
         tx=Transaction(
@@ -7135,9 +6873,7 @@ poolRegistrationOperatorTestCases: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoWithPath0"]],
             outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
-            certificates=[
-                certificates["poolRegistrationOperatorOneOwnerOperatorNoRelays"]
-            ],
+            certificates=[certificates["poolRegistrationOperatorOneOwnerOperatorNoRelays"]],
         ),
         signingMode=TransactionSigningMode.POOL_REGISTRATION_OPERATOR,
         unit_test_expect=SignTxUnitTestExpect(
@@ -7164,9 +6900,7 @@ poolRegistrationOperatorTestCases: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoWithPath0"]],
             outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
-            certificates=[
-                certificates["poolRegistrationOperatorMultipleOwnersAllRelays"]
-            ],
+            certificates=[certificates["poolRegistrationOperatorMultipleOwnersAllRelays"]],
         ),
         signingMode=TransactionSigningMode.POOL_REGISTRATION_OPERATOR,
         unit_test_expect=SignTxUnitTestExpect(
@@ -7188,16 +6922,14 @@ poolRegistrationOperatorTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-requiredSignerDenyTestCases: List[SignTxTestCase] = [
+requiredSignerDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Required_signer_path_pool_cold_key",
         tx=Transaction(
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[],
-            requiredSigners=[
-                RequiredSigner(TxRequiredSignerType.PATH, "m/1853'/1815'/0'/0'")
-            ],
+            requiredSigners=[RequiredSigner(TxRequiredSignerType.PATH, "m/1853'/1815'/0'/0'")],
             includeNetworkId=True,
         ),
         signingMode=TransactionSigningMode.PLUTUS,
@@ -7209,9 +6941,7 @@ requiredSignerDenyTestCases: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[],
-            requiredSigners=[
-                RequiredSigner(TxRequiredSignerType.PATH, "m/1694'/1815'/0'")
-            ],
+            requiredSigners=[RequiredSigner(TxRequiredSignerType.PATH, "m/1694'/1815'/0'")],
             includeNetworkId=True,
         ),
         signingMode=TransactionSigningMode.PLUTUS,
@@ -7223,9 +6953,7 @@ requiredSignerDenyTestCases: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[],
-            requiredSigners=[
-                RequiredSigner(TxRequiredSignerType.PATH, "m/1694'/1815'/0'/0/0")
-            ],
+            requiredSigners=[RequiredSigner(TxRequiredSignerType.PATH, "m/1694'/1815'/0'/0/0")],
             includeNetworkId=True,
         ),
         signingMode=TransactionSigningMode.PLUTUS,
@@ -7237,9 +6965,7 @@ requiredSignerDenyTestCases: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[],
-            requiredSigners=[
-                RequiredSigner(TxRequiredSignerType.PATH, "m/1854'/1815'/0'/1/0")
-            ],
+            requiredSigners=[RequiredSigner(TxRequiredSignerType.PATH, "m/1854'/1815'/0'/1/0")],
             includeNetworkId=True,
         ),
         signingMode=TransactionSigningMode.PLUTUS,
@@ -7250,7 +6976,7 @@ requiredSignerDenyTestCases: List[SignTxTestCase] = [
 # =================
 # Denies signTx
 # =================
-transactionInitDenyTestCases: List[SignTxTestCase] = [
+transactionInitDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Deny_unrestricted_tx_without_expert_mode",
         tx=Transaction(
@@ -7389,9 +7115,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -7408,9 +7132,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -7501,9 +7223,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -7587,9 +7307,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -7690,9 +7408,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -7760,9 +7476,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -7777,11 +7491,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                     ),
                 )
             ],
-            requiredSigners=[
-                RequiredSigner(
-                    type=TxRequiredSignerType.PATH, pathOrHashHex="m/1852'/1815'/0'/0/0"
-                )
-            ],
+            requiredSigners=[RequiredSigner(type=TxRequiredSignerType.PATH, pathOrHashHex="m/1852'/1815'/0'/0/0")],
         ),
         signingMode=TransactionSigningMode.POOL_REGISTRATION_OPERATOR,
         expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -7819,11 +7529,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                     ),
                 )
             ],
-            requiredSigners=[
-                RequiredSigner(
-                    type=TxRequiredSignerType.PATH, pathOrHashHex="m/1852'/1815'/0'/0/0"
-                )
-            ],
+            requiredSigners=[RequiredSigner(type=TxRequiredSignerType.PATH, pathOrHashHex="m/1852'/1815'/0'/0/0")],
         ),
         signingMode=TransactionSigningMode.POOL_REGISTRATION_OWNER,
         expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -7882,9 +7588,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -7996,9 +7700,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -8100,9 +7802,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -8185,7 +7885,7 @@ transactionInitDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-addressParamsDenyTestCases: List[SignTxTestCase] = [
+addressParamsDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Reward_address_key",
         tx=Transaction(
@@ -8370,7 +8070,7 @@ addressParamsDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-certificateDenyTestCases: List[SignTxTestCase] = [
+certificateDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Pool_registration_in_Unrestricted_Tx",
         tx=Transaction(
@@ -8381,9 +8081,7 @@ certificateDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -8413,9 +8111,7 @@ certificateDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -8444,9 +8140,7 @@ certificateDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -8475,9 +8169,7 @@ certificateDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -8694,7 +8386,7 @@ certificateDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-certificateStakingDenyTestCases: List[SignTxTestCase] = [
+certificateStakingDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Script_hash_in_Ordinary_Tx",
         tx=Transaction(
@@ -8760,7 +8452,7 @@ certificateStakingDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-certificateStakePoolRetirementDenyTestCases: List[SignTxTestCase] = [
+certificateStakePoolRetirementDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Non_pool_cold_key_in_Ordinary_Tx",
         tx=Transaction(
@@ -8786,7 +8478,7 @@ certificateStakePoolRetirementDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-withdrawalDenyTestCases: List[SignTxTestCase] = [
+withdrawalDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Deny_withdrawal_with_key_hash_in_ordinary_tx",
         tx=Transaction(
@@ -8835,9 +8527,7 @@ withdrawalDenyTestCases: List[SignTxTestCase] = [
             outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
             withdrawals=[
                 Withdrawal(
-                    CredentialParams(
-                        CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                    ),
+                    CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                     111,
                 )
             ],
@@ -8971,7 +8661,7 @@ withdrawalDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-witnessDenyTestCases: List[SignTxTestCase] = [
+witnessDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Ordinary_account_path_in_Ordinary_Tx",
         tx=Transaction(
@@ -9353,9 +9043,7 @@ witnessDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -9385,9 +9073,7 @@ witnessDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -9417,9 +9103,7 @@ witnessDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -9449,9 +9133,7 @@ witnessDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -9481,9 +9163,7 @@ witnessDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="0123456789012345678901234567890123456789012345678901234567890123",
                         pledge=0,
                         cost=0,
@@ -9516,7 +9196,7 @@ witnessDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-singleAccountDenyTestCases: List[SignTxTestCase] = [
+singleAccountDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Input_and_change_output_account_mismatch",
         tx=Transaction(
@@ -9833,9 +9513,7 @@ singleAccountDenyTestCases: List[SignTxTestCase] = [
             outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
             withdrawals=[
                 Withdrawal(
-                    CredentialParams(
-                        CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"
-                    ),
+                    CredentialParams(CredentialParamsType.KEY_PATH, "m/1852'/1815'/0'/2/0"),
                     111,
                 )
             ],
@@ -9866,7 +9544,7 @@ singleAccountDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-collateralOutputDenyTestCases: List[SignTxTestCase] = [
+collateralOutputDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Deny_collateral_output_with_byron_address",
         tx=Transaction(
@@ -9959,9 +9637,7 @@ collateralOutputDenyTestCases: List[SignTxTestCase] = [
             network=NetworkDesc(networkId=1, protocol=764824073),
             inputs=[inputs["utxoShelley"]],
             outputs=[outputs["inlineByronMainnet3003112"]],
-            collateralOutput=TxOutputBabbage(
-                destination=destinations["deny2"], amount=7120787
-            ),
+            collateralOutput=TxOutputBabbage(destination=destinations["deny2"], amount=7120787),
         ),
         signingMode=TransactionSigningMode.PLUTUS,
         expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -9981,7 +9657,7 @@ collateralOutputDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-testsInvalidTokenBundleOrdering: List[SignTxTestCase] = [
+testsInvalidTokenBundleOrdering: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Deny_tx_where_asset_groups_are_not_ordered",
         tx=Transaction(
@@ -10193,9 +9869,7 @@ testsInvalidTokenBundleOrdering: List[SignTxTestCase] = [
             network=Mainnet,
             inputs=[inputs["utxoShelley"]],
             outputs=[outputs["externalByronMainnet"]],
-            votingProcedures=[
-                VoterVotes(Voter(VoterType.DREP_KEY_PATH, "m/1852'/1815'/0'/3/0"), [])
-            ],
+            votingProcedures=[VoterVotes(Voter(VoterType.DREP_KEY_PATH, "m/1852'/1815'/0'/3/0"), [])],
         ),
         signingMode=TransactionSigningMode.ORDINARY,
         expected_swo=StatusWord.SWO_TX_PARSING_FAIL_VOTING_PROCEDURES,
@@ -10246,7 +9920,7 @@ testsInvalidTokenBundleOrdering: List[SignTxTestCase] = [
     ),
 ]
 
-poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
+poolRegistrationOwnerDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Device_owned_output_in_Pool_Registration_Owner_Tx",
         tx=Transaction(
@@ -10282,9 +9956,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
@@ -10296,9 +9968,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_HOSTNAME,
-                                params=SingleHostHostnameRelayParams(
-                                    portNumber=3000, dnsName="aaaa.bbbb.com"
-                                ),
+                                params=SingleHostHostnameRelayParams(portNumber=3000, dnsName="aaaa.bbbb.com"),
                             ),
                             Relay(
                                 type=RelayType.MULTI_HOST,
@@ -10352,9 +10022,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
@@ -10366,9 +10034,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_HOSTNAME,
-                                params=SingleHostHostnameRelayParams(
-                                    portNumber=3000, dnsName="aaaa.bbbb.com"
-                                ),
+                                params=SingleHostHostnameRelayParams(portNumber=3000, dnsName="aaaa.bbbb.com"),
                             ),
                             Relay(
                                 type=RelayType.MULTI_HOST,
@@ -10422,9 +10088,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
@@ -10436,9 +10100,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_HOSTNAME,
-                                params=SingleHostHostnameRelayParams(
-                                    portNumber=3000, dnsName="aaaa.bbbb.com"
-                                ),
+                                params=SingleHostHostnameRelayParams(portNumber=3000, dnsName="aaaa.bbbb.com"),
                             ),
                             Relay(
                                 type=RelayType.MULTI_HOST,
@@ -10488,9 +10150,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
@@ -10502,9 +10162,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_HOSTNAME,
-                                params=SingleHostHostnameRelayParams(
-                                    portNumber=3000, dnsName="aaaa.bbbb.com"
-                                ),
+                                params=SingleHostHostnameRelayParams(portNumber=3000, dnsName="aaaa.bbbb.com"),
                             ),
                             Relay(
                                 type=RelayType.MULTI_HOST,
@@ -10554,9 +10212,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
@@ -10568,9 +10224,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                             ),
                             Relay(
                                 type=RelayType.SINGLE_HOST_HOSTNAME,
-                                params=SingleHostHostnameRelayParams(
-                                    portNumber=3000, dnsName="aaaa.bbbb.com"
-                                ),
+                                params=SingleHostHostnameRelayParams(portNumber=3000, dnsName="aaaa.bbbb.com"),
                             ),
                             Relay(
                                 type=RelayType.MULTI_HOST,
@@ -10620,9 +10274,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -10669,9 +10321,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -10717,9 +10367,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -10735,7 +10383,7 @@ poolRegistrationOwnerDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-stakePoolRegistrationPoolIdDenyTestCases: List[SignTxTestCase] = [
+stakePoolRegistrationPoolIdDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Path_sent_in_for_Pool_Registration_Owner_Tx",
         tx=Transaction(
@@ -10746,9 +10394,7 @@ stakePoolRegistrationPoolIdDenyTestCases: List[SignTxTestCase] = [
                 Certificate(
                     type=CertificateType.STAKE_POOL_REGISTRATION,
                     params=PoolRegistrationParams(
-                        poolKey=PoolKey(
-                            type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"
-                        ),
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
                         vrfKeyHashHex="07821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d084450",
                         pledge=50000000000,
                         cost=340000000,
@@ -10766,9 +10412,7 @@ stakePoolRegistrationPoolIdDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -10814,9 +10458,7 @@ stakePoolRegistrationPoolIdDenyTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -10833,7 +10475,7 @@ stakePoolRegistrationPoolIdDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-outputDenyTestCases: List[SignTxTestCase] = [
+outputDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Deny_pool_registration_operator_with_datum_hash",
         tx=Transaction(
@@ -10867,9 +10509,7 @@ outputDenyTestCases: List[SignTxTestCase] = [
                 TxOutputAlonzo(
                     destination=TxOutputDestination(
                         type=TxOutputDestinationType.THIRD_PARTY,
-                        params=ThirdPartyAddressParams(
-                            addressHex="e0db219ee5ce9a74f98fdadc2de13efced5a154ef8d4d41929d5bf9ff6"
-                        ),
+                        params=ThirdPartyAddressParams(addressHex="e0db219ee5ce9a74f98fdadc2de13efced5a154ef8d4d41929d5bf9ff6"),
                     ),
                     amount=10,
                     format=TxOutputFormat.ARRAY_LEGACY,
@@ -10890,9 +10530,7 @@ outputDenyTestCases: List[SignTxTestCase] = [
                 TxOutputAlonzo(
                     destination=TxOutputDestination(
                         type=TxOutputDestinationType.THIRD_PARTY,
-                        params=ThirdPartyAddressParams(
-                            addressHex="f0122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-                        ),
+                        params=ThirdPartyAddressParams(addressHex="f0122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
                     ),
                     amount=10,
                     format=TxOutputFormat.ARRAY_LEGACY,
@@ -10934,7 +10572,7 @@ outputDenyTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-testsCVoteRegistrationDenies: List[SignTxTestCase] = [
+testsCVoteRegistrationDenies: list[SignTxTestCase] = [
     SignTxTestCase(
         name="CIP15_registration_with_delegations_rejected",
         tx=Transaction(
@@ -10996,9 +10634,7 @@ testsCVoteRegistrationDenies: List[SignTxTestCase] = [
             auxiliaryData=TxAuxiliaryData(
                 TxAuxiliaryDataType.CIP36_REGISTRATION,
                 TxAuxiliaryDataCIP36(
-                    cast(
-                        CIP36VoteRegistrationFormat, 3
-                    ),  # invalid: only CIP_15=1 and CIP_36=2 are valid
+                    cast(CIP36VoteRegistrationFormat, 3),  # invalid: only CIP_15=1 and CIP_36=2 are valid
                     "m/1852'/1815'/0'/2/0",
                     destinations["internalBaseWithStakingPath"],
                     1454448,
@@ -11045,9 +10681,7 @@ testsCVoteRegistrationDenies: List[SignTxTestCase] = [
                 TxAuxiliaryDataCIP36(
                     CIP36VoteRegistrationFormat.CIP_36,
                     "m/1852'/1815'/0'/2/0",
-                    destinations[
-                        "externalShelleyBaseKeyhashScripthashFakenet"
-                    ],  # FakeNet addr on Mainnet tx
+                    destinations["externalShelleyBaseKeyhashScripthashFakenet"],  # FakeNet addr on Mainnet tx
                     1454448,
                     "4b19e27ffc006ace16592311c4d2f0cafc255eaa47a6178ff540c0a46d07027c",
                     votingPurpose=0,
@@ -11084,7 +10718,7 @@ testsCVoteRegistrationDenies: List[SignTxTestCase] = [
     ),
 ]
 
-invalidCertificates: List[SignTxTestCase] = [
+invalidCertificates: list[SignTxTestCase] = [
     SignTxTestCase(
         name="pool_registration_with_multiple_path_owners",
         tx=Transaction(
@@ -11120,9 +10754,7 @@ invalidCertificates: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -11162,9 +10794,7 @@ invalidCertificates: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -11180,7 +10810,7 @@ invalidCertificates: List[SignTxTestCase] = [
     ),
 ]
 
-invalidPoolMetadataTestCases: List[SignTxTestCase] = [
+invalidPoolMetadataTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="pool_metadata_url_too_long",
         tx=Transaction(
@@ -11212,9 +10842,7 @@ invalidPoolMetadataTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -11260,9 +10888,7 @@ invalidPoolMetadataTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -11308,9 +10934,7 @@ invalidPoolMetadataTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -11356,9 +10980,7 @@ invalidPoolMetadataTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_IP_ADDR,
-                                params=SingleHostIpAddrRelayParams(
-                                    portNumber=3000, ipv4="54.228.75.154", ipv6=None
-                                ),
+                                params=SingleHostIpAddrRelayParams(portNumber=3000, ipv4="54.228.75.154", ipv6=None),
                             )
                         ],
                         metadata=PoolMetadataParams(
@@ -11375,7 +10997,7 @@ invalidPoolMetadataTestCases: List[SignTxTestCase] = [
     ),
 ]
 
-invalidRelayTestCases: List[SignTxTestCase] = [
+invalidRelayTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="SingleHostHostname_missing_dns",
         tx=Transaction(
@@ -11407,9 +11029,7 @@ invalidRelayTestCases: List[SignTxTestCase] = [
                         relays=[
                             Relay(
                                 type=RelayType.SINGLE_HOST_HOSTNAME,
-                                params=SingleHostHostnameRelayParams(
-                                    portNumber=3000, dnsName=None
-                                ),
+                                params=SingleHostHostnameRelayParams(portNumber=3000, dnsName=None),
                             )
                         ],
                         metadata=PoolMetadataParams(

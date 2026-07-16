@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -7,20 +6,21 @@
 This module provides Ragger tests for Sign Message
 """
 
-from typing import Optional
 from dataclasses import dataclass, field
 
-from tests.application_client.command_builder import AddressParams, AddressType, Mainnet
-from tests.application_client.security_warnings import WarningBit
-from tests.application_client.status_words import StatusWord
 from tests.application_client.command_builder import (
+    AddressParams,
+    AddressType,
     CommandBuilder,
     InsType,
+    Mainnet,
     MessageAddressFieldType,
     MessageData,
     P1Type,
     P2Type,
 )
+from tests.application_client.security_warnings import WarningBit
+from tests.application_client.status_words import StatusWord
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -33,10 +33,10 @@ class SignMsgExpectedResult:
 @dataclass(kw_only=True, frozen=True)
 class SignMsgTestCase:
     name: str
-    msgData: Optional[MessageData] = None
-    unit_test_expect: Optional[SignMsgExpectedResult] = None
+    msgData: MessageData | None = None
+    unit_test_expect: SignMsgExpectedResult | None = None
     expected_warnings: tuple[WarningBit, ...] = field(default_factory=tuple)
-    ragger_expect: Optional[SignMsgExpectedResult] = None
+    ragger_expect: SignMsgExpectedResult | None = None
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -45,30 +45,20 @@ class SignMsgDenyTestCase:
     msgData: MessageData
     expected_swo: StatusWord
     # INIT-phase manipulation options
-    invalid_address_field_type: Optional[int] = None
-    invalid_msg_length: Optional[int] = None  # Override msgLength in INIT (4 bytes BE)
-    truncate_init_apdu_at: Optional[int] = None  # Truncate INIT APDU at byte position
-    trailing_init_bytes: int = (
-        0  # Append N extra garbage bytes after valid INIT payload
-    )
+    invalid_address_field_type: int | None = None
+    invalid_msg_length: int | None = None  # Override msgLength in INIT (4 bytes BE)
+    truncate_init_apdu_at: int | None = None  # Truncate INIT APDU at byte position
+    trailing_init_bytes: int = 0  # Append N extra garbage bytes after valid INIT payload
     # CHUNK-phase manipulation options
-    invalid_chunk_size: Optional[int] = None  # Override chunk size in first CHUNK
-    truncate_chunk_data_at: Optional[int] = (
-        None  # Truncate chunk APDU payload to N bytes after size header
-    )
+    invalid_chunk_size: int | None = None  # Override chunk size in first CHUNK
+    truncate_chunk_data_at: int | None = None  # Truncate chunk APDU payload to N bytes after size header
     # Multi-phase testing: if True, manually craft APDU sequence
     send_chunk_without_init: bool = False
-    send_init_when_active: bool = (
-        False  # Send a second INIT while a session is already active
-    )
+    send_init_when_active: bool = False  # Send a second INIT while a session is already active
     send_confirm_without_chunks: bool = False  # Skip CHUNK phase entirely
     send_confirm_with_payload: bool = False  # Add non-empty payload to CONFIRM
-    send_confirm_without_init: bool = (
-        False  # Send CONFIRM with no prior INIT (req_type mismatch)
-    )
-    send_chunk_when_in_confirm: bool = (
-        False  # Complete chunks, then send extra CHUNK in CONFIRM state
-    )
+    send_confirm_without_init: bool = False  # Send CONFIRM with no prior INIT (req_type mismatch)
+    send_chunk_when_in_confirm: bool = False  # Complete chunks, then send extra CHUNK in CONFIRM state
 
 
 def build_sign_msg_init_apdu_for_deny(test_case: SignMsgDenyTestCase) -> bytes:
@@ -82,9 +72,7 @@ def build_sign_msg_init_apdu_for_deny(test_case: SignMsgDenyTestCase) -> bytes:
     if test_case.invalid_msg_length is not None:
         # Message length is in payload (after 5-byte header), first 4 bytes
         payload_offset = 5
-        init_apdu[payload_offset : payload_offset + 4] = (
-            test_case.invalid_msg_length.to_bytes(4, "big")
-        )
+        init_apdu[payload_offset : payload_offset + 4] = test_case.invalid_msg_length.to_bytes(4, "big")
 
     if test_case.invalid_address_field_type is not None:
         # KEY_HASH has no trailing address params; addressFieldType is the last cdata byte.
@@ -108,9 +96,7 @@ def build_sign_msg_init_apdu_for_deny(test_case: SignMsgDenyTestCase) -> bytes:
     return bytes(init_apdu)
 
 
-def build_sign_msg_chunk_apdu_for_deny(
-    test_case: SignMsgDenyTestCase, chunk_index: int = 0
-) -> bytes:
+def build_sign_msg_chunk_apdu_for_deny(test_case: SignMsgDenyTestCase, chunk_index: int = 0) -> bytes:
     """Build a CHUNK APDU with optional manipulation for deny testing."""
     transient_success_case = SignMsgTestCase(
         name=test_case.name,
@@ -120,9 +106,7 @@ def build_sign_msg_chunk_apdu_for_deny(
 
     if chunk_index >= len(chunk_apdus):
         # Return empty chunk if no chunks needed (e.g., empty message)
-        return CommandBuilder().serialize(
-            InsType.INS_SIGN_MSG, P1Type.P1_SIGN_MSG_CHUNK, P2Type.P2_UNUSED, bytes()
-        )
+        return CommandBuilder().serialize(InsType.INS_SIGN_MSG, P1Type.P1_SIGN_MSG_CHUNK, P2Type.P2_UNUSED, b"")
 
     chunk_apdu = bytearray(chunk_apdus[chunk_index])
 
@@ -149,11 +133,9 @@ def build_sign_msg_confirm_apdu_for_deny(test_case: SignMsgDenyTestCase) -> byte
         # Add non-empty payload (should be denied)
         payload = b"\xde\xad\xbe\xef"
     else:
-        payload = bytes()
+        payload = b""
 
-    return CommandBuilder().serialize(
-        InsType.INS_SIGN_MSG, P1Type.P1_SIGN_MSG_CONFIRM, P2Type.P2_UNUSED, payload
-    )
+    return CommandBuilder().serialize(InsType.INS_SIGN_MSG, P1Type.P1_SIGN_MSG_CONFIRM, P2Type.P2_UNUSED, payload)
 
 
 # pylint: disable=line-too-long
@@ -598,8 +580,7 @@ signMsgDenyTestCases = [
     SignMsgDenyTestCase(
         name="Sign_msg_deny_nonascii_msg_causing_ui_hex_buffer_overflow",
         msgData=MessageData(
-            messageHex="de"
-            * 32768,  # 32768 bytes -> 65536 hex chars + 1 null + 2 safety = overflow
+            messageHex="de" * 32768,  # 32768 bytes -> 65536 hex chars + 1 null + 2 safety = overflow
             signingPath="m/1852'/1815'/0'/0/1",
             hashPayload=False,
             isAscii=False,
@@ -621,8 +602,7 @@ signMsgDenyTestCases = [
     SignMsgDenyTestCase(
         name="Sign_msg_deny_nonhashed_msg_causing_sig_structure_overflow",
         msgData=MessageData(
-            messageHex="de"
-            * 65280,  # Large enough to cause sig_structure overflow (UINT16_MAX - overhead)
+            messageHex="de" * 65280,  # Large enough to cause sig_structure overflow (UINT16_MAX - overhead)
             signingPath="m/1852'/1815'/0'/0/1",
             hashPayload=False,  # Non-hashed payload uses raw message in sig_structure
             isAscii=False,
@@ -633,8 +613,7 @@ signMsgDenyTestCases = [
     SignMsgDenyTestCase(
         name="Sign_msg_deny_ascii_nonhashed_msg_causing_sig_structure_overflow",
         msgData=MessageData(
-            messageHex="41"
-            * 65280,  # 65280 bytes 'A'; SIG_STRUCTURE_OVERHEAD + 65280 = 65536 > UINT16_MAX
+            messageHex="41" * 65280,  # 65280 bytes 'A'; SIG_STRUCTURE_OVERHEAD + 65280 = 65536 > UINT16_MAX
             signingPath="m/1852'/1815'/0'/0/1",
             hashPayload=False,  # Non-hashed: raw message used as Sig_structure payload
             isAscii=True,  # ASCII flag skips hex-display overflow check; hits sig_structure check
@@ -795,7 +774,7 @@ signMsgDenyTestCases = [
         name="Sign_msg_deny_invalid_witness_path_wrong_length",
         msgData=MessageData(
             messageHex="deadbeef",
-            signingPath="m/1852'/1815'/0'",  # Length 3 (account level) instead of 5 -> valid for account but not allowed for message signing
+            signingPath="m/1852'/1815'/0'",  # Length 3 (account level) instead of 5 -> valid for account but not allowed for message signing  # noqa: E501
             hashPayload=False,
             isAscii=False,
             addressFieldType=MessageAddressFieldType.KEY_HASH,
@@ -846,7 +825,7 @@ signMsgDenyTestCases = [
             addressFieldType=MessageAddressFieldType.ADDRESS,
             addressDesc=AddressParams(
                 netDesc=Mainnet,
-                addrType=AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,  # Payment script: parsing will fail due to missing script hash
+                addrType=AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,  # Payment script: parsing will fail due to missing script hash  # noqa: E501
                 spendingValue="",  # Scripts don't have paths
                 stakingValue="m/1852'/1815'/0'/2/0",
             ),

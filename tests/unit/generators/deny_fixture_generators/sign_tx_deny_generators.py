@@ -70,25 +70,25 @@ def _build_deny_fixtures() -> str:
     )
     from tests.application_client.status_words import StatusWord  # type: ignore
     from tests.standalone.input_files.signTx import (  # type: ignore
-        transactionInitDenyTestCases,
         addressParamsDenyTestCases,
         certificateDenyTestCases,
-        certificateStakingDenyTestCases,
         certificateStakePoolRetirementDenyTestCases,
-        withdrawalDenyTestCases,
-        witnessDenyTestCases,
-        singleAccountDenyTestCases,
+        certificateStakingDenyTestCases,
         collateralOutputDenyTestCases,
-        requiredSignerDenyTestCases,
-        testsInvalidTokenBundleOrdering,
-        votingDenyTestCases,
-        poolRegistrationOwnerDenyTestCases,
-        stakePoolRegistrationPoolIdDenyTestCases,
-        outputDenyTestCases,
-        testsCVoteRegistrationDenies,
         invalidCertificates,
         invalidPoolMetadataTestCases,
         invalidRelayTestCases,
+        outputDenyTestCases,
+        poolRegistrationOwnerDenyTestCases,
+        requiredSignerDenyTestCases,
+        singleAccountDenyTestCases,
+        stakePoolRegistrationPoolIdDenyTestCases,
+        testsCVoteRegistrationDenies,
+        testsInvalidTokenBundleOrdering,
+        transactionInitDenyTestCases,
+        votingDenyTestCases,
+        withdrawalDenyTestCases,
+        witnessDenyTestCases,
     )
 
     fixtures_by_set: dict[str, list[Any]] = {
@@ -158,15 +158,10 @@ def _build_deny_fixtures() -> str:
             )
             for chunk in builder.serialize_transaction_chunks(tx)
         ]
-        if (
-            tx.auxiliaryData is not None
-            and tx.auxiliaryData.type == TxAuxiliaryDataType.CIP36_REGISTRATION
-        ):
+        if tx.auxiliaryData is not None and tx.auxiliaryData.type == TxAuxiliaryDataType.CIP36_REGISTRATION:
             aux_params = tx.auxiliaryData.params
             if not isinstance(aux_params, TxAuxiliaryDataCIP36):
-                raise ValueError(
-                    "Expected TxAuxiliaryDataCIP36 params for CIP36 registration"
-                )
+                raise ValueError("Expected TxAuxiliaryDataCIP36 params for CIP36 registration")
             aux_chunks: list[ChunkInfo] = []
             aux_init_apdu = builder.sign_tx_aux_data_init(aux_params)
             aux_chunks.append(
@@ -203,10 +198,7 @@ def _build_deny_fixtures() -> str:
         expect_init_failure = prefix == "DENY_INIT"
         if prefix == "DENY_ADDRESS":
             normalized_name = sanitize_c_identifier(test_case.name).upper()
-            if (
-                "POOL_OPERATOR_SPENDING_CHOICE_NOT_PATH" in normalized_name
-                or "POOL_OWNER_UNCONDITIONALLY" in normalized_name
-            ):
+            if "POOL_OPERATOR_SPENDING_CHOICE_NOT_PATH" in normalized_name or "POOL_OWNER_UNCONDITIONALLY" in normalized_name:
                 expect_init_failure = True
 
         display_name = format_display_name(prefix, test_case.name)
@@ -266,12 +258,8 @@ def _build_deny_fixtures() -> str:
             for fixture in fixtures[set_name]:
                 if not fixture.chunks:
                     continue
-                lines.append(
-                    f"// Source: {fixture.source_file} > {fixture.source_set} > {fixture.name}"
-                )
-                lines.append(
-                    f"static const apdu_segment_t SIGN_TX_SEGMENTS_{prefix}_{fixture.sanitized_name}[] = {{"
-                )
+                lines.append(f"// Source: {fixture.source_file} > {fixture.source_set} > {fixture.name}")
+                lines.append(f"static const apdu_segment_t SIGN_TX_SEGMENTS_{prefix}_{fixture.sanitized_name}[] = {{")
                 for chunk in fixture.chunks:
                     lines.append("    {")
                     lines.append("        .hex_payload =")
@@ -285,9 +273,7 @@ def _build_deny_fixtures() -> str:
                     p2_constant = P2_CONSTANTS.get(chunk.p2, f"0x{chunk.p2:02X}")
                     lines.append(f"        .p1 = {p1_constant},")
                     lines.append(f"        .p2 = {p2_constant},")
-                    lines.append(
-                        f"        .more = {'true' if chunk.more else 'false'},"
-                    )
+                    lines.append(f"        .more = {'true' if chunk.more else 'false'},")
                     lines.append("    },")
                 lines.append("};")
                 lines.append("")
@@ -298,9 +284,7 @@ def _build_deny_fixtures() -> str:
             if not prefix or set_name not in fixtures:
                 continue
             for fixture in fixtures[set_name]:
-                lines.append(
-                    f"    // Source: {fixture.source_file} > {fixture.source_set} > {fixture.name}"
-                )
+                lines.append(f"    // Source: {fixture.source_file} > {fixture.source_set} > {fixture.name}")
                 lines.append("    {")
                 lines.append(f'        .name = "{fixture.display_name}",')
                 lines.append("        .init_hex =")
@@ -319,14 +303,10 @@ def _build_deny_fixtures() -> str:
                     lines.append("        .chunks = NULL,")
                     lines.append("        .chunk_count = 0,")
                 lines.append(f"        .expected_swo = {fixture.expected_swo},")
-                lines.append(
-                    f"        .expect_init_failure = {'true' if fixture.expect_init_failure else 'false'},"
-                )
+                lines.append(f"        .expect_init_failure = {'true' if fixture.expect_init_failure else 'false'},")
                 if fixture.required_expert_mode is not None:
                     lines.append("        .has_required_expert_mode = true,")
-                    lines.append(
-                        f"        .required_expert_mode = {'true' if fixture.required_expert_mode else 'false'},"
-                    )
+                    lines.append(f"        .required_expert_mode = {'true' if fixture.required_expert_mode else 'false'},")
                 lines.append("        .skip_reason = NULL,")
                 lines.append("    },")
         lines.append("};")

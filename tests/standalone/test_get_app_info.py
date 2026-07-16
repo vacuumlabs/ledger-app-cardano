@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -8,8 +7,8 @@ This module provides Ragger tests for application metadata APDUs.
 Tests app-level information commands: GET_APP_NAME, GET_VERSION, GET_SERIAL.
 """
 
-from ragger.utils.misc import get_current_app_name_and_version
 from ragger.backend.interface import BackendInterface
+from ragger.utils.misc import get_current_app_name_and_version
 
 from tests.application_client.command_sender import CommandSender
 from tests.application_client.response_unpacker import (
@@ -30,9 +29,7 @@ def test_get_app_name(backend: BackendInterface) -> None:
 
     # Verify app name matches what OS reports
     os_app_name, _ = get_current_app_name_and_version(backend)
-    assert app_name == os_app_name, (
-        f"App name mismatch: app reports '{app_name}', OS reports '{os_app_name}'"
-    )
+    assert app_name == os_app_name, f"App name mismatch: app reports '{app_name}', OS reports '{os_app_name}'"
 
 
 def test_get_version(backend: BackendInterface) -> None:
@@ -46,9 +43,7 @@ def test_get_version(backend: BackendInterface) -> None:
 
     # Verify app version matches what OS reports
     _, os_version = get_current_app_name_and_version(backend)
-    assert vers_str == os_version, (
-        f"Version mismatch: app reports '{vers_str}', OS reports '{os_version}'"
-    )
+    assert vers_str == os_version, f"Version mismatch: app reports '{vers_str}', OS reports '{os_version}'"
 
 
 def test_get_serial(backend: BackendInterface) -> None:

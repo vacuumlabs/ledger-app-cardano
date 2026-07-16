@@ -4,9 +4,9 @@
 from typing import Any
 
 from tests.unit.generators.common import (
-    write_generated_c_file,
-    sanitize_c_identifier,
     format_bytes_as_c_array,
+    sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_OPCERT_DIR
 
@@ -21,29 +21,17 @@ def _load_opcert_deny_test_cases() -> list[Any]:
 
 def _generate_fixture_code(test_case: Any, test_number: int) -> list[str]:
     code_lines: list[str] = []
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append(f"// Deny Test {test_number}: {test_case.name}")
-    code_lines.append(
-        f"// Expected SW: {test_case.expected_swo.name} (0x{test_case.expected_swo.value:04X})"
-    )
-    code_lines.append(
-        f"// Source: tests/standalone/input_files/signOpCert.py > opCertDenyTestCases > {test_case.name}"
-    )
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append(f"// Expected SW: {test_case.expected_swo.name} (0x{test_case.expected_swo.value:04X})")
+    code_lines.append(f"// Source: tests/standalone/input_files/signOpCert.py > opCertDenyTestCases > {test_case.name}")
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append("")
 
     payload_bytes = bytes.fromhex(test_case.payload_hex)
     safe_name = sanitize_c_identifier(test_case.name)
     array_name = f"OPCERT_DENY_{test_number:03d}_{safe_name}_PAYLOAD"
-    code_lines.extend(
-        format_bytes_as_c_array(
-            payload_bytes, array_name, bytes_per_line=16, return_as_list=True
-        )
-    )
+    code_lines.extend(format_bytes_as_c_array(payload_bytes, array_name, bytes_per_line=16, return_as_list=True))
     code_lines.append("")
     return code_lines
 
@@ -76,9 +64,7 @@ def _build_deny_fixtures() -> str:
     for idx, test_case in enumerate(deny_test_cases):
         safe_name = sanitize_c_identifier(test_case.name)
         array_name = f"OPCERT_DENY_{idx:03d}_{safe_name}_PAYLOAD"
-        header_lines.append(
-            f"// Source: tests/standalone/input_files/signOpCert.py > opCertDenyTestCases > {test_case.name}"
-        )
+        header_lines.append(f"// Source: tests/standalone/input_files/signOpCert.py > opCertDenyTestCases > {test_case.name}")
         header_lines.append("{")
         header_lines.append(f'    .name = "{test_case.name}",')
         header_lines.append(f"    .payload = {array_name},")

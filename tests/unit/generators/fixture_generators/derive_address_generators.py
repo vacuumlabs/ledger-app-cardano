@@ -5,11 +5,11 @@ from dataclasses import dataclass
 from typing import Any
 
 from tests.unit.generators.common import (
-    write_generated_c_file,
-    sanitize_c_identifier,
     _ensure_base58_module,
     extract_apdu_payload,
     format_bytes_as_c_array,
+    sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_DERIVE_ADDRESS_DIR
 
@@ -27,9 +27,7 @@ class TestCaseCategory:
     test_cases: list[Any]
 
 
-def _load_address_derivation_test_cases() -> tuple[
-    dict[str, list[Any]], dict[str, TestCaseCategory]
-]:
+def _load_address_derivation_test_cases() -> tuple[dict[str, list[Any]], dict[str, TestCaseCategory]]:
     """
     Load address derivation test cases from ragger standalone tests.
 
@@ -143,18 +141,14 @@ def _generate_fixture_code_for_test_case(
     code_lines = []
 
     # Add descriptive comment header
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append(f"// Test type: {type_test}")
     code_lines.append(f"// Test {test_number}: {test_case.name}")
     code_lines.append(f"// Address Type: {test_case.params.addrType.name}")
     code_lines.append(f"// Spending: {test_case.params.spendingValue}")
     if test_case.params.stakingValue:
         code_lines.append(f"// Staking: {test_case.params.stakingValue}")
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append("")
 
     # Serialize test case to APDU command using CommandBuilder
@@ -167,14 +161,10 @@ def _generate_fixture_code_for_test_case(
     safe_test_name = sanitize_c_identifier(test_case.name)
 
     # Add source traceability comment
-    code_lines.append(
-        f"// Source: tests/standalone/input_files/derive_address.py > {test_case.name}"
-    )
+    code_lines.append(f"// Source: tests/standalone/input_files/derive_address.py > {test_case.name}")
 
     # Generate C array for complete APDU command
-    payload_array_name = (
-        f"DERIVE_ADDRESS_{type_test}_{test_number:03d}_{safe_test_name}_APDU"
-    )
+    payload_array_name = f"DERIVE_ADDRESS_{type_test}_{test_number:03d}_{safe_test_name}_APDU"
     payload_array_code = format_bytes_as_c_array(
         payload_bytes,
         payload_array_name,
@@ -187,9 +177,7 @@ def _generate_fixture_code_for_test_case(
     expected = getattr(test_case, "unit_test_expect", None)
     expected_hex = getattr(expected, "addressHex", None)
     if expected_hex is None or expected_hex == "":
-        raise ValueError(
-            f"derive_address fixture {test_case.name!r} is missing unit_test_expect.addressHex"
-        )
+        raise ValueError(f"derive_address fixture {test_case.name!r} is missing unit_test_expect.addressHex")
 
     expected_bytes = bytes.fromhex(expected_hex)
     expected_array_name = f"DERIVE_ADDRESS_{type_test}_{test_number:03d}_{safe_test_name}_EXPECTED_ADDRESS"
@@ -220,9 +208,7 @@ def _build_fixtures() -> str:
     # Load test cases from ragger tests
     all_test_cases, categorized_test_cases = _load_address_derivation_test_cases()
 
-    print(
-        f"Generating fixtures for {len(categorized_test_cases)} categories of test cases..."
-    )
+    print(f"Generating fixtures for {len(categorized_test_cases)} categories of test cases...")
     print()
 
     # Start building header content
@@ -275,9 +261,7 @@ def _build_fixtures() -> str:
     for category_name, category in categorized_test_cases.items():
         test_cases = category.test_cases
 
-        header_lines.append(
-            f"static const derive_address_fixture_t DERIVE_ADDRESS_FIXTURES_{category_name.upper()}[] = {{"
-        )
+        header_lines.append(f"static const derive_address_fixture_t DERIVE_ADDRESS_FIXTURES_{category_name.upper()}[] = {{")
 
         for test_number, test_case in enumerate(test_cases):
             # Generate fixture struct
@@ -286,9 +270,7 @@ def _build_fixtures() -> str:
 
             payload_array_name = f"DERIVE_ADDRESS_{category.type}_{test_number:03d}_{safe_test_name}_APDU"
             # Add source traceability comment
-            header_lines.append(
-                f"// Source: tests/standalone/input_files/derive_address.py > {category_name} > {test_case.name}"
-            )
+            header_lines.append(f"// Source: tests/standalone/input_files/derive_address.py > {category_name} > {test_case.name}")
             header_lines.append("{")
 
             header_lines.append(f'    .name = "{test_case.name}",')
@@ -301,9 +283,7 @@ def _build_fixtures() -> str:
             if expected_hex:
                 expected_array_name = f"DERIVE_ADDRESS_{category.type}_{test_number:03d}_{safe_test_name}_EXPECTED_ADDRESS"
                 header_lines.append(f"    .expected_address = {expected_array_name},")
-                header_lines.append(
-                    f"    .expected_address_len = sizeof({expected_array_name}),"
-                )
+                header_lines.append(f"    .expected_address_len = sizeof({expected_array_name}),")
             else:
                 header_lines.append("    .expected_address = NULL,")
                 header_lines.append("    .expected_address_len = 0,")

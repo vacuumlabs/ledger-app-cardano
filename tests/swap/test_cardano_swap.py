@@ -6,17 +6,13 @@ import time
 
 import pytest
 from ledger_app_clients.exchange.test_runner import (
-    ExchangeTestRunner,
     ALL_TESTS_EXCEPT_MEMO_THORSWAP_AND_FEES,
+    ExchangeTestRunner,
 )
 from ledger_app_clients.exchange.utils import handle_lib_call_start_or_stop
 from ragger.error import ExceptionRAPDU
 
 import bech32
-
-from tests.application_client.command_sender import CommandSender
-from tests.application_client.status_words import StatusWord
-from tests.application_client.command_builder import gather_witness_paths
 from tests.application_client.command_builder import (
     AddressParams,
     AddressType,
@@ -30,7 +26,10 @@ from tests.application_client.command_builder import (
     TxOutputDestination,
     TxOutputDestinationType,
     TxOutputFormat,
+    gather_witness_paths,
 )
+from tests.application_client.command_sender import CommandSender
+from tests.application_client.status_words import StatusWord
 
 from . import cal_helper as cal
 
@@ -44,8 +43,12 @@ class CardanoShelleySwapTests(ExchangeTestRunner):
     currency_configuration = cal.ADA_SHELLEY_CURRENCY_CONFIGURATION
 
     # Valid destination addresses (bech32 mainnet Shelley addresses)
-    valid_destination_1 = "addr1q80r70qggedqy90z4rzy6kynv4xqejxfxqmangwhz8ugalfwlqyt4mswmh4hl0nnq53r4rp798vj4c7p7f2wdgqnc8uqt2xltv"  # pylint: disable=line-too-long
-    valid_destination_2 = "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"  # pylint: disable=line-too-long
+    valid_destination_1 = (
+        "addr1q80r70qggedqy90z4rzy6kynv4xqejxfxqmangwhz8ugalfwlqyt4mswmh4hl0nnq53r4rp798vj4c7p7f2wdgqnc8uqt2xltv"  # pylint: disable=line-too-long
+    )
+    valid_destination_2 = (
+        "addr1q84sh2j72ux0l03fxndjnhctdg7hcppsaejafsa84vh7lwgmcs5wgus8qt4atk45lvt4xfxpjtwfhdmvchdf2m3u3hlsd5tq5r"  # pylint: disable=line-too-long
+    )
 
     # Refund address (device-owned, derived from Speculos seed at m/1852'/1815'/0'/0/0)
     valid_refund = "addr1q9kl5z2zd9vakyprvw0g68c8hv0y0rnj93htc82hh2rs8wwmyx0wtn56wnuclkku9hsnal8dtg25a7x56svjn4dlnlmq7quz6p"  # pylint: disable=line-too-long
@@ -180,9 +183,7 @@ class CardanoShelleySwapTests(ExchangeTestRunner):
 
     def perform_final_tx(self, destination, send_amount, fees, memo):  # pylint: disable=unused-argument
         """Build and sign a standard Cardano transaction for swap finalization."""
-        tx = self._build_swap_tx(
-            destination, send_amount, fees, third_party_output_count=1
-        )
+        tx = self._build_swap_tx(destination, send_amount, fees, third_party_output_count=1)
         client = CommandSender(self.backend)
 
         # In swap mode, no UI review is needed (on_review=None)
@@ -194,9 +195,7 @@ class CardanoShelleySwapTests(ExchangeTestRunner):
 
         # Swap flow is completed only after all witnesses are requested and signed.
         witness_paths = gather_witness_paths(tx, TransactionSigningMode.ORDINARY, [])
-        assert witness_paths, (
-            "Expected at least one witness path for swap final transaction"
-        )
+        assert witness_paths, "Expected at least one witness path for swap final transaction"
         for witness_path in witness_paths:
             witness_response = client.sign_tx_witness(witness_path)
 
@@ -206,9 +205,7 @@ class CardanoShelleySwapTests(ExchangeTestRunner):
 
 class CardanoShelleySwapDenyMultipleThirdPartyOutputs(CardanoShelleySwapTests):
     def perform_final_tx(self, destination, send_amount, fees, memo):  # pylint: disable=unused-argument
-        tx = self._build_swap_tx(
-            destination, send_amount, fees, third_party_output_count=2
-        )
+        tx = self._build_swap_tx(destination, send_amount, fees, third_party_output_count=2)
         client = CommandSender(self.backend)
 
         # Must be denied in swap mode with SWO_SWAP_CHECKING_FAIL.
@@ -239,9 +236,7 @@ class CardanoShelleySwapDenyMultipleThirdPartyOutputs(CardanoShelleySwapTests):
 
 class CardanoShelleySwapDenyWitnessPoolColdPath(CardanoShelleySwapTests):
     def perform_final_tx(self, destination, send_amount, fees, memo):  # pylint: disable=unused-argument
-        tx = self._build_swap_tx(
-            destination, send_amount, fees, third_party_output_count=1
-        )
+        tx = self._build_swap_tx(destination, send_amount, fees, third_party_output_count=1)
         client = CommandSender(self.backend)
 
         # Pool cold key is denied in swap witness policy.
@@ -284,13 +279,9 @@ class CardanoShelleySwapDenyWitnessPoolColdPath(CardanoShelleySwapTests):
 class TestsCardanoSwap:
     @pytest.mark.parametrize("test_to_run", ALL_TESTS_EXCEPT_MEMO_THORSWAP_AND_FEES)
     def test_cardano_swap(self, backend, exchange_navigation_helper, test_to_run):
-        CardanoShelleySwapTests(backend, exchange_navigation_helper).run_test(
-            test_to_run
-        )
+        CardanoShelleySwapTests(backend, exchange_navigation_helper).run_test(test_to_run)
 
-    def test_cardano_swap_deny_multiple_third_party_outputs(
-        self, backend, exchange_navigation_helper
-    ):
+    def test_cardano_swap_deny_multiple_third_party_outputs(self, backend, exchange_navigation_helper):
         CardanoShelleySwapDenyMultipleThirdPartyOutputs(
             backend,
             exchange_navigation_helper,

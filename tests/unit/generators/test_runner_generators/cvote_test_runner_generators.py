@@ -7,8 +7,8 @@ from pathlib import Path
 
 from tests.unit.generators.common import (
     read_file_safe,
-    write_generated_c_file,
     sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_CVOTE_DIR
 
@@ -59,9 +59,7 @@ def _build_test_functions(fixture_names: list[str]) -> tuple[str, list[str]]:
     lines = []
     function_names = []
     for idx, raw_name in enumerate(fixture_names):
-        sanitized = sanitize_c_identifier(
-            raw_name, uppercase=False, handle_leading_digit=True
-        )
+        sanitized = sanitize_c_identifier(raw_name, uppercase=False, handle_leading_digit=True)
         if not sanitized:
             sanitized = f"fixture_{idx}"
         function_name = f"test_cvote_{sanitized}_{idx}"
@@ -101,9 +99,7 @@ def _build_main(function_names: list[str]) -> str:
 
 def generate_cvote_test_runners() -> int:
     if not FIXTURE_HEADER.exists():
-        raise FileNotFoundError(
-            "CVote fixtures missing. Run generate_unit_tests_from_ragger.py fixtures stage first."
-        )
+        raise FileNotFoundError("CVote fixtures missing. Run generate_unit_tests_from_ragger.py fixtures stage first.")
 
     fixture_names = _extract_fixture_names(FIXTURE_HEADER)
     if not fixture_names:

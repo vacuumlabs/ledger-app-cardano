@@ -5,20 +5,18 @@ from __future__ import annotations
 from typing import Any
 
 from tests.unit.generators.common import (
-    write_generated_c_file,
-    sanitize_c_identifier,
     _ensure_base58_module,
+    sanitize_c_identifier,
+    write_generated_c_file,
 )
-from tests.unit.generators.paths import GENERATED_NATIVE_SCRIPT_DIR
 from tests.unit.generators.native_script_codegen import (
+    generate_finish_apdu_payload,
     generate_native_script_tree_recursive,
     generate_simple_script_fixture,
-    generate_finish_apdu_payload,
 )
+from tests.unit.generators.paths import GENERATED_NATIVE_SCRIPT_DIR
 
-FIXTURES_FILE = (
-    GENERATED_NATIVE_SCRIPT_DIR / "test_derive_native_script_deny_fixtures.h"
-)
+FIXTURES_FILE = GENERATED_NATIVE_SCRIPT_DIR / "test_derive_native_script_deny_fixtures.h"
 
 
 def _load_native_script_test_cases() -> list[Any]:
@@ -97,22 +95,14 @@ def _build_fixtures() -> str:
         test_case_name_sanitized = sanitize_c_identifier(test_case.name)
         base_id = f"TC{test_case_index}_{test_case_name_sanitized.upper()}"
         if test_case.unit_test_expect is None or test_case.unit_test_expect.swo is None:
-            raise ValueError(
-                f"native_script deny fixture {test_case.name!r} is missing unit_test_expect.swo"
-            )
+            raise ValueError(f"native_script deny fixture {test_case.name!r} is missing unit_test_expect.swo")
 
         print(f"  [{test_case_index:2d}] Generating tree for: {test_case.name}")
 
-        header_lines.append(
-            "// ======================================================================"
-        )
+        header_lines.append("// ======================================================================")
         header_lines.append(f"// Test Case [{test_case_index}]: {test_case.name}")
-        header_lines.append(
-            "// Source: tests/standalone/input_files/native_script.py > deny tests"
-        )
-        header_lines.append(
-            "// ======================================================================"
-        )
+        header_lines.append("// Source: tests/standalone/input_files/native_script.py > deny tests")
+        header_lines.append("// ======================================================================")
         header_lines.append("")
 
         # Recursively generate script tree
@@ -123,9 +113,7 @@ def _build_fixtures() -> str:
         header_lines.append("")
 
         # Generate finish APDU payload
-        finish_lines, finish_array_name = generate_finish_apdu_payload(
-            base_id, test_case.displayFormat
-        )
+        finish_lines, finish_array_name = generate_finish_apdu_payload(base_id, test_case.displayFormat)
         header_lines.extend(finish_lines)
 
         # Store root identifier for test case array
@@ -150,26 +138,20 @@ def _build_fixtures() -> str:
     )
 
     for (
-        base_id,
+        _base_id,
         name,
         root_id,
         finish_apdu_array,
         expected_swo,
     ) in test_case_root_identifiers:
         # Add source traceability comment
-        header_lines.append(
-            f"    // Source: tests/standalone/input_files/native_script.py > deny tests > {name}"
-        )
+        header_lines.append(f"    // Source: tests/standalone/input_files/native_script.py > deny tests > {name}")
         header_lines.append("    {")
         header_lines.append(f'        .name = "{name}",')
-        header_lines.append(
-            f"        .root_script = (const native_script_t*)&{root_id},"
-        )
+        header_lines.append(f"        .root_script = (const native_script_t*)&{root_id},")
         header_lines.append(f"        .expected_response = {expected_swo},")
         header_lines.append(f"        .finish_apdu_payload = {finish_apdu_array},")
-        header_lines.append(
-            f"        .finish_apdu_payload_length = sizeof({finish_apdu_array}),"
-        )
+        header_lines.append(f"        .finish_apdu_payload_length = sizeof({finish_apdu_array}),")
         header_lines.append("    },")
 
     header_lines.extend(

@@ -15,8 +15,8 @@ from pathlib import Path
 
 from tests.unit.generators.common import (
     read_file_safe,
-    write_generated_c_file,
     sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_CVOTE_DIR
 
@@ -67,9 +67,7 @@ def _build_test_functions(fixture_names: list[str]) -> tuple[str, list[str]]:
     lines: list[str] = []
     func_names: list[str] = []
     for idx, name in enumerate(fixture_names):
-        sanitized = sanitize_c_identifier(
-            name, uppercase=False, handle_leading_digit=True
-        )
+        sanitized = sanitize_c_identifier(name, uppercase=False, handle_leading_digit=True)
         func_name = f"test_cvote_deny_{idx}_{sanitized}"
         lines.append(f"static void {func_name}(void **state) {{")
         lines.append("    (void) state;")

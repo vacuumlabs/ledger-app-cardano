@@ -1,14 +1,14 @@
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
 
-from typing import Any, Dict, List
+from typing import Any
 
 from tests.unit.generators.common import (
-    write_generated_c_file,
-    sanitize_c_identifier,
-    format_bytes_as_c_array,
     extract_apdu_payload,
+    format_bytes_as_c_array,
+    sanitize_c_identifier,
     warning_expr_from_test_case,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_SIGN_MSG_DIR
 
@@ -38,7 +38,7 @@ def _load_sign_msg_test_cases() -> list[Any]:
 # ==============================================================================
 
 
-def _serialize_sign_msg_test_case_to_apdus(test_case: Any) -> Dict[str, Any]:
+def _serialize_sign_msg_test_case_to_apdus(test_case: Any) -> dict[str, Any]:
     """
     Serialize a sign message test case into APDU payload bytes.
 
@@ -151,22 +151,16 @@ def _generate_fixture_code_for_test_case(
     """
     code_lines: list[str] = []
 
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append(f"// Test {test_number}: {test_case.name}")
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append("")
 
     # payloads provided by caller to avoid redundant serialization
 
     safe_test_name = sanitize_c_identifier(test_case.name)
 
-    code_lines.append(
-        f"// Source: tests/standalone/input_files/signMsg.py > {test_case.name}"
-    )
+    code_lines.append(f"// Source: tests/standalone/input_files/signMsg.py > {test_case.name}")
 
     # INIT payload
     init_array_name = f"SIGN_MSG_{test_number:03d}_{safe_test_name}_INIT_APDU"
@@ -180,11 +174,9 @@ def _generate_fixture_code_for_test_case(
     code_lines.append("")
 
     chunk_payloads = payloads["chunk_payloads"]
-    chunk_array_names: List[str] = []
+    chunk_array_names: list[str] = []
     for chunk_index, chunk_payload in enumerate(chunk_payloads):
-        chunk_array_name = (
-            f"SIGN_MSG_{test_number:03d}_{safe_test_name}_CHUNK_APDU_{chunk_index:03d}"
-        )
+        chunk_array_name = f"SIGN_MSG_{test_number:03d}_{safe_test_name}_CHUNK_APDU_{chunk_index:03d}"
         chunk_array_code = format_bytes_as_c_array(
             chunk_payload,
             chunk_array_name,
@@ -199,12 +191,7 @@ def _generate_fixture_code_for_test_case(
     if chunk_array_names:
         code_lines.append(f"static const sign_msg_chunk_t {chunk_struct_name}[] = {{")
         for chunk_array_name in chunk_array_names:
-            code_lines.append(
-                "    {"
-                f" .data = {chunk_array_name},"
-                f" .data_len = sizeof({chunk_array_name}),"
-                " },"
-            )
+            code_lines.append(f"    {{ .data = {chunk_array_name}, .data_len = sizeof({chunk_array_name}), }},")
         code_lines.append("};")
         code_lines.append("")
 
@@ -221,9 +208,7 @@ def _generate_fixture_code_for_test_case(
         code_lines.extend(confirm_array_code)
         code_lines.append("")
 
-    expected_section, expected_struct_name = _generate_expected_data_section(
-        test_case, test_number, safe_test_name
-    )
+    expected_section, expected_struct_name = _generate_expected_data_section(test_case, test_number, safe_test_name)
     code_lines.extend(expected_section)
 
     return code_lines, expected_struct_name
@@ -279,17 +264,11 @@ def _build_fixtures() -> str:
     for idx, test_case in enumerate(test_cases):
         payloads = fixture_payloads[idx]
         safe_test_name = sanitize_c_identifier(test_case.name)
-        header_lines.append(
-            f"// Source: tests/standalone/input_files/signMsg.py > {test_case.name}"
-        )
+        header_lines.append(f"// Source: tests/standalone/input_files/signMsg.py > {test_case.name}")
         header_lines.append("{")
         header_lines.append(f'    .name = "{test_case.name}",')
-        header_lines.append(
-            f"    .init_data = SIGN_MSG_{idx:03d}_{safe_test_name}_INIT_APDU,"
-        )
-        header_lines.append(
-            f"    .init_data_len = sizeof(SIGN_MSG_{idx:03d}_{safe_test_name}_INIT_APDU),"
-        )
+        header_lines.append(f"    .init_data = SIGN_MSG_{idx:03d}_{safe_test_name}_INIT_APDU,")
+        header_lines.append(f"    .init_data_len = sizeof(SIGN_MSG_{idx:03d}_{safe_test_name}_INIT_APDU),")
         chunk_struct_name = f"SIGN_MSG_{idx:03d}_{safe_test_name}_CHUNKS"
         if payloads["chunk_payloads"]:
             header_lines.append(f"    .chunks = {chunk_struct_name},")
@@ -298,19 +277,13 @@ def _build_fixtures() -> str:
             header_lines.append("    .chunks = NULL,")
             header_lines.append("    .chunk_count = 0,")
         if payloads["confirm_payload"]:
-            header_lines.append(
-                f"    .confirm_data = SIGN_MSG_{idx:03d}_{safe_test_name}_CONFIRM_APDU,"
-            )
-            header_lines.append(
-                f"    .confirm_data_len = sizeof(SIGN_MSG_{idx:03d}_{safe_test_name}_CONFIRM_APDU),"
-            )
+            header_lines.append(f"    .confirm_data = SIGN_MSG_{idx:03d}_{safe_test_name}_CONFIRM_APDU,")
+            header_lines.append(f"    .confirm_data_len = sizeof(SIGN_MSG_{idx:03d}_{safe_test_name}_CONFIRM_APDU),")
         else:
             header_lines.append("    .confirm_data = NULL,")
             header_lines.append("    .confirm_data_len = 0,")
         header_lines.append("    .check_expected = SWO_SUCCESS,")
-        header_lines.append(
-            f"    .expected_warning_bits = {warning_expr_from_test_case(test_case)},"
-        )
+        header_lines.append(f"    .expected_warning_bits = {warning_expr_from_test_case(test_case)},")
         expected_struct_name = fixture_expected_structs[idx]
         if expected_struct_name:
             header_lines.append(f"    .expected = &{expected_struct_name},")

@@ -7,7 +7,7 @@ We are converting an old version of the Ledger Cardano app into a new modernized
 - **New app:** `../ledger-app-cardano`. The modernized Ledger Cardano app in this repository.
 - **Local reference repos:** Use the checked-out local copies first, not web search:
   - `../../ledger/app-ethereum`
-  - `../../ledger/app-bitcoin-new`
+  - `../../ledger/app-bitcoin`
   - `../../ledger/app-boilerplate`
   - `../../ledger/ledger-app-workflows`
 - **Device Support:** Supporting Stax, Flex, Nano X, and Nano S+. *Nano S is no longer supported.*
@@ -96,7 +96,7 @@ This also applies when the user gives a direction that has multiple plausible in
 
 ## Additional Resources
 - **BOLOS SDK:** `/opt/ledger-secure-sdk` (underlying library).
-- **Reference Apps:** `../../ledger/app-ethereum` (eth app) and `../../ledger/app-bitcoin-new` (btc app) for modern coding patterns.
+- **Reference Apps:** `../../ledger/app-ethereum` (eth app) and `../../ledger/app-bitcoin` (btc app) for modern coding patterns.
 - **Client Libraries:** `../ledgerjs-cardano-shelley` and `../cardano-hw-interop-lib`.
 - **Testing:**
     - [doc/testing.md](doc/testing.md): Testing entry point and workflow.

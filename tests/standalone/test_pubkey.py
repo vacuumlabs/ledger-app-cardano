@@ -2,43 +2,40 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pytest
-
 from ledgered.devices import Device
 from ragger.backend import BackendInterface
+from ragger.error import ExceptionRAPDU
 from ragger.navigator import Navigator
 from ragger.navigator.navigation_scenario import NavigateWithScenario
-from ragger.error import ExceptionRAPDU
 
 from tests.application_client.command_sender import CommandSender
-from tests.application_client.status_words import StatusWord
 from tests.application_client.response_unpacker import unpack_get_pubkey_response
-
+from tests.application_client.status_words import StatusWord
 from tests.standalone.input_files.pubkey import (
     PubKeyTestCase,
     denyTestCases,
     testsByron,
-    testsShelleyUsual,
-    testsShelleyUnusual,
-    testsMultisig,
     testsColdKeys,
-    testsCVoteKeysUsual,
-    testsCVoteKeysUnusual,
-    testsDRepKeys,
     testsCommitteeColdKeys,
     testsCommitteeHotKeys,
+    testsCVoteKeysUnusual,
+    testsCVoteKeysUsual,
+    testsDRepKeys,
     testsMintKeys,
+    testsMultisig,
+    testsShelleyUnusual,
+    testsShelleyUsual,
     testsSilentExport,
     testsSilentExportRareKeys,
 )
-
+from tests.standalone.settings import SettingID, SettingValue, settings_set
 from tests.standalone.utils import (
-    idTestFunc,
-    get_device_pubkey,
-    choice_approve,
     NavContext,
     assert_expected_deny_and_app_alive,
+    choice_approve,
+    get_device_pubkey,
+    idTestFunc,
 )
-from tests.standalone.settings import SettingID, SettingValue, settings_set
 
 
 @pytest.mark.parametrize(
@@ -171,14 +168,10 @@ def test_pubkey_deny(backend: BackendInterface, testCase: PubKeyTestCase) -> Non
     with pytest.raises(ExceptionRAPDU) as err:
         with client.get_pubkey_async(testCase.path):
             pass
-    assert_expected_deny_and_app_alive(
-        backend, err.value, StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED
-    )
+    assert_expected_deny_and_app_alive(backend, err.value, StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED)
 
 
-def _check_ragger_expect_pubkey(
-    testCase: PubKeyTestCase, public_key: bytes, chain_code: bytes
-) -> None:
+def _check_ragger_expect_pubkey(testCase: PubKeyTestCase, public_key: bytes, chain_code: bytes) -> None:
     if testCase.ragger_expect is None:
         pytest.fail(f"Missing ragger_expect for pubkey fixture {testCase.name!r}")
     assert public_key.hex() == testCase.ragger_expect.publicKeyHex

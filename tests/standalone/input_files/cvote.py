@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -8,7 +7,6 @@ This module provides Ragger tests for CIP-36 Vote check
 """
 
 from dataclasses import dataclass
-from typing import List, Optional
 
 from tests.application_client.command_builder import (
     CIP36Vote,
@@ -32,8 +30,8 @@ class CVoteDenyTestCase:
 
     name: str
     expected_swo: StatusWord
-    init_payload_hex: Optional[str] = None
-    invalid_witness_path: Optional[str] = None
+    init_payload_hex: str | None = None
+    invalid_witness_path: str | None = None
     send_chunk_before_init: bool = False
 
 
@@ -58,7 +56,7 @@ cvoteTestCases = [
 ]
 
 # pylint: disable=line-too-long
-cvoteDenyTestCases: List[CVoteDenyTestCase] = [
+cvoteDenyTestCases: list[CVoteDenyTestCase] = [
     CVoteDenyTestCase(
         name="cvote_deny_zero_remaining_bytes",
         # 4-byte length field is zero — app rejects before reading any chunk data.

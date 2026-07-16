@@ -2,14 +2,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
-from pathlib import Path
 import sys
-from typing import List
+from pathlib import Path
+
 import pytest
-
-from ragger.conftest import configuration
-
 from ledger_app_clients.exchange.navigation_helper import ExchangeNavigationHelper
+from ragger.conftest import configuration
 
 # Add parent tests directory to path so we can import application_client
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -44,7 +42,7 @@ def snapshots_path():
 
 
 @pytest.fixture
-def additional_speculos_arguments() -> List[str]:
+def additional_speculos_arguments() -> list[str]:
     """Assign deterministic per-worker Speculos ports under pytest-xdist.
 
     Ragger's default "find a free port" logic races across xdist workers.

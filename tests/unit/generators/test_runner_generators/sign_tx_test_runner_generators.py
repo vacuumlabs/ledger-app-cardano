@@ -2,16 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import re
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 from tests.unit.generators.common import (
     read_file_safe,
-    write_generated_c_file,
     sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_SIGN_TX_DIR
-
 
 # ======================================================================
 # Compiled Regex Patterns (module level for performance)
@@ -27,9 +26,7 @@ _FIXTURE_PATTERN = re.compile(
 _NAME_FIELD_PATTERN = re.compile(r'\.name\s*=\s*((?:"[^"]*"\s*)+)')
 AUX_INCLUDED_PATTERN = re.compile(r"\.include_aux_data_hash\s*=\s*(true|false)")
 AUX_TYPE_PATTERN = re.compile(r"\.aux_data_type\s*=\s*([A-Z0-9_]+|\d+)")
-BLIND_SIGNING_MODE_PATTERN = re.compile(
-    r"\.blind_signing_mode\s*=\s*(BLIND_SIGNING_MODE_[A-Z_]+|\d+)"
-)
+BLIND_SIGNING_MODE_PATTERN = re.compile(r"\.blind_signing_mode\s*=\s*(BLIND_SIGNING_MODE_[A-Z_]+|\d+)")
 SIGNING_MODE_PATTERN = re.compile(r"\.signing_mode\s*=\s*(\d+)")
 SIGN_TX_SIGNINGMODE_UNRESTRICTED = 9
 
@@ -162,11 +159,7 @@ def _build_test_functions(
             )
             names.append(function_name)
 
-        expert_mode_variants = (
-            [("expert_on", "true")]
-            if is_unrestricted
-            else [("expert_off", "false"), ("expert_on", "true")]
-        )
+        expert_mode_variants = [("expert_on", "true")] if is_unrestricted else [("expert_off", "false"), ("expert_on", "true")]
         for suffix, expert_flag in expert_mode_variants:
             function_name = f"{test_name}_{suffix}"
             functions.append(
@@ -200,9 +193,7 @@ def _build_test_functions(
                 names.append(reject_aux_function_name)
 
             if has_blind_signing_hash_only_path:
-                blind_signing_hash_only_function_name = (
-                    f"{test_name}_blind_signing_hash_only_{suffix}"
-                )
+                blind_signing_hash_only_function_name = f"{test_name}_blind_signing_hash_only_{suffix}"
                 functions.append(
                     "static void\n"
                     f"{blind_signing_hash_only_function_name}(void **state) {{\n"
@@ -216,9 +207,7 @@ def _build_test_functions(
 
 
 def _build_main_function(test_names: Sequence[str], test_c_file: str) -> str:
-    registrations = ",\n".join(
-        f"        cmocka_unit_test(\n            {name})" for name in test_names
-    )
+    registrations = ",\n".join(f"        cmocka_unit_test(\n            {name})" for name in test_names)
     return (
         "// ======================================================================\n"
         "// Main\n"
@@ -307,9 +296,7 @@ def _build_common_header(fixture_file: str) -> str:
     )
 
 
-def _generate_complete_test_file(
-    era: str, fixture_file: str, test_c_file: str, era_upper: str
-) -> int:
+def _generate_complete_test_file(era: str, fixture_file: str, test_c_file: str, era_upper: str) -> int:
     fixture_path = GENERATED_SIGN_TX_DIR / fixture_file
     test_path = GENERATED_SIGN_TX_DIR / test_c_file
 
@@ -337,9 +324,7 @@ def _generate_complete_test_file(
         if has_blind_signing_hash_only_path:
             expected_test_count += 2
     if len(test_names) != expected_test_count:
-        raise ValueError(
-            f"Test count mismatch for {test_c_file}: expected {expected_test_count}, got {len(test_names)}"
-        )
+        raise ValueError(f"Test count mismatch for {test_c_file}: expected {expected_test_count}, got {len(test_names)}")
 
     common_header = _build_common_header(fixture_file)
     tests_block = "\n\n".join(test_functions)
@@ -351,14 +336,7 @@ def _generate_complete_test_file(
         "// ======================================================================\n\n"
     )
 
-    complete_file = (
-        common_header.rstrip()
-        + "\n\n"
-        + era_comment_block
-        + tests_block
-        + "\n\n"
-        + main_block
-    )
+    complete_file = common_header.rstrip() + "\n\n" + era_comment_block + tests_block + "\n\n" + main_block
 
     write_generated_c_file(test_path, complete_file)
     print(f"Generated {test_c_file}: {len(test_names)} tests")
@@ -369,9 +347,7 @@ def generate_tx_test_runners() -> int:
 
     total_tests = 0
     for era, (fixture_file, test_c_file, era_upper) in ERA_TEST_FILE_MAP.items():
-        total_tests += _generate_complete_test_file(
-            era, fixture_file, test_c_file, era_upper
-        )
+        total_tests += _generate_complete_test_file(era, fixture_file, test_c_file, era_upper)
 
     print("\nAll test files generated successfully!")
     return total_tests

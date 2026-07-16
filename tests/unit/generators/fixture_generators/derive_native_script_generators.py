@@ -5,16 +5,16 @@ from __future__ import annotations
 from typing import Any
 
 from tests.unit.generators.common import (
-    write_generated_c_file,
-    sanitize_c_identifier,
     _ensure_base58_module,
+    sanitize_c_identifier,
+    write_generated_c_file,
 )
-from tests.unit.generators.paths import GENERATED_NATIVE_SCRIPT_DIR
 from tests.unit.generators.native_script_codegen import (
+    generate_finish_apdu_payload,
     generate_native_script_tree_recursive,
     generate_simple_script_fixture,
-    generate_finish_apdu_payload,
 )
+from tests.unit.generators.paths import GENERATED_NATIVE_SCRIPT_DIR
 
 FIXTURES_FILE = GENERATED_NATIVE_SCRIPT_DIR / "test_derive_native_script_fixtures.h"
 
@@ -96,22 +96,16 @@ def _build_fixtures() -> str:
         test_case_name_sanitized = sanitize_c_identifier(test_case.name)
         base_id = f"TC{test_case_index}_{test_case_name_sanitized.upper()}"
 
-        header_lines.append(
-            "// ======================================================================"
-        )
+        header_lines.append("// ======================================================================")
         header_lines.append(f"// Test Case [{test_case_index}]: {test_case.name}")
         header_lines.append("// Source: tests/standalone/input_files/native_script.py")
-        header_lines.append(
-            "// ======================================================================"
-        )
+        header_lines.append("// ======================================================================")
         header_lines.append("")
 
         # Generate expected hash
         assert test_case.unit_test_expect is not None
         expected_hash_bytes = bytes.fromhex(test_case.unit_test_expect.hash)
-        header_lines.append(
-            f"static const uint8_t EXPECTED_HASH_{base_id}[SCRIPT_HASH_LENGTH] = {{"
-        )
+        header_lines.append(f"static const uint8_t EXPECTED_HASH_{base_id}[SCRIPT_HASH_LENGTH] = {{")
         for chunk_start in range(0, len(expected_hash_bytes), 8):
             chunk = expected_hash_bytes[chunk_start : chunk_start + 8]
             hex_str = ", ".join(f"0x{byte:02x}" for byte in chunk)
@@ -129,9 +123,7 @@ def _build_fixtures() -> str:
         # Generate finish APDU payload
         if not hasattr(test_case, "displayFormat"):
             raise ValueError(f"Test case {test_case.name} missing displayFormat")
-        finish_lines, finish_array_name = generate_finish_apdu_payload(
-            base_id, test_case.displayFormat
-        )
+        finish_lines, finish_array_name = generate_finish_apdu_payload(base_id, test_case.displayFormat)
         header_lines.extend(finish_lines)
 
         # Store root identifier for test case array
@@ -161,19 +153,13 @@ def _build_fixtures() -> str:
         finish_apdu_array,
     ) in test_case_root_identifiers:
         # Add source traceability comment
-        header_lines.append(
-            f"    // Source: tests/standalone/input_files/native_script.py > {name}"
-        )
+        header_lines.append(f"    // Source: tests/standalone/input_files/native_script.py > {name}")
         header_lines.append("    {")
         header_lines.append(f'        .name = "{name}",')
-        header_lines.append(
-            f"        .root_script = (const native_script_t*)&{root_id},"
-        )
+        header_lines.append(f"        .root_script = (const native_script_t*)&{root_id},")
         header_lines.append(f"        .expected_hash = EXPECTED_HASH_{base_id},")
         header_lines.append(f"        .finish_apdu_payload = {finish_apdu_array},")
-        header_lines.append(
-            f"        .finish_apdu_payload_length = sizeof({finish_apdu_array}),"
-        )
+        header_lines.append(f"        .finish_apdu_payload_length = sizeof({finish_apdu_array}),")
         header_lines.append("    },")
 
     header_lines.extend(

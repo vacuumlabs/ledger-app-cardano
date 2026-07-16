@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 from enum import IntFlag
-from typing import NamedTuple, Tuple
 from struct import unpack
+from typing import NamedTuple
 
 
 def _require(condition: bool, message: str) -> None:
@@ -57,7 +57,7 @@ def unpack_get_serial_response(response: bytes) -> bytes:
 # Unpack from response:
 # response = pub_key (32)
 #            chain_code (32)
-def unpack_get_pubkey_response(response: bytes) -> Tuple[bytes, bytes]:
+def unpack_get_pubkey_response(response: bytes) -> tuple[bytes, bytes]:
     PUBLIC_KEY_LENGTH = 32
     CHAIN_CODE_LENGTH = 32
     _require(
@@ -130,7 +130,7 @@ def unpack_derive_native_script_hash_response(response: bytes) -> bytes:
 #            public_key (32)
 #            address_field_size (4)
 #            address_field (variable, up to 128)
-def unpack_sign_message_response(response: bytes) -> Tuple[bytes, bytes, bytes]:
+def unpack_sign_message_response(response: bytes) -> tuple[bytes, bytes, bytes]:
     SIGNATURE_LENGTH = 64
     PUBLIC_KEY_LENGTH = 32
     ADDRESS_FIELD_SIZE_LENGTH = 4
@@ -165,9 +165,7 @@ def unpack_sign_message_response(response: bytes) -> Tuple[bytes, bytes, bytes]:
     offset += PUBLIC_KEY_LENGTH
 
     # Extract address field size
-    address_field_size = int.from_bytes(
-        response[offset : offset + ADDRESS_FIELD_SIZE_LENGTH], "big"
-    )
+    address_field_size = int.from_bytes(response[offset : offset + ADDRESS_FIELD_SIZE_LENGTH], "big")
     _require(
         address_field_size <= MAX_ADDRESS_FIELD_LENGTH,
         f"Address field too long: {address_field_size} > {MAX_ADDRESS_FIELD_LENGTH}",

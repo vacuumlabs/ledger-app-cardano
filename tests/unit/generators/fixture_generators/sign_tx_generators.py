@@ -3,7 +3,8 @@
 
 import hashlib
 import re
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from tests.application_client.security_warnings import WarningBit
 from tests.unit.generators.common import (
@@ -17,7 +18,6 @@ from tests.unit.generators.common import (
     write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_SIGN_TX_DIR
-
 
 # ======================================================================
 # Compiled Regex Patterns (module level for performance)
@@ -60,11 +60,9 @@ def _sign_with_extended_key(extended_key: bytes, message: bytes) -> bytes:
 
 def _derive_witness_signature(witness_path: str, message: bytes) -> bytes:
     try:
-        from bip_utils import Bip39SeedGenerator, Bip32Ed25519Kholaw  # type: ignore
+        from bip_utils import Bip32Ed25519Kholaw, Bip39SeedGenerator  # type: ignore
     except ImportError as exc:
-        raise RuntimeError(
-            f"Missing dependency for sign-tx signature derivation: {exc}"
-        ) from exc
+        raise RuntimeError(f"Missing dependency for sign-tx signature derivation: {exc}") from exc
 
     mnemonic = resolve_mnemonic()
     seed = Bip39SeedGenerator(mnemonic).Generate()
@@ -88,9 +86,7 @@ def _extract_aux_data_hash_from_tx_body(hex_str: str) -> str | None:
     try:
         parsed = cbor2.loads(_cbor_hex_to_bytes(hex_str))
     except Exception as exc:
-        raise ValueError(
-            "Failed to parse txBodyHex while extracting auxiliary data hash"
-        ) from exc
+        raise ValueError("Failed to parse txBodyHex while extracting auxiliary data hash") from exc
 
     if not isinstance(parsed, dict):
         return None
@@ -181,19 +177,13 @@ def _is_reasonable_witness_path(path: str) -> bool:
             _CARDANO_CHAIN_INTERNAL,
             _CARDANO_CHAIN_STAKING_KEY,
         ):
-            return _has_reasonable_account(path_words) and _has_reasonable_address(
-                path_words
-            )
+            return _has_reasonable_account(path_words) and _has_reasonable_address(path_words)
         if len(path_words) == 5 and path_words[3] in (
             _CARDANO_CHAIN_DREP_KEY,
             _CARDANO_CHAIN_COMMITTEE_COLD_KEY,
             _CARDANO_CHAIN_COMMITTEE_HOT_KEY,
         ):
-            return (
-                _has_reasonable_account(path_words)
-                and _has_reasonable_address(path_words)
-                and path_words[4] == 0
-            )
+            return _has_reasonable_account(path_words) and _has_reasonable_address(path_words) and path_words[4] == 0
         return False
 
     if purpose == (_PURPOSE_MULTISIG | _HARDENED_BIP32):
@@ -204,26 +194,18 @@ def _is_reasonable_witness_path(path: str) -> bool:
             _CARDANO_CHAIN_INTERNAL,
             _CARDANO_CHAIN_STAKING_KEY,
         ):
-            return _has_reasonable_account(path_words) and _has_reasonable_address(
-                path_words
-            )
+            return _has_reasonable_account(path_words) and _has_reasonable_address(path_words)
         if len(path_words) == 5 and path_words[3] in (
             _CARDANO_CHAIN_DREP_KEY,
             _CARDANO_CHAIN_COMMITTEE_COLD_KEY,
             _CARDANO_CHAIN_COMMITTEE_HOT_KEY,
         ):
-            return (
-                _has_reasonable_account(path_words)
-                and _has_reasonable_address(path_words)
-                and path_words[4] == 0
-            )
+            return _has_reasonable_account(path_words) and _has_reasonable_address(path_words) and path_words[4] == 0
         return False
 
     if purpose == (_PURPOSE_MINT | _HARDENED_BIP32):
         return (
-            len(path_words) == 3
-            and _is_hardened(path_words[2])
-            and _unharden(path_words[2]) <= _MAX_REASONABLE_MINT_POLICY_INDEX
+            len(path_words) == 3 and _is_hardened(path_words[2]) and _unharden(path_words[2]) <= _MAX_REASONABLE_MINT_POLICY_INDEX
         )
 
     if purpose == (_PURPOSE_POOL_COLD_KEY | _HARDENED_BIP32):
@@ -347,24 +329,18 @@ def _generate_fixtures_for_era(
                     aux_data_init_payload = extract_apdu_payload(aux_data_init_apdu)
                     for delegation in aux_params.delegations:
                         reg_apdu = builder.sign_tx_aux_data_delegation(delegation)
-                        aux_data_delegation_payloads.append(
-                            extract_apdu_payload(reg_apdu)
-                        )
+                        aux_data_delegation_payloads.append(extract_apdu_payload(reg_apdu))
                 else:
                     include_aux_data_hash = False
 
         include_script_data_hash = getattr(tx, "scriptDataHash", None) is not None
 
-        options_value = (
-            "TX_OPTIONS_TAG_CBOR_SETS" if "d90102" in expected_cbor_hex.lower() else "0"
-        )
+        options_value = "TX_OPTIONS_TAG_CBOR_SETS" if "d90102" in expected_cbor_hex.lower() else "0"
         network_id_value = int(test_case.tx.network.networkId)
         protocol_magic_value = int(test_case.tx.network.protocol)
 
         header_lines.append(f"// Test {test_index}: {test_case.name}")
-        header_lines.append(
-            f"// Source: tests/standalone/input_files/signTx.py > {era_key} era tests"
-        )
+        header_lines.append(f"// Source: tests/standalone/input_files/signTx.py > {era_key} era tests")
         header_lines.append("//")
 
         array_lines = format_bytes_as_c_array(
@@ -373,9 +349,7 @@ def _generate_fixtures_for_era(
         ).split("\n")
         header_lines.extend(array_lines)
         header_lines.append("")
-        if include_aux_data_hash and aux_data_type == int(
-            TxAuxiliaryDataType.CIP36_REGISTRATION
-        ):
+        if include_aux_data_hash and aux_data_type == int(TxAuxiliaryDataType.CIP36_REGISTRATION):
             init_payload_name = f"{fixture_prefix}_AUX_DATA_INIT_PAYLOAD"
             init_payload_lines = format_bytes_as_c_array(
                 aux_data_init_payload,
@@ -392,12 +366,8 @@ def _generate_fixtures_for_era(
                     reg_lines = format_bytes_as_c_array(payload, entry_name).split("\n")
                     header_lines.extend(reg_lines)
                     header_lines.append("")
-                    delegation_entries.append(
-                        f"    {{ .payload = {entry_name}, .payload_len = sizeof({entry_name}) }},"
-                    )
-                header_lines.append(
-                    f"static const aux_data_payload_t {delegations_name}[] = {{"
-                )
+                    delegation_entries.append(f"    {{ .payload = {entry_name}, .payload_len = sizeof({entry_name}) }},")
+                header_lines.append(f"static const aux_data_payload_t {delegations_name}[] = {{")
                 header_lines.extend(delegation_entries)
                 header_lines.append("};")
             header_lines.append("")
@@ -412,9 +382,7 @@ def _generate_fixtures_for_era(
         expected_hash_bytes = bytes.fromhex(expected_hash_hex)
         for witness_index, witness_path in enumerate(witness_paths):
             witness_payload_name = f"{fixture_prefix}_WITNESS_{witness_index}_PAYLOAD"
-            witness_signature_name = (
-                f"{fixture_prefix}_WITNESS_{witness_index}_EXPECTED_SIGNATURE"
-            )
+            witness_signature_name = f"{fixture_prefix}_WITNESS_{witness_index}_EXPECTED_SIGNATURE"
             witness_apdu = builder.sign_tx_witness(witness_path)
             witness_payload = extract_apdu_payload(witness_apdu)
             witness_signature = _derive_witness_signature(
@@ -440,9 +408,7 @@ def _generate_fixtures_for_era(
                 f".expected_signature = {witness_signature_name} }},"
             )
         if witness_payload_entries:
-            witness_declaration_lines.append(
-                f"static const witness_payload_t {witness_payloads_name}[] = {{"
-            )
+            witness_declaration_lines.append(f"static const witness_payload_t {witness_payloads_name}[] = {{")
             witness_declaration_lines.extend(witness_payload_entries)
             witness_declaration_lines.append("};")
             witness_declaration_lines.append("")
@@ -469,42 +435,23 @@ def _generate_fixtures_for_era(
         header_lines.append(f"    .num_witnesses = {len(witness_paths)},")
         if witness_payload_entries:
             header_lines.append(f"    .witness_payloads = {witness_payloads_name},")
-            header_lines.append(
-                f"    .witness_payload_count = {len(witness_payload_entries)},"
-            )
+            header_lines.append(f"    .witness_payload_count = {len(witness_payload_entries)},")
         else:
             header_lines.append("    .witness_payloads = NULL,")
             header_lines.append("    .witness_payload_count = 0,")
-        header_lines.append(
-            f"    .num_certificates = {len(tx.certificates) if tx.certificates else 0},"
-        )
-        header_lines.append(
-            f"    .num_withdrawals = {len(tx.withdrawals) if tx.withdrawals else 0},"
-        )
-        header_lines.append(
-            f"    .num_mint_asset_groups = {len(tx.mint) if tx.mint else 0},"
-        )
+        header_lines.append(f"    .num_certificates = {len(tx.certificates) if tx.certificates else 0},")
+        header_lines.append(f"    .num_withdrawals = {len(tx.withdrawals) if tx.withdrawals else 0},")
+        header_lines.append(f"    .num_mint_asset_groups = {len(tx.mint) if tx.mint else 0},")
         header_lines.append(f"    .include_ttl = {bool_to_c(tx.ttl is not None)},")
-        header_lines.append(
-            f"    .include_validity_interval_start = "
-            f"{bool_to_c(tx.validityIntervalStart is not None)},"
-        )
-        header_lines.append(
-            f"    .include_aux_data_hash = {bool_to_c(include_aux_data_hash)},"
-        )
+        header_lines.append(f"    .include_validity_interval_start = {bool_to_c(tx.validityIntervalStart is not None)},")
+        header_lines.append(f"    .include_aux_data_hash = {bool_to_c(include_aux_data_hash)},")
         header_lines.append(f"    .aux_data_type = {aux_data_type},")
-        if include_aux_data_hash and aux_data_type == int(
-            TxAuxiliaryDataType.CIP36_REGISTRATION
-        ):
+        if include_aux_data_hash and aux_data_type == int(TxAuxiliaryDataType.CIP36_REGISTRATION):
             header_lines.append(f"    .aux_data_init_payload = {init_payload_name},")
-            header_lines.append(
-                f"    .aux_data_init_payload_len = sizeof({init_payload_name}),"
-            )
+            header_lines.append(f"    .aux_data_init_payload_len = sizeof({init_payload_name}),")
             if aux_data_delegation_payloads:
                 header_lines.append(f"    .aux_data_delegations = {delegations_name},")
-                header_lines.append(
-                    f"    .aux_data_delegation_count = {len(aux_data_delegation_payloads)},"
-                )
+                header_lines.append(f"    .aux_data_delegation_count = {len(aux_data_delegation_payloads)},")
             else:
                 header_lines.append("    .aux_data_delegations = NULL,")
                 header_lines.append("    .aux_data_delegation_count = 0,")
@@ -513,9 +460,7 @@ def _generate_fixtures_for_era(
             header_lines.append("    .aux_data_init_payload_len = 0,")
             header_lines.append("    .aux_data_delegations = NULL,")
             header_lines.append("    .aux_data_delegation_count = 0,")
-        header_lines.append(
-            f"    .include_script_data_hash = {bool_to_c(include_script_data_hash)},"
-        )
+        header_lines.append(f"    .include_script_data_hash = {bool_to_c(include_script_data_hash)},")
         header_lines.append(
             f"    .num_collateral_inputs = "
             f"{len(tx.collateralInputs) if hasattr(tx, 'collateralInputs') and tx.collateralInputs else 0},"
@@ -524,40 +469,22 @@ def _generate_fixtures_for_era(
             f"    .num_required_signers = "
             f"{len(tx.requiredSigners) if hasattr(tx, 'requiredSigners') and tx.requiredSigners else 0},"
         )
-        header_lines.append(
-            f"    .include_network_id = "
-            f"{bool_to_c(getattr(tx, 'includeNetworkId', False))},"
-        )
-        header_lines.append(
-            f"    .include_collateral_output = "
-            f"{bool_to_c(getattr(tx, 'collateralOutput', None) is not None)},"
-        )
-        header_lines.append(
-            f"    .include_total_collateral = "
-            f"{bool_to_c(getattr(tx, 'totalCollateral', None) is not None)},"
-        )
+        header_lines.append(f"    .include_network_id = {bool_to_c(getattr(tx, 'includeNetworkId', False))},")
+        header_lines.append(f"    .include_collateral_output = {bool_to_c(getattr(tx, 'collateralOutput', None) is not None)},")
+        header_lines.append(f"    .include_total_collateral = {bool_to_c(getattr(tx, 'totalCollateral', None) is not None)},")
         header_lines.append(
             f"    .num_reference_inputs = "
             f"{len(tx.referenceInputs) if hasattr(tx, 'referenceInputs') and tx.referenceInputs else 0},"
         )
         header_lines.append(
-            f"    .num_voters = "
-            f"{len(tx.votingProcedures) if hasattr(tx, 'votingProcedures') and tx.votingProcedures else 0},"
+            f"    .num_voters = {len(tx.votingProcedures) if hasattr(tx, 'votingProcedures') and tx.votingProcedures else 0},"
         )
         treasury_value = getattr(tx, "treasury", None)
         donation_value = getattr(tx, "donation", None)
-        header_lines.append(
-            f"    .include_treasury = {bool_to_c(treasury_value is not None)},"
-        )
-        header_lines.append(
-            f"    .treasury = {treasury_value if treasury_value is not None else 0},"
-        )
-        header_lines.append(
-            f"    .include_donation = {bool_to_c(donation_value is not None)},"
-        )
-        header_lines.append(
-            f"    .donation = {donation_value if donation_value is not None else 0},"
-        )
+        header_lines.append(f"    .include_treasury = {bool_to_c(treasury_value is not None)},")
+        header_lines.append(f"    .treasury = {treasury_value if treasury_value is not None else 0},")
+        header_lines.append(f"    .include_donation = {bool_to_c(donation_value is not None)},")
+        header_lines.append(f"    .donation = {donation_value if donation_value is not None else 0},")
 
         if include_aux_data_hash and aux_data_hash_hex is not None:
             header_lines.append(f'    .aux_data_hash_hex = "{aux_data_hash_hex}",')
@@ -565,8 +492,7 @@ def _generate_fixtures_for_era(
             header_lines.append("    .aux_data_hash_hex = NULL,")
         header_lines.append(f"    .options = {options_value},")
         header_lines.append(
-            "    .blind_signing_mode = "
-            f"{_blind_signing_mode_to_c_enum(getattr(test_case, 'blind_signing_mode', None))},"
+            f"    .blind_signing_mode = {_blind_signing_mode_to_c_enum(getattr(test_case, 'blind_signing_mode', None))},"
         )
 
         warning_expr = warning_expr_from_test_case(test_case)
@@ -588,9 +514,7 @@ def _generate_fixtures_for_era(
 
     fixture_count = _count_fixture_structs(header_content)
     if fixture_count != len(tests):
-        raise ValueError(
-            f"Fixture count mismatch for {era_key}: expected {len(tests)}, got {fixture_count}"
-        )
+        raise ValueError(f"Fixture count mismatch for {era_key}: expected {len(tests)}, got {fixture_count}")
 
     print()
     print(f"Generated: {output_file}")
@@ -600,29 +524,29 @@ def _generate_fixtures_for_era(
 def _load_sign_tx_tests() -> dict[str, Any]:
     _ensure_base58_module()
     from tests.standalone.input_files.signTx import (  # type: ignore
-        testsMary,
-        testsShelleyNoCertificates,
-        testsShelleyWithCertificates,
+        TxAuxiliaryDataCIP36,
+        TxAuxiliaryDataHash,
+        TxAuxiliaryDataType,
+        poolRegistrationOperatorTestCases,
+        poolRegistrationOwnerTestCases,
         testsAllegra,
-        testsByron,
         testsAlonzo,
         testsAlonzoTrezorComparison,
-        testsStreaming,
         testsBabbage,
         testsBabbageTrezorComparison,
+        testsByron,
+        testsCatalystRegistration,
+        testsConwayMultisig,
+        testsConwayVotingProcedures,
         testsConwayWithCertificates,
         testsConwayWithoutCertificates,
-        testsConwayVotingProcedures,
-        testsConwayMultisig,
-        testsMultidelegation,
-        testsCatalystRegistration,
         testsCVoteRegistrationCIP36,
+        testsMary,
+        testsMultidelegation,
         testsMultisig,
-        poolRegistrationOwnerTestCases,
-        poolRegistrationOperatorTestCases,
-        TxAuxiliaryDataCIP36,
-        TxAuxiliaryDataType,
-        TxAuxiliaryDataHash,
+        testsShelleyNoCertificates,
+        testsShelleyWithCertificates,
+        testsStreaming,
     )
 
     era_tests = {
@@ -640,8 +564,7 @@ def _load_sign_tx_tests() -> dict[str, Any]:
         "multisig": testsMultisig + testsConwayMultisig,
         "alonzo_catalyst": testsCatalystRegistration,
         "alonzo_cip36": testsCVoteRegistrationCIP36,
-        "pool_registration": poolRegistrationOwnerTestCases
-        + poolRegistrationOperatorTestCases,
+        "pool_registration": poolRegistrationOwnerTestCases + poolRegistrationOperatorTestCases,
     }
 
     return {

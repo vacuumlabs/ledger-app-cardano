@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
 
@@ -7,72 +6,72 @@
 import pytest
 from ledgered.devices import Device
 from ragger.backend import BackendInterface
-from ragger.navigator import Navigator, NavInsID, NavIns
-from ragger.navigator.navigation_scenario import NavigateWithScenario
 from ragger.error import ExceptionRAPDU
+from ragger.navigator import Navigator, NavIns, NavInsID
+from ragger.navigator.navigation_scenario import NavigateWithScenario
 
-from tests.application_client.status_words import StatusWord
 from tests.application_client.command_builder import (
-    gather_witness_paths,
     TxAuxiliaryDataCIP36,
+    gather_witness_paths,
 )
 from tests.application_client.command_sender import CommandSender
 from tests.application_client.response_unpacker import unpack_sign_tx_witness_response
-from tests.standalone.utils import (
-    verify_signature,
-    idTestFunc,
-    review_approve,
-    choice_approve,
-    choice_reject,
-    nano_navigate_until_text_relaxed,
-    NavContext,
-    assert_expected_deny_and_app_alive,
-)
-from tests.standalone.settings import SettingID, SettingValue, settings_set
+from tests.application_client.status_words import StatusWord
 from tests.standalone.input_files.signTx import (
-    testsByron,
-    testsMary,
-    testsShelleyNoCertificates,
-    testsShelleyWithCertificates,
-    testsConwayWithCertificates,
-    testsAllegra,
-    testsAlonzoTrezorComparison,
-    testsBabbageTrezorComparison,
-    testsAlonzo,
-    testsStreaming,
-    testsBabbage,
-    testsConwayWithoutCertificates,
-    testsConwayVotingProcedures,
-    testsConwayMultisig,
-    testsMultidelegation,
-    testsCatalystRegistration,
-    testsCVoteRegistrationCIP36,
     BlindSigningMode,
-    testsMultisig,
-    poolRegistrationOwnerTestCases,
-    poolRegistrationOperatorTestCases,
-    transactionInitDenyTestCases,
+    SignTxTestCase,
+    ThirdPartyAddressParams,
+    TransactionSigningMode,
+    TxAuxiliaryDataType,
+    Witness,
     addressParamsDenyTestCases,
     certificateDenyTestCases,
-    certificateStakingDenyTestCases,
     certificateStakePoolRetirementDenyTestCases,
-    withdrawalDenyTestCases,
-    witnessDenyTestCases,
-    singleAccountDenyTestCases,
+    certificateStakingDenyTestCases,
     collateralOutputDenyTestCases,
-    testsInvalidTokenBundleOrdering,
-    votingDenyTestCases,
-    poolRegistrationOwnerDenyTestCases,
-    stakePoolRegistrationPoolIdDenyTestCases,
     invalidCertificates,
     invalidPoolMetadataTestCases,
     invalidRelayTestCases,
+    poolRegistrationOperatorTestCases,
+    poolRegistrationOwnerDenyTestCases,
+    poolRegistrationOwnerTestCases,
+    singleAccountDenyTestCases,
+    stakePoolRegistrationPoolIdDenyTestCases,
+    testsAllegra,
+    testsAlonzo,
+    testsAlonzoTrezorComparison,
+    testsBabbage,
+    testsBabbageTrezorComparison,
+    testsByron,
+    testsCatalystRegistration,
+    testsConwayMultisig,
+    testsConwayVotingProcedures,
+    testsConwayWithCertificates,
+    testsConwayWithoutCertificates,
+    testsCVoteRegistrationCIP36,
     testsCVoteRegistrationDenies,
-    SignTxTestCase,
-    TxAuxiliaryDataType,
-    ThirdPartyAddressParams,
-    TransactionSigningMode,
-    Witness,
+    testsInvalidTokenBundleOrdering,
+    testsMary,
+    testsMultidelegation,
+    testsMultisig,
+    testsShelleyNoCertificates,
+    testsShelleyWithCertificates,
+    testsStreaming,
+    transactionInitDenyTestCases,
+    votingDenyTestCases,
+    withdrawalDenyTestCases,
+    witnessDenyTestCases,
+)
+from tests.standalone.settings import SettingID, SettingValue, settings_set
+from tests.standalone.utils import (
+    NavContext,
+    assert_expected_deny_and_app_alive,
+    choice_approve,
+    choice_reject,
+    idTestFunc,
+    nano_navigate_until_text_relaxed,
+    review_approve,
+    verify_signature,
 )
 
 
@@ -122,16 +121,11 @@ def _run_sign_tx_test(
     assert testCase.tx is not None
     assert testCase.signingMode is not None
     if testCase.ragger_expect is None:
-        pytest.fail(
-            f"Missing ragger_expect for happy-path signTx fixture {testCase.name!r}"
-        )
+        pytest.fail(f"Missing ragger_expect for happy-path signTx fixture {testCase.name!r}")
     tx = testCase.tx
 
     auxiliary_data = testCase.tx.auxiliaryData
-    is_cip36_auxiliary_review = (
-        auxiliary_data is not None
-        and auxiliary_data.type == TxAuxiliaryDataType.CIP36_REGISTRATION
-    )
+    is_cip36_auxiliary_review = auxiliary_data is not None and auxiliary_data.type == TxAuxiliaryDataType.CIP36_REGISTRATION
 
     def review_cvote() -> None:
         # CVote auxiliary data review (if present)
@@ -185,15 +179,9 @@ def _run_sign_tx_test(
         review_approve(
             nav_ctx,
             test_name=test_name,
-            target_text=r"^Confirm vote"
-            if not testCase.expected_aux_warnings
-            else r"^Reject operation$",
+            target_text=r"^Confirm vote" if not testCase.expected_aux_warnings else r"^Reject operation$",
             warnings=testCase.expected_aux_warnings,
-            nano_review_instructions=(
-                [NavInsID.LEFT_CLICK, NavInsID.BOTH_CLICK]
-                if testCase.expected_aux_warnings
-                else None
-            ),
+            nano_review_instructions=([NavInsID.LEFT_CLICK, NavInsID.BOTH_CLICK] if testCase.expected_aux_warnings else None),
         )
 
     def review_tx() -> None:
@@ -268,14 +256,10 @@ def _run_sign_tx_test(
             pair_count += 1
         if auxiliary_params.voteKey is not None:
             pair_count += 1
-            if isinstance(
-                auxiliary_params.voteKey, str
-            ) and auxiliary_params.voteKey.startswith("m/"):
+            if isinstance(auxiliary_params.voteKey, str) and auxiliary_params.voteKey.startswith("m/"):
                 vote_key_path = auxiliary_params.voteKey.replace("'", "").split("/")
                 try:
-                    account_index = (
-                        int(vote_key_path[3]) if len(vote_key_path) > 3 else 0
-                    )
+                    account_index = int(vote_key_path[3]) if len(vote_key_path) > 3 else 0
                 except ValueError:
                     account_index = 0
                 if account_index > 100:
@@ -381,9 +365,7 @@ def _run_sign_tx_test(
 
     # Step 4: Get witness signatures
     # After user approval, request signatures for all witness paths
-    witness_paths = gather_witness_paths(
-        tx, testCase.signingMode, testCase.additionalWitnessPaths or []
-    )
+    witness_paths = gather_witness_paths(tx, testCase.signingMode, testCase.additionalWitnessPaths or [])
     print(f"Witness paths: {witness_paths}")
 
     collected_witnesses: list[Witness] = []
@@ -407,17 +389,13 @@ def _run_sign_tx_test(
             or testCase.signingMode in pool_or_plutus_modes
             or (
                 len(tx.outputs) > 0
-                and not isinstance(
-                    tx.outputs[0].destination.params, ThirdPartyAddressParams
-                )
+                and not isinstance(tx.outputs[0].destination.params, ThirdPartyAddressParams)
                 and auxiliary_data is not None
                 and auxiliary_data.type != TxAuxiliaryDataType.CIP36_REGISTRATION
             )
         )
         should_confirm_witness = (
-            witness_has_non_hidden_review
-            or _is_mint_witness_path(path)
-            or (expert_mode and _is_ordinary_witness_path(path))
+            witness_has_non_hidden_review or _is_mint_witness_path(path) or (expert_mode and _is_ordinary_witness_path(path))
         )
 
         # Each witness requires explicit confirmation on the device
@@ -434,18 +412,12 @@ def _run_sign_tx_test(
 
         response = client.get_async_response()
         assert response is not None, f"No response for witness {path_idx}: {path}"
-        assert response.status == StatusWord.SWO_SUCCESS, (
-            f"Witness failed for {path}: {hex(response.status)}"
-        )
+        assert response.status == StatusWord.SWO_SUCCESS, f"Witness failed for {path}: {hex(response.status)}"
 
         signature = unpack_sign_tx_witness_response(response.data)
-        print(
-            f"Witness signature for {path} ({len(signature)} bytes): {signature.hex()}"
-        )
+        print(f"Witness signature for {path} ({len(signature)} bytes): {signature.hex()}")
         verify_signature(path, signature, tx_hash)
-        collected_witnesses.append(
-            Witness(path=path, witnessSignatureHex=signature.hex())
-        )
+        collected_witnesses.append(Witness(path=path, witnessSignatureHex=signature.hex()))
 
     _check_ragger_expect_sign_tx(testCase, tx_hash, collected_witnesses)
 
@@ -455,9 +427,7 @@ def _check_ragger_expect_sign_tx(
     tx_hash: bytes,
     collected_witnesses: list[Witness],
 ) -> None:
-    assert testCase.ragger_expect is not None, (
-        f"Missing ragger_expect for happy-path signTx fixture {testCase.name!r}"
-    )
+    assert testCase.ragger_expect is not None, f"Missing ragger_expect for happy-path signTx fixture {testCase.name!r}"
     assert testCase.ragger_expect.txHashHex is not None, (
         f"Missing ragger_expect.txHashHex for happy-path signTx fixture {testCase.name!r}"
     )
@@ -465,17 +435,13 @@ def _check_ragger_expect_sign_tx(
         f"Missing ragger_expect.witnesses for happy-path signTx fixture {testCase.name!r}"
     )
 
-    assert tx_hash.hex() == testCase.ragger_expect.txHashHex, (
-        f"Tx hash mismatch for {testCase.name!r}"
-    )
+    assert tx_hash.hex() == testCase.ragger_expect.txHashHex, f"Tx hash mismatch for {testCase.name!r}"
 
     assert len(collected_witnesses) == len(testCase.ragger_expect.witnesses), (
         f"Witness count mismatch for {testCase.name!r}: "
         f"got {len(collected_witnesses)}, expected {len(testCase.ragger_expect.witnesses)}"
     )
-    for idx, (actual, expected) in enumerate(
-        zip(collected_witnesses, testCase.ragger_expect.witnesses)
-    ):
+    for idx, (actual, expected) in enumerate(zip(collected_witnesses, testCase.ragger_expect.witnesses, strict=True)):
         assert actual.witnessSignatureHex == expected.witnessSignatureHex, (
             f"Witness[{idx}] signature mismatch for {testCase.name!r} path={actual.path!r}"
         )
@@ -537,9 +503,7 @@ def test_sign_tx(
         device,
         navigator,
         {
-            SettingID.EXPERT_MODE: SettingValue.ENABLED
-            if expert_mode
-            else SettingValue.DISABLED,
+            SettingID.EXPERT_MODE: SettingValue.ENABLED if expert_mode else SettingValue.DISABLED,
             SettingID.SILENT_PUBKEY_EXPORT: SettingValue.ENABLED,
             SettingID.BLIND_SIGNING: SettingValue.ENABLED
             if testCase.blind_signing_mode != BlindSigningMode.DISABLED
@@ -605,9 +569,7 @@ def test_sign_tx_deny(
             device,
             navigator,
             {
-                SettingID.EXPERT_MODE: SettingValue.ENABLED
-                if testCase.required_expert_mode
-                else SettingValue.DISABLED,
+                SettingID.EXPERT_MODE: SettingValue.ENABLED if testCase.required_expert_mode else SettingValue.DISABLED,
                 SettingID.SILENT_PUBKEY_EXPORT: SettingValue.ENABLED,
             },
             backend=backend,
@@ -684,14 +646,10 @@ def test_sign_tx_deny(
         testCase.additionalWitnessPaths or [],
     )
     if len(witness_paths) == 0:
-        raise AssertionError(
-            "Transaction unexpectedly succeeded but no witness paths were found"
-        )
+        raise AssertionError("Transaction unexpectedly succeeded but no witness paths were found")
 
     witness_paths_to_try = (
-        [testCase.additionalWitnessPaths[-1]]
-        if len(testCase.additionalWitnessPaths) > 0
-        else list(reversed(witness_paths))
+        [testCase.additionalWitnessPaths[-1]] if len(testCase.additionalWitnessPaths) > 0 else list(reversed(witness_paths))
     )
 
     deny_observed = False

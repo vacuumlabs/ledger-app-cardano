@@ -43,9 +43,7 @@ def _escape_c_string(value):
 
 def _normalize_asset_subject(asset_subject):
     _require(isinstance(asset_subject, str), "assetSubject must be a hex string")
-    _require(
-        len(asset_subject) % 2 == 0, "assetSubject hex string must have even length"
-    )
+    _require(len(asset_subject) % 2 == 0, "assetSubject hex string must have even length")
     try:
         return bytes.fromhex(asset_subject)
     except ValueError as exc:

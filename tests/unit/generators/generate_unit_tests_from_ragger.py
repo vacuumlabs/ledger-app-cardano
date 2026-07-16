@@ -13,123 +13,117 @@ import io
 import re
 import subprocess
 import sys
-from contextlib import redirect_stdout
 from collections import defaultdict
+from collections.abc import Callable
+from contextlib import redirect_stdout
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable
 
-from tests.unit.generators.paths import UNIT_TESTS_DIR
-from tests.unit.generators.paths import (
-    REPO_ROOT,
-    GENERATED_SIGN_TX_DIR,
-    GENERATED_SIGN_MSG_DIR,
-    GENERATED_CVOTE_DIR,
-    GENERATED_OPCERT_DIR,
-    GENERATED_PUBKEY_DIR,
-    GENERATED_DERIVE_ADDRESS_DIR,
-    GENERATED_NATIVE_SCRIPT_DIR,
+from tests.unit.generators.deny_fixture_generators.cvote_deny_generators import (
+    generate_cvote_deny_fixtures,
 )
-from tests.unit.generators.mock_data_utils import regenerate_mock_data_with_options
-
-
-# Import fixture generators
-from tests.unit.generators.fixture_generators.sign_tx_generators import (
-    generate_tx_fixtures,
-    _load_sign_tx_tests,
+from tests.unit.generators.deny_fixture_generators.derive_address_deny_generators import (
+    generate_address_derivation_deny_fixtures,
 )
-
-from tests.unit.generators.fixture_generators.derive_address_generators import (
-    generate_address_derivation_fixtures,
-    _load_address_derivation_test_cases,
+from tests.unit.generators.deny_fixture_generators.derive_native_script_deny_generators import (
+    generate_derive_native_script_deny_fixtures,
 )
-
-from tests.unit.generators.fixture_generators.derive_native_script_generators import (
-    generate_derive_native_script_fixtures,
-    _load_native_script_test_cases,
+from tests.unit.generators.deny_fixture_generators.opcert_deny_generators import (
+    generate_opcert_deny_fixtures,
 )
-from tests.unit.generators.fixture_generators.pubkey_generators import (
-    generate_pubkey_fixtures,
-    _load_public_key_test_cases,
+from tests.unit.generators.deny_fixture_generators.pubkey_deny_generators import (
+    generate_pubkey_deny_fixtures,
 )
-from tests.unit.generators.fixture_generators.sign_msg_generators import (
-    generate_sign_msg_fixtures,
-    _load_sign_msg_test_cases,
-)
-from tests.unit.generators.fixture_generators.opcert_generators import (
-    generate_opcert_fixtures,
-    _load_opcert_test_cases,
-)
-from tests.unit.generators.fixture_generators.cvote_generators import (
-    generate_cvote_fixtures,
-    _load_cvote_test_cases,
+from tests.unit.generators.deny_fixture_generators.sign_msg_deny_generators import (
+    generate_sign_msg_deny_test_runners,
 )
 
 # Import deny generators
 from tests.unit.generators.deny_fixture_generators.sign_tx_deny_generators import (
     generate_tx_deny_fixtures,
 )
-from tests.unit.generators.deny_fixture_generators.sign_msg_deny_generators import (
-    generate_sign_msg_deny_test_runners,
+from tests.unit.generators.fixture_generators.cvote_generators import (
+    _load_cvote_test_cases,
+    generate_cvote_fixtures,
 )
-from tests.unit.generators.deny_fixture_generators.derive_address_deny_generators import (
-    generate_address_derivation_deny_fixtures,
+from tests.unit.generators.fixture_generators.derive_address_generators import (
+    _load_address_derivation_test_cases,
+    generate_address_derivation_fixtures,
 )
-
-from tests.unit.generators.deny_fixture_generators.derive_native_script_deny_generators import (
-    generate_derive_native_script_deny_fixtures,
+from tests.unit.generators.fixture_generators.derive_native_script_generators import (
+    _load_native_script_test_cases,
+    generate_derive_native_script_fixtures,
 )
-from tests.unit.generators.deny_fixture_generators.pubkey_deny_generators import (
-    generate_pubkey_deny_fixtures,
+from tests.unit.generators.fixture_generators.opcert_generators import (
+    _load_opcert_test_cases,
+    generate_opcert_fixtures,
 )
-from tests.unit.generators.deny_fixture_generators.opcert_deny_generators import (
-    generate_opcert_deny_fixtures,
+from tests.unit.generators.fixture_generators.pubkey_generators import (
+    _load_public_key_test_cases,
+    generate_pubkey_fixtures,
 )
-from tests.unit.generators.deny_fixture_generators.cvote_deny_generators import (
-    generate_cvote_deny_fixtures,
-)
-
-# Import test runners
-from tests.unit.generators.test_runner_generators.sign_tx_test_runner_generators import (
-    generate_tx_test_runners,
-    fixture_has_cvote_aux_data,
-    fixture_has_blind_signing_hash_only_path,
-    fixture_is_unrestricted,
+from tests.unit.generators.fixture_generators.sign_msg_generators import (
+    _load_sign_msg_test_cases,
+    generate_sign_msg_fixtures,
 )
 
-from tests.unit.generators.test_runner_generators.derive_address_test_runner_generators import (
-    generate_address_derivation_test_runners,
+# Import fixture generators
+from tests.unit.generators.fixture_generators.sign_tx_generators import (
+    _load_sign_tx_tests,
+    generate_tx_fixtures,
 )
-
-from tests.unit.generators.test_runner_generators.derive_native_script_runner_generators import (
-    generate_native_script_test_runners,
-)
-from tests.unit.generators.test_runner_generators.derive_address_deny_runner_generators import (
-    generate_address_derivation_deny_test_runners,
-)
-from tests.unit.generators.test_runner_generators.pubkey_test_runner_generators import (
-    generate_pubkey_test_runners,
-)
-from tests.unit.generators.test_runner_generators.pubkey_deny_runner_generators import (
-    generate_pubkey_deny_test_runners,
-)
-from tests.unit.generators.test_runner_generators.sign_msg_test_runner_generators import (
-    generate_sign_msg_test_runners,
-)
-from tests.unit.generators.test_runner_generators.opcert_test_runner_generators import (
-    generate_opcert_test_runners,
-)
-from tests.unit.generators.test_runner_generators.opcert_deny_runner_generators import (
-    generate_opcert_deny_test_runners,
-)
-from tests.unit.generators.test_runner_generators.cvote_test_runner_generators import (
-    generate_cvote_test_runners,
+from tests.unit.generators.mock_data_utils import regenerate_mock_data_with_options
+from tests.unit.generators.paths import (
+    GENERATED_CVOTE_DIR,
+    GENERATED_DERIVE_ADDRESS_DIR,
+    GENERATED_NATIVE_SCRIPT_DIR,
+    GENERATED_OPCERT_DIR,
+    GENERATED_PUBKEY_DIR,
+    GENERATED_SIGN_MSG_DIR,
+    GENERATED_SIGN_TX_DIR,
+    REPO_ROOT,
+    UNIT_TESTS_DIR,
 )
 from tests.unit.generators.test_runner_generators.cvote_deny_runner_generators import (
     generate_cvote_deny_test_runners,
 )
+from tests.unit.generators.test_runner_generators.cvote_test_runner_generators import (
+    generate_cvote_test_runners,
+)
+from tests.unit.generators.test_runner_generators.derive_address_deny_runner_generators import (
+    generate_address_derivation_deny_test_runners,
+)
+from tests.unit.generators.test_runner_generators.derive_address_test_runner_generators import (
+    generate_address_derivation_test_runners,
+)
+from tests.unit.generators.test_runner_generators.derive_native_script_runner_generators import (
+    generate_native_script_test_runners,
+)
 from tests.unit.generators.test_runner_generators.native_script_deny_runner_generators import (
     generate_native_script_deny_test_runners,
+)
+from tests.unit.generators.test_runner_generators.opcert_deny_runner_generators import (
+    generate_opcert_deny_test_runners,
+)
+from tests.unit.generators.test_runner_generators.opcert_test_runner_generators import (
+    generate_opcert_test_runners,
+)
+from tests.unit.generators.test_runner_generators.pubkey_deny_runner_generators import (
+    generate_pubkey_deny_test_runners,
+)
+from tests.unit.generators.test_runner_generators.pubkey_test_runner_generators import (
+    generate_pubkey_test_runners,
+)
+from tests.unit.generators.test_runner_generators.sign_msg_test_runner_generators import (
+    generate_sign_msg_test_runners,
+)
+
+# Import test runners
+from tests.unit.generators.test_runner_generators.sign_tx_test_runner_generators import (
+    fixture_has_blind_signing_hash_only_path,
+    fixture_has_cvote_aux_data,
+    fixture_is_unrestricted,
+    generate_tx_test_runners,
 )
 
 _REPORT_WIDTH = 88
@@ -184,9 +178,7 @@ def _count_sign_tx_fine_grained_entries_from_fixtures() -> int:
     """
     total_entries = 0
     fixture_headers = sorted(
-        p
-        for p in GENERATED_SIGN_TX_DIR.glob("test_sign_tx_fixtures_*.h")
-        if p.name != "test_sign_tx_fixtures_deny.h"
+        p for p in GENERATED_SIGN_TX_DIR.glob("test_sign_tx_fixtures_*.h") if p.name != "test_sign_tx_fixtures_deny.h"
     )
 
     for fixture_header_path in fixture_headers:
@@ -385,33 +377,23 @@ def _count_unit_tests_by_command() -> tuple[dict[str, int], int, set[str], str]:
     return command_counts, total_funcs, registered_names, combined_content
 
 
-def _is_covered_by_registered_names(
-    candidate_names: set[str], registered_names: set[str]
-) -> bool:
+def _is_covered_by_registered_names(candidate_names: set[str], registered_names: set[str]) -> bool:
     """Option B: check coverage against the authoritative set of cmocka-registered names."""
     return any(
         any(
-            registered_name == candidate_name
-            or registered_name.startswith(f"{candidate_name}_")
+            registered_name == candidate_name or registered_name.startswith(f"{candidate_name}_")
             for registered_name in registered_names
         )
         for candidate_name in candidate_names
     )
 
 
-def _is_covered_by_substring(
-    candidate_names: set[str], unit_tests_content: str
-) -> bool:
+def _is_covered_by_substring(candidate_names: set[str], unit_tests_content: str) -> bool:
     """Option A: word-boundary regex check against raw source text."""
-    return any(
-        bool(re.search(rf"\b{re.escape(candidate_name)}\b", unit_tests_content))
-        for candidate_name in candidate_names
-    )
+    return any(bool(re.search(rf"\b{re.escape(candidate_name)}\b", unit_tests_content)) for candidate_name in candidate_names)
 
 
-def _verify_ragger_test_coverage(
-    generated_entries_count_by_command: dict[str, int], *, verbose: bool
-) -> None:
+def _verify_ragger_test_coverage(generated_entries_count_by_command: dict[str, int], *, verbose: bool) -> None:
     """Verify that all ragger tests have corresponding unit test coverage."""
     # Collect ragger test names using pytest --collect-only
     ragger_tests_dir = REPO_ROOT / "tests" / "standalone"
@@ -441,13 +423,9 @@ def _verify_ragger_test_coverage(
         # Check for collection errors (non-zero return code indicates failure)
         if result.returncode != 0:
             if result.returncode == 5:
-                print(
-                    "WARNING: pytest returned 5 (no tests collected). Continuing anyway."
-                )
+                print("WARNING: pytest returned 5 (no tests collected). Continuing anyway.")
             else:
-                print(
-                    f"ERROR: pytest collection failed with return code {result.returncode}"
-                )
+                print(f"ERROR: pytest collection failed with return code {result.returncode}")
                 if result.stderr:
                     print("STDERR output:")
                     print(result.stderr)
@@ -456,19 +434,13 @@ def _verify_ragger_test_coverage(
                     print(result.stdout)
                 sys.exit(1)
         # Parse test names from pytest output (format: test_file.py::test_name[...])
-        ragger_tests = [
-            line.strip()
-            for line in result.stdout.split("\n")
-            if "::" in line and "test_" in line
-        ]
+        ragger_tests = [line.strip() for line in result.stdout.split("\n") if "::" in line and "test_" in line]
     except (FileNotFoundError, subprocess.TimeoutExpired) as exc:
         print(f"ERROR: Could not collect ragger tests: {exc}")
         sys.exit(1)
 
     if not ragger_tests:
-        print(
-            "ERROR: No ragger tests found - check that test files are present and importable"
-        )
+        print("ERROR: No ragger tests found - check that test files are present and importable")
         sys.exit(1)
 
     # Count total test cases (including parameterized variants)
@@ -540,9 +512,7 @@ def _verify_ragger_test_coverage(
     expanded_unit_test_count = total_unit_test_funcs + deny_fixture_count
     # For sign_tx, compare against fine-grained expected entries (same granularity
     # as generated unit tests), not raw pytest parameterized-case count.
-    comparable_ragger_command_counts["sign_tx"] = (
-        _count_sign_tx_fine_grained_entries_from_fixtures()
-    )
+    comparable_ragger_command_counts["sign_tx"] = _count_sign_tx_fine_grained_entries_from_fixtures()
 
     # Extract unique test function names from ragger tests
     # Format: test_file.py::test_func_name[param] -> extract test_func_name
@@ -551,19 +521,13 @@ def _verify_ragger_test_coverage(
     for func_name in sorted(ragger_test_funcs):
         # Some ragger tests expand into indexed unit tests. Match both the exact
         # function name and generated prefixes.
-        candidate_function_names = _candidate_function_names_for_coverage_match(
-            func_name
-        )
+        candidate_function_names = _candidate_function_names_for_coverage_match(func_name)
         # We intentionally use two mechanisms (Option A and Option B) for coverage validation.
         # This redundancy is for validation purposes, and any mismatch between them will be manually investigated.
         # Primary check (B): coverage is determined by cmocka_unit_test() registrations only.
-        found_by_registered = _is_covered_by_registered_names(
-            candidate_function_names, registered_unit_test_names
-        )
+        found_by_registered = _is_covered_by_registered_names(candidate_function_names, registered_unit_test_names)
         # Sanity check (A): word-boundary regex over raw source text.
-        found_by_substring = _is_covered_by_substring(
-            candidate_function_names, unit_tests_content
-        )
+        found_by_substring = _is_covered_by_substring(candidate_function_names, unit_tests_content)
         if found_by_substring and not found_by_registered:
             if verbose:
                 print(
@@ -578,10 +542,7 @@ def _verify_ragger_test_coverage(
 
     deny_note = ""
     if deny_fixture_count:
-        deny_note = (
-            f", includes {deny_fixture_count} fixtures sampled through "
-            f"`SIGN_TX_DENY_FIXTURES`"
-        )
+        deny_note = f", includes {deny_fixture_count} fixtures sampled through `SIGN_TX_DENY_FIXTURES`"
     insufficient_commands = []
     mismatched_counts = []
     for cmd in COMMAND_REGISTRY:
@@ -597,15 +558,11 @@ def _verify_ragger_test_coverage(
                     f"but parsed {unit_count} cmocka tests from files."
                 )
         if unit_count < ragger_count:
-            insufficient_commands.append(
-                f"{cmd.display_name} (Ragger {ragger_count}, Unit {unit_count})"
-            )
+            insufficient_commands.append(f"{cmd.display_name} (Ragger {ragger_count}, Unit {unit_count})")
 
     if verbose or mismatched_counts or insufficient_commands or missing_coverage:
         print("\nRagger test coverage check:")
-        print(
-            f"  Ragger: {total_ragger_test_cases} total test cases from {len(ragger_tests)} parameterized variants"
-        )
+        print(f"  Ragger: {total_ragger_test_cases} total test cases from {len(ragger_tests)} parameterized variants")
         print(
             f"  Unit tests: {expanded_unit_test_count} total test entries "
             f"({total_unit_test_funcs} generated functions{deny_note})"
@@ -617,30 +574,19 @@ def _verify_ragger_test_coverage(
             unit_count = unit_command_counts.get(command, 0)
             delta = unit_count - ragger_count
             delta_note = f" (Δ {delta:+d})" if delta else ""
-            print(
-                f"    - {cmd.display_name}: {ragger_count} Ragger -> {unit_count} unit entries{delta_note}"
-            )
-        if (
-            comparable_ragger_command_counts["sign_tx"]
-            != ragger_command_counts["sign_tx"]
-        ):
+            print(f"    - {cmd.display_name}: {ragger_count} Ragger -> {unit_count} unit entries{delta_note}")
+        if comparable_ragger_command_counts["sign_tx"] != ragger_command_counts["sign_tx"]:
             print(
                 "  Note: Sign Transaction uses fine-grained fixture-based counting for comparison "
                 f"(raw pytest cases: {ragger_command_counts['sign_tx']})."
             )
         if skip_counts:
             skip_total = sum(skip_counts.values())
-            skip_details = ", ".join(
-                f"{name}({count})" for name, count in sorted(skip_counts.items())
-            )
-            print(
-                f"  Ignored {skip_total} pytest cases from auxiliary modules ({skip_details})"
-            )
+            skip_details = ", ".join(f"{name}({count})" for name, count in sorted(skip_counts.items()))
+            print(f"  Ignored {skip_total} pytest cases from auxiliary modules ({skip_details})")
         if unmapped_counts:
             unmapped_total = sum(unmapped_counts.values())
-            unmapped_details = ", ".join(
-                f"{name}({count})" for name, count in sorted(unmapped_counts.items())
-            )
+            unmapped_details = ", ".join(f"{name}({count})" for name, count in sorted(unmapped_counts.items()))
             print(
                 f"  Unmapped pytest modules ({unmapped_total} cases): {unmapped_details}"
                 f" — their test functions are still checked for unit-test coverage above"
@@ -648,41 +594,22 @@ def _verify_ragger_test_coverage(
 
     if mismatched_counts:
         print("\n" + "!" * _REPORT_WIDTH)
-        print(
-            "!!! "
-            + "WARNING: Mismatch between in-memory generation and file parsing".center(
-                _REPORT_WIDTH - 8
-            )
-            + " !!!"
-        )
-        print(
-            "!!! "
-            + "(Intentional validation redundancy)".center(_REPORT_WIDTH - 8)
-            + " !!!"
-        )
+        print("!!! " + "WARNING: Mismatch between in-memory generation and file parsing".center(_REPORT_WIDTH - 8) + " !!!")
+        print("!!! " + "(Intentional validation redundancy)".center(_REPORT_WIDTH - 8) + " !!!")
         print("!" * _REPORT_WIDTH)
         for mismatch in mismatched_counts:
             print(f"  - {mismatch}")
         print("!" * _REPORT_WIDTH + "\n")
 
     if insufficient_commands and (verbose or not missing_coverage):
-        print(
-            f"  ERROR: insufficient per-command coverage detected: {', '.join(insufficient_commands)}"
-        )
+        print(f"  ERROR: insufficient per-command coverage detected: {', '.join(insufficient_commands)}")
     if verbose or missing_coverage or mismatched_counts or insufficient_commands:
         print(f"  Found {len(ragger_test_funcs)} unique ragger test functions to cover")
-        print(
-            f"  Coverage: {len(covered_coverage)} functions covered, {len(missing_coverage)} missing"
-        )
+        print(f"  Coverage: {len(covered_coverage)} functions covered, {len(missing_coverage)} missing")
 
     if missing_coverage:
         print("\n" + "=" * _REPORT_WIDTH)
-        print(
-            (
-                "WARNING: "
-                f"{len(missing_coverage)} test function(s) lack unit test coverage"
-            ).center(_REPORT_WIDTH)
-        )
+        print((f"WARNING: {len(missing_coverage)} test function(s) lack unit test coverage").center(_REPORT_WIDTH))
         print("=" * _REPORT_WIDTH)
         for test in missing_coverage:
             print(f"    - {test}")
@@ -691,9 +618,7 @@ def _verify_ragger_test_coverage(
         print("\n  Missing test cases by function:")
         for func_name in missing_coverage:
             # Find all ragger test cases for this function
-            missing_test_cases = [
-                line.strip() for line in ragger_tests if f"::{func_name}[" in line
-            ]
+            missing_test_cases = [line.strip() for line in ragger_tests if f"::{func_name}[" in line]
             if missing_test_cases:
                 print(f"    {func_name}: ({len(missing_test_cases)} cases)")
                 for case in missing_test_cases:
@@ -702,20 +627,14 @@ def _verify_ragger_test_coverage(
                         _, test_case = case.split("::", 1)
                         print(f"      - {test_case}")
         print("\n" + "=" * _REPORT_WIDTH)
-        print(
-            "COVERAGE FAILURE: missing unit-test coverage for one or more ragger test functions."
-        )
-        print(
-            "The generator run is unsuccessful until all missing functions above are covered."
-        )
+        print("COVERAGE FAILURE: missing unit-test coverage for one or more ragger test functions.")
+        print("The generator run is unsuccessful until all missing functions above are covered.")
         print("=" * _REPORT_WIDTH)
         sys.exit(1)
 
     if mismatched_counts:
         print("\n" + "=" * _REPORT_WIDTH)
-        print(
-            "MOCK DATA / COUNTING FAILURE: In-memory counts do not match file parsing."
-        )
+        print("MOCK DATA / COUNTING FAILURE: In-memory counts do not match file parsing.")
         print("The generator run is unsuccessful until all mismatches are resolved.")
         print("=" * _REPORT_WIDTH)
         sys.exit(1)
@@ -733,9 +652,7 @@ def _verify_ragger_test_coverage(
     )
 
 
-def _run_generator_step(
-    message: str, func: Callable[[], object], *, verbose: bool
-) -> object:
+def _run_generator_step(message: str, func: Callable[[], object], *, verbose: bool) -> object:
     _log_stage(message, verbose=verbose)
     if verbose:
         return func()
@@ -785,13 +702,9 @@ def _collect_missing_unit_expected_results() -> list[str]:
                 current_name = source_name
                 continue
             if ".expected = NULL," in line:
-                missing_reports.append(
-                    f"Sign Message: {current_name or '<unknown fixture>'}"
-                )
+                missing_reports.append(f"Sign Message: {current_name or '<unknown fixture>'}")
 
-    derive_address_header_path = (
-        GENERATED_DERIVE_ADDRESS_DIR / "test_derive_address_fixtures.h"
-    )
+    derive_address_header_path = GENERATED_DERIVE_ADDRESS_DIR / "test_derive_address_fixtures.h"
     if derive_address_header_path.exists():
         current_name: str | None = None
         fixture_expects_success_response = False
@@ -805,9 +718,7 @@ def _collect_missing_unit_expected_results() -> list[str]:
                 fixture_expects_success_response = True
                 continue
             if fixture_expects_success_response and ".expected_address = NULL," in line:
-                missing_reports.append(
-                    f"Derive Address: {current_name or '<unknown fixture>'}"
-                )
+                missing_reports.append(f"Derive Address: {current_name or '<unknown fixture>'}")
                 fixture_expects_success_response = False
 
     opcert_header_path = GENERATED_OPCERT_DIR / "test_opcert_fixtures.h"
@@ -818,9 +729,7 @@ def _collect_missing_unit_expected_results() -> list[str]:
                 current_name = line.split('"')[1]
                 continue
             if ".expected_signature = NULL," in line:
-                missing_reports.append(
-                    f"Sign Opcert: {current_name or '<unknown fixture>'}"
-                )
+                missing_reports.append(f"Sign Opcert: {current_name or '<unknown fixture>'}")
 
     cvote_header_path = GENERATED_CVOTE_DIR / "test_cvote_fixtures.h"
     if cvote_header_path.exists():
@@ -842,17 +751,11 @@ def _collect_missing_unit_expected_results() -> list[str]:
             if ".expected_witness_signature = NULL," in line:
                 missing_witness_signature = True
                 continue
-            if line.strip() == "}," and (
-                missing_votecast_hash or missing_witness_signature
-            ):
-                missing_reports.append(
-                    f"Sign CVote: {current_name or '<unknown fixture>'}"
-                )
+            if line.strip() == "}," and (missing_votecast_hash or missing_witness_signature):
+                missing_reports.append(f"Sign CVote: {current_name or '<unknown fixture>'}")
 
     sign_tx_header_paths = sorted(
-        path
-        for path in GENERATED_SIGN_TX_DIR.glob("test_sign_tx_fixtures_*.h")
-        if path.name != "test_sign_tx_fixtures_deny.h"
+        path for path in GENERATED_SIGN_TX_DIR.glob("test_sign_tx_fixtures_*.h") if path.name != "test_sign_tx_fixtures_deny.h"
     )
     for sign_tx_header_path in sign_tx_header_paths:
         current_name: str | None = None
@@ -867,17 +770,13 @@ def _collect_missing_unit_expected_results() -> list[str]:
                     if missing_witness_signature:
                         missing_parts.append("expected witness signature")
                     missing_reports.append(
-                        f"Sign Transaction: {current_name or '<unknown fixture>'} "
-                        f"missing {', '.join(missing_parts)}"
+                        f"Sign Transaction: {current_name or '<unknown fixture>'} missing {', '.join(missing_parts)}"
                     )
                 current_name = line.split(": ", 1)[1].strip()
                 missing_hash = False
                 missing_witness_signature = False
                 continue
-            if (
-                ".expected_hash_hex = NULL," in line
-                or '.expected_hash_hex = "",' in line
-            ):
+            if ".expected_hash_hex = NULL," in line or '.expected_hash_hex = "",' in line:
                 missing_hash = True
                 continue
             if ".expected_signature = NULL" in line:
@@ -888,10 +787,7 @@ def _collect_missing_unit_expected_results() -> list[str]:
                 missing_parts.append("expected_hash_hex")
             if missing_witness_signature:
                 missing_parts.append("expected witness signature")
-            missing_reports.append(
-                f"Sign Transaction: {current_name or '<unknown fixture>'} "
-                f"missing {', '.join(missing_parts)}"
-            )
+            missing_reports.append(f"Sign Transaction: {current_name or '<unknown fixture>'} missing {', '.join(missing_parts)}")
 
     pubkey_header_path = GENERATED_PUBKEY_DIR / "test_pubkey_fixtures.h"
     if pubkey_header_path.exists():
@@ -906,12 +802,9 @@ def _collect_missing_unit_expected_results() -> list[str]:
                 fixture_expects_success_response = True
                 continue
             if fixture_expects_success_response and (
-                ".expected_response = NULL," in line
-                or ".expected_response_len = 0," in line
+                ".expected_response = NULL," in line or ".expected_response_len = 0," in line
             ):
-                missing_reports.append(
-                    f"Public Key: {current_name or '<unknown fixture>'}"
-                )
+                missing_reports.append(f"Public Key: {current_name or '<unknown fixture>'}")
                 fixture_expects_success_response = False
 
     return missing_reports
@@ -922,27 +815,21 @@ def _collect_python_fixture_cases() -> list[tuple[str, object]]:
 
     sign_tx_data = _load_sign_tx_tests()
     for era_name, test_cases in sign_tx_data["era_tests"].items():
-        python_fixture_cases.extend(
-            (f"SignTx/{era_name}", test_case) for test_case in test_cases
-        )
+        python_fixture_cases.extend((f"SignTx/{era_name}", test_case) for test_case in test_cases)
 
     for test_case in _load_sign_msg_test_cases():
         python_fixture_cases.append(("SignMsg", test_case))
 
     all_address_test_cases, _ = _load_address_derivation_test_cases()
     for category_name, test_cases in all_address_test_cases.items():
-        python_fixture_cases.extend(
-            (f"DeriveAddress/{category_name}", test_case) for test_case in test_cases
-        )
+        python_fixture_cases.extend((f"DeriveAddress/{category_name}", test_case) for test_case in test_cases)
 
     for test_case in _load_native_script_test_cases():
         python_fixture_cases.append(("NativeScript", test_case))
 
     pubkey_test_groups = _load_public_key_test_cases()
     for group_name, test_group in pubkey_test_groups.items():
-        python_fixture_cases.extend(
-            (f"PubKey/{group_name}", test_case) for test_case in test_group.test_cases
-        )
+        python_fixture_cases.extend((f"PubKey/{group_name}", test_case) for test_case in test_group.test_cases)
 
     for test_case in _load_opcert_test_cases():
         python_fixture_cases.append(("OpCert", test_case))
@@ -969,9 +856,7 @@ def _collect_missing_object_fields(
     return missing_fields
 
 
-def _validate_sign_tx_expectations(
-    suite_name: str, test_case: object, missing_reports: list[str]
-) -> None:
+def _validate_sign_tx_expectations(suite_name: str, test_case: object, missing_reports: list[str]) -> None:
     fixture_name = getattr(test_case, "name", "<unknown fixture>")
     missing_unit_fields = _collect_missing_object_fields(
         "unit_test_expect",
@@ -979,9 +864,7 @@ def _validate_sign_tx_expectations(
         ("txBodyHex",),
     )
     if missing_unit_fields:
-        missing_reports.append(
-            f"{suite_name}: {fixture_name} is missing {', '.join(missing_unit_fields)}"
-        )
+        missing_reports.append(f"{suite_name}: {fixture_name} is missing {', '.join(missing_unit_fields)}")
 
     if getattr(test_case, "unsuitable_in_ragger_reason", None) is not None:
         return
@@ -992,26 +875,19 @@ def _validate_sign_tx_expectations(
         ("txHashHex",),
     )
     if missing_ragger_fields:
-        missing_reports.append(
-            f"{suite_name}: {fixture_name} is missing {', '.join(missing_ragger_fields)}"
-        )
+        missing_reports.append(f"{suite_name}: {fixture_name} is missing {', '.join(missing_ragger_fields)}")
         return
 
     ragger_expect = getattr(test_case, "ragger_expect", None)
     witnesses = getattr(ragger_expect, "witnesses", None)
     if witnesses is None or len(witnesses) == 0:
-        missing_reports.append(
-            f"{suite_name}: {fixture_name} is missing ragger_expect.witnesses"
-        )
+        missing_reports.append(f"{suite_name}: {fixture_name} is missing ragger_expect.witnesses")
         return
 
     for witness_index, witness in enumerate(witnesses):
         witness_signature_hex = getattr(witness, "witnessSignatureHex", None)
         if witness_signature_hex is None or witness_signature_hex == "":
-            missing_reports.append(
-                f"{suite_name}: {fixture_name} witness {witness_index} "
-                "is missing witnessSignatureHex"
-            )
+            missing_reports.append(f"{suite_name}: {fixture_name} witness {witness_index} is missing witnessSignatureHex")
 
 
 def _validate_expected_result_fields(
@@ -1030,9 +906,7 @@ def _validate_expected_result_fields(
         unit_fields,
     )
     if missing_unit_fields:
-        missing_reports.append(
-            f"{suite_name}: {fixture_name} is missing {', '.join(missing_unit_fields)}"
-        )
+        missing_reports.append(f"{suite_name}: {fixture_name} is missing {', '.join(missing_unit_fields)}")
 
     if getattr(test_case, "unsuitable_in_ragger_reason", None) is not None:
         return
@@ -1046,9 +920,7 @@ def _validate_expected_result_fields(
         ragger_fields,
     )
     if missing_ragger_fields:
-        missing_reports.append(
-            f"{suite_name}: {fixture_name} is missing {', '.join(missing_ragger_fields)}"
-        )
+        missing_reports.append(f"{suite_name}: {fixture_name} is missing {', '.join(missing_ragger_fields)}")
 
 
 def _collect_missing_python_expected_results() -> list[str]:
@@ -1171,9 +1043,7 @@ def run_all(*, verbose: bool) -> None:
                 verbose=verbose,
             )
             if count is not None:
-                has_deny_runner = any(
-                    "deny" in r.__name__ for r in cmd.runner_generators
-                )
+                has_deny_runner = any("deny" in r.__name__ for r in cmd.runner_generators)
                 if not has_deny_runner:
                     generated_entries_count_by_command[cmd.id] += count
                 deny_count_for_cmd += count
@@ -1212,9 +1082,7 @@ def run_all(*, verbose: bool) -> None:
     missing_expected_reports = _collect_missing_unit_expected_results()
     if missing_expected_reports:
         print("\n" + "=" * _REPORT_WIDTH)
-        print(
-            "EXPECTED-RESULT FAILURE: missing unit expected results in generated fixtures."
-        )
+        print("EXPECTED-RESULT FAILURE: missing unit expected results in generated fixtures.")
         print("=" * _REPORT_WIDTH)
         for report in missing_expected_reports:
             print(f"  - {report}")
@@ -1223,9 +1091,7 @@ def run_all(*, verbose: bool) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Generate unit-test fixtures from ragger sources."
-    )
+    parser = argparse.ArgumentParser(description="Generate unit-test fixtures from ragger sources.")
     parser.add_argument(
         "--verbose",
         action="store_true",
@@ -1234,9 +1100,7 @@ def main() -> None:
     subparsers = parser.add_subparsers(dest="command")
     subparsers.add_parser("all", help="Run all generators (default).")
     subparsers.add_parser("fixtures", help="Generate sign-tx fixture headers.")
-    subparsers.add_parser(
-        "generate-test-runners", help="Regenerate test_sign_tx_*.c files."
-    )
+    subparsers.add_parser("generate-test-runners", help="Regenerate test_sign_tx_*.c files.")
     subparsers.add_parser("deny_tests", help="Generate deny fixture headers.")
     subparsers.add_parser("mock-data", help="Regenerate mocks/crypto_mock_data.h.")
 

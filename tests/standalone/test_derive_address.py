@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -9,25 +8,24 @@ This module provides Ragger tests for Derive Address check
 
 import pytest
 from ragger.backend import BackendInterface
-from ragger.navigator.navigation_scenario import NavigateWithScenario
 from ragger.error import ExceptionRAPDU
+from ragger.navigator.navigation_scenario import NavigateWithScenario
 
-from tests.application_client.status_words import StatusWord
-from tests.application_client.command_sender import CommandSender
 from tests.application_client.command_builder import P1Type
+from tests.application_client.command_sender import CommandSender
 from tests.application_client.response_unpacker import unpack_derive_address_response
-
-from tests.standalone.input_files.derive_address import DeriveAddressTestCase
-from tests.standalone.input_files.derive_address import byronTestCases
+from tests.application_client.status_words import StatusWord
 from tests.standalone.input_files.derive_address import (
+    DeriveAddressTestCase,
+    byronTestCases,
+    denyTestCases,
     shelleyTestCasesNoConfirm,
     shelleyTestCasesWithConfirm,
-    denyTestCases,
 )
 from tests.standalone.utils import (
-    idTestFunc,
-    derive_address,
     assert_expected_deny_and_app_alive,
+    derive_address,
+    idTestFunc,
 )
 
 
@@ -47,9 +45,7 @@ def test_derive_address(
 
     client = CommandSender(backend)
 
-    p1_type = (
-        P1Type.P1_ADDRESS_RETURN if mode == "return" else P1Type.P1_ADDRESS_DISPLAY
-    )
+    p1_type = P1Type.P1_ADDRESS_RETURN if mode == "return" else P1Type.P1_ADDRESS_DISPLAY
 
     # Shelley test cases without confirmation don't require UI interaction (return mode only)
     if testCase in shelleyTestCasesNoConfirm and mode == "return":
@@ -76,20 +72,14 @@ def test_derive_address(
         _check_ragger_expect_address(testCase, address)
 
 
-def _check_ragger_expect_address(
-    testCase: DeriveAddressTestCase, address: bytes
-) -> None:
+def _check_ragger_expect_address(testCase: DeriveAddressTestCase, address: bytes) -> None:
     if testCase.ragger_expect is None:
-        pytest.fail(
-            f"Missing ragger_expect for derive_address fixture {testCase.name!r}"
-        )
+        pytest.fail(f"Missing ragger_expect for derive_address fixture {testCase.name!r}")
     assert address.hex() == testCase.ragger_expect.addressHex
 
 
 @pytest.mark.parametrize("testCase", denyTestCases, ids=idTestFunc)
-def test_derive_address_deny(
-    backend: BackendInterface, testCase: DeriveAddressTestCase
-) -> None:
+def test_derive_address_deny(backend: BackendInterface, testCase: DeriveAddressTestCase) -> None:
     """Check deny behavior for invalid derive-address inputs."""
 
     client = CommandSender(backend)
@@ -98,7 +88,5 @@ def test_derive_address_deny(
         with client.derive_address_async(testCase.p1, testCase.params):
             pass
     if testCase.expected_swo is None:
-        pytest.fail(
-            f"MISSING_EXPECTED_SWO [{testCase.name}] expected_swo must be set for deny fixtures"
-        )
+        pytest.fail(f"MISSING_EXPECTED_SWO [{testCase.name}] expected_swo must be set for deny fixtures")
     assert_expected_deny_and_app_alive(backend, err.value, testCase.expected_swo)

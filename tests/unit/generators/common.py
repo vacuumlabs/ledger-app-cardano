@@ -90,9 +90,7 @@ def write_file_safe(file_path: Path, content: str) -> None:
             try:
                 temp_file_path.unlink()
             except OSError as exc:
-                print(
-                    f"WARNING: Failed to clean up temporary file {temp_file_path}: {exc}"
-                )
+                print(f"WARNING: Failed to clean up temporary file {temp_file_path}: {exc}")
 
 
 def write_generated_c_file(file_path: Path, content: str) -> None:
@@ -131,19 +129,14 @@ def write_generated_c_file(file_path: Path, content: str) -> None:
             )
             full_content = clang_format_result.stdout
         except subprocess.CalledProcessError as exc:
-            print(
-                "ERROR: clang-format-14 failed while formatting generated file "
-                f"{file_path}: {exc.stderr.strip()}"
-            )
+            print(f"ERROR: clang-format-14 failed while formatting generated file {file_path}: {exc.stderr.strip()}")
             sys.exit(1)
     if not full_content.endswith("\n"):
         full_content += "\n"
     write_file_safe(file_path, full_content)
 
 
-def sanitize_c_identifier(
-    name: str, uppercase: bool = True, handle_leading_digit: bool = False
-) -> str:
+def sanitize_c_identifier(name: str, uppercase: bool = True, handle_leading_digit: bool = False) -> str:
     """
     Convert arbitrary string to valid C identifier.
 
@@ -201,9 +194,7 @@ def warning_expr_from_test_case(test_case: object) -> str:
     """
     expected_warnings = getattr(test_case, "expected_warnings", [])
     if expected_warnings:
-        return " | ".join(
-            f"((warning_bits_t)1 << {bit.name})" for bit in expected_warnings
-        )
+        return " | ".join(f"((warning_bits_t)1 << {bit.name})" for bit in expected_warnings)
     return "0"
 
 
@@ -252,10 +243,7 @@ def extract_apdu_payload(apdu: bytes) -> bytes:
     MIN_HEADER_LENGTH = 5
 
     if len(apdu) < MIN_HEADER_LENGTH:
-        raise ValueError(
-            f"APDU command too short: {len(apdu)} bytes "
-            f"(expected at least {MIN_HEADER_LENGTH})"
-        )
+        raise ValueError(f"APDU command too short: {len(apdu)} bytes (expected at least {MIN_HEADER_LENGTH})")
 
     lc = apdu[4]
     payload_start = 5
@@ -266,17 +254,12 @@ def extract_apdu_payload(apdu: bytes) -> bytes:
     payload_bytes = apdu[payload_start:payload_end]
 
     if len(payload_bytes) != payload_length:
-        raise ValueError(
-            f"Payload length mismatch: Lc field says {payload_length} bytes, "
-            f"but got {len(payload_bytes)} bytes"
-        )
+        raise ValueError(f"Payload length mismatch: Lc field says {payload_length} bytes, but got {len(payload_bytes)} bytes")
 
     return payload_bytes
 
 
-def format_bytes_as_c_array(
-    data: bytes, name: str, bytes_per_line: int = 8, return_as_list: bool = False
-) -> str | list[str]:
+def format_bytes_as_c_array(data: bytes, name: str, bytes_per_line: int = 8, return_as_list: bool = False) -> str | list[str]:
     """
     Generate C code for a byte array declaration.
 
@@ -381,10 +364,7 @@ def resolve_mnemonic() -> str:
     Checks ``ragger_configuration.OPTIONAL.CUSTOM_SEED`` first; falls back to
     the standard ``abandon … about`` mnemonic used across the test suite.
     """
-    default_mnemonic = (
-        "abandon abandon abandon abandon abandon abandon "
-        "abandon abandon abandon abandon abandon about"
-    )
+    default_mnemonic = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
     try:
         from ragger.conftest import configuration as ragger_configuration  # type: ignore
     except ImportError:
@@ -485,9 +465,7 @@ def extract_static_uint8_array_bodies(content: str) -> dict[str, str]:
         array_name = match.group(1)
         opening_brace_index = content.find("{", match.start())
         if opening_brace_index == -1:
-            raise ValueError(
-                f"Missing opening brace for array declaration {array_name}"
-            )
+            raise ValueError(f"Missing opening brace for array declaration {array_name}")
         closing_brace_index = _find_matching_closing_brace(content, opening_brace_index)
         arrays[array_name] = content[opening_brace_index + 1 : closing_brace_index]
     return arrays
@@ -512,9 +490,7 @@ def remove_static_uint8_arrays_by_name(content: str, array_names: set[str]) -> s
 
         opening_brace_index = content.find("{", match.start())
         if opening_brace_index == -1:
-            raise ValueError(
-                f"Missing opening brace for array declaration {array_name}"
-            )
+            raise ValueError(f"Missing opening brace for array declaration {array_name}")
         closing_brace_index = _find_matching_closing_brace(content, opening_brace_index)
 
         declaration_end = closing_brace_index + 1

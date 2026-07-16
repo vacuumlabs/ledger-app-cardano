@@ -3,19 +3,17 @@
 
 from typing import Any
 
+from tests.application_client.command_builder import P1Type
 from tests.unit.generators.common import (
-    write_generated_c_file,
-    sanitize_c_identifier,
     _ensure_base58_module,
     extract_apdu_payload,
     format_bytes_as_c_array,
+    sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_DERIVE_ADDRESS_DIR
-from tests.application_client.command_builder import P1Type
 
-GENERATED_DENY_HEADER = (
-    GENERATED_DERIVE_ADDRESS_DIR / "test_derive_address_fixtures_deny.h"
-)
+GENERATED_DENY_HEADER = GENERATED_DERIVE_ADDRESS_DIR / "test_derive_address_fixtures_deny.h"
 
 # ==============================================================================
 # Step 1: Load Deny Test Cases from Ragger Tests
@@ -145,9 +143,7 @@ def _get_expected_deny_reason(test_case: Any) -> str:
     """
     expected_swo = getattr(test_case, "expected_swo", None)
     if expected_swo is None:
-        raise ValueError(
-            f"derive_address deny fixture {test_case.name!r} is missing expected_swo"
-        )
+        raise ValueError(f"derive_address deny fixture {test_case.name!r} is missing expected_swo")
     return expected_swo.name
 
 
@@ -171,21 +167,15 @@ def _generate_fixture_code_for_deny_test_case(
     deny_reason = _get_expected_deny_reason(test_case)
 
     # Add descriptive comment header
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append(f"// Deny Test {test_number}: {test_case.name}")
     code_lines.append(f"// Expected deny SW: {deny_reason}")
     code_lines.append(f"// Address Type: {test_case.params.addrType.name}")
-    code_lines.append(
-        f"// Source: tests/standalone/input_files/derive_address.py > deny tests > {test_case.name}"
-    )
+    code_lines.append(f"// Source: tests/standalone/input_files/derive_address.py > deny tests > {test_case.name}")
     code_lines.append(f"// Spending: {test_case.params.spendingValue}")
     if test_case.params.stakingValue:
         code_lines.append(f"// Staking: {test_case.params.stakingValue}")
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append("")
 
     # Serialize test case to APDU command using CommandBuilder
@@ -265,31 +255,21 @@ def _build_deny_fixtures_header() -> str:
         )
         header_lines.extend(fixture_code)
 
-    header_lines.append(
-        "static const derive_address_fixture_t DERIVE_ADDRESS_DENY_FIXTURES[] = {"
-    )
+    header_lines.append("static const derive_address_fixture_t DERIVE_ADDRESS_DENY_FIXTURES[] = {")
 
     for test_number, test_case in enumerate(deny_test_cases, start=1):
         # Generate fixture struct
         # Extract just the payload (skip the 5-byte APDU header: CLA, INS, P1, P2, Lc)
         safe_test_name = sanitize_c_identifier(test_case.name)
-        payload_array_name = (
-            f"DERIVE_ADDRESS_DENY_{test_number:03d}_{safe_test_name}_APDU"
-        )
+        payload_array_name = f"DERIVE_ADDRESS_DENY_{test_number:03d}_{safe_test_name}_APDU"
         # Generate safe C identifier from test name
         deny_reason = _get_expected_deny_reason(test_case)
 
         # Add source traceability comment
-        header_lines.append(
-            f"// Source: tests/standalone/input_files/derive_address.py > deny tests > {test_case.name}"
-        )
+        header_lines.append(f"// Source: tests/standalone/input_files/derive_address.py > deny tests > {test_case.name}")
         header_lines.append("{")
 
-        p1_name = (
-            "P1_ADDRESS_DISPLAY"
-            if test_case.p1 == int(P1Type.P1_ADDRESS_DISPLAY)
-            else "P1_ADDRESS_RETURN"
-        )
+        p1_name = "P1_ADDRESS_DISPLAY" if test_case.p1 == int(P1Type.P1_ADDRESS_DISPLAY) else "P1_ADDRESS_RETURN"
         header_lines.append(f'    .name = "{test_case.name}",')
         header_lines.append(f"    .p1 = {p1_name},")
         header_lines.append(f"    .data = {payload_array_name},")
@@ -300,9 +280,7 @@ def _build_deny_fixtures_header() -> str:
     header_lines.append("};")
     header_lines.append("")
 
-    header_lines.append(
-        f"#define DERIVE_ADDRESS_DENY_FIXTURE_COUNT {len(deny_test_cases)}"
-    )
+    header_lines.append(f"#define DERIVE_ADDRESS_DENY_FIXTURE_COUNT {len(deny_test_cases)}")
 
     print()
     print(f"Generated {len(deny_test_cases)} deny test fixtures")

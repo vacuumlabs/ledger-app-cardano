@@ -16,7 +16,6 @@ from pathlib import Path
 import pytest
 from ragger.bip import CurveChoice, calculate_public_key_and_chaincode
 
-
 MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
 

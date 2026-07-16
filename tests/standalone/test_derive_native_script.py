@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -12,18 +11,11 @@ import re
 
 import cbor2
 import pytest
-
 from ledgered.devices import Device
 from ragger.backend import BackendInterface
 from ragger.error import ExceptionRAPDU
 from ragger.navigator import Navigator, NavInsID
 from ragger.navigator.navigation_scenario import NavigateWithScenario
-
-from tests.application_client.status_words import StatusWord
-from tests.application_client.command_sender import CommandSender
-from tests.application_client.response_unpacker import (
-    unpack_derive_native_script_hash_response,
-)
 
 from tests.application_client.command_builder import (
     NativeScript,
@@ -33,6 +25,11 @@ from tests.application_client.command_builder import (
     NativeScriptParamsScripts,
     NativeScriptType,
 )
+from tests.application_client.command_sender import CommandSender
+from tests.application_client.response_unpacker import (
+    unpack_derive_native_script_hash_response,
+)
+from tests.application_client.status_words import StatusWord
 from tests.standalone.input_files.native_script import (
     InvalidScriptTestCases,
     ValidNativeScriptTestCase,
@@ -40,10 +37,10 @@ from tests.standalone.input_files.native_script import (
 )
 from tests.standalone.utils import (
     NavContext,
-    idTestFunc,
-    get_device_pubkey,
-    nano_navigate_without_waits,
     assert_expected_deny_and_app_alive,
+    get_device_pubkey,
+    idTestFunc,
+    nano_navigate_without_waits,
 )
 
 
@@ -167,18 +164,12 @@ def test_derive_native_script_hash(
 
     _deriveNativeScriptHash_init(nav_ctx, client, testCase.name, step_counter)
     assert testCase.script is not None
-    _deriveNativeScriptHash_addScript(
-        nav_ctx, client, testCase.script, testCase.name, step_counter
-    )
+    _deriveNativeScriptHash_addScript(nav_ctx, client, testCase.script, testCase.name, step_counter)
 
-    _deriveNativeScriptHash_finishWholeNativeScript(
-        nav_ctx, client, testCase, step_counter
-    )
+    _deriveNativeScriptHash_finishWholeNativeScript(nav_ctx, client, testCase, step_counter)
 
 
-def _deriveNativeScriptHash_init(
-    nav_ctx: NavContext, client: CommandSender, test_name: str, step_counter: list[int]
-) -> None:
+def _deriveNativeScriptHash_init(nav_ctx: NavContext, client: CommandSender, test_name: str, step_counter: list[int]) -> None:
     with client.derive_script_init_async() as has_data_available:
         if has_data_available:
             pass
@@ -231,20 +222,12 @@ def _deriveNativeScriptHash_addScript(
         NativeScriptType.ANY,
         NativeScriptType.N_OF_K,
     ]:
-        _deriveScriptHash_startComplexScript(
-            nav_ctx, client, script, test_name, step_counter
-        )
-        assert isinstance(
-            script.params, (NativeScriptParamsScripts, NativeScriptParamsNofK)
-        )
+        _deriveScriptHash_startComplexScript(nav_ctx, client, script, test_name, step_counter)
+        assert isinstance(script.params, (NativeScriptParamsScripts, NativeScriptParamsNofK))
         for subscript in script.params.scripts:
-            _deriveNativeScriptHash_addScript(
-                nav_ctx, client, subscript, test_name, step_counter
-            )
+            _deriveNativeScriptHash_addScript(nav_ctx, client, subscript, test_name, step_counter)
     else:
-        _deriveNativeScriptHash_addSimpleScript(
-            nav_ctx, client, script, test_name, step_counter
-        )
+        _deriveNativeScriptHash_addSimpleScript(nav_ctx, client, script, test_name, step_counter)
 
 
 def _deriveNativeScriptHash_addSimpleScript(
@@ -373,9 +356,7 @@ def _deriveNativeScriptHash_finishWholeNativeScript(
     """
 
     assert testCase.displayFormat is not None
-    with client.derive_script_finish_async(
-        testCase.displayFormat
-    ) as has_data_available:
+    with client.derive_script_finish_async(testCase.displayFormat) as has_data_available:
         if has_data_available:
             pass
         elif nav_ctx.is_nano:
@@ -416,17 +397,11 @@ def _deriveNativeScriptHash_finishWholeNativeScript(
     _check_ragger_expect_native_script(testCase, script_hash)
 
 
-def _check_ragger_expect_native_script(
-    testCase: ValidNativeScriptTestCase, script_hash: bytes
-) -> None:
+def _check_ragger_expect_native_script(testCase: ValidNativeScriptTestCase, script_hash: bytes) -> None:
     if testCase.ragger_expect is None:
-        pytest.fail(
-            f"Missing ragger_expect for native_script fixture {testCase.name!r}"
-        )
+        pytest.fail(f"Missing ragger_expect for native_script fixture {testCase.name!r}")
     assert testCase.ragger_expect.hash is not None
-    assert script_hash.hex() == testCase.ragger_expect.hash, (
-        f"Script hash mismatch for {testCase.name!r}"
-    )
+    assert script_hash.hex() == testCase.ragger_expect.hash, f"Script hash mismatch for {testCase.name!r}"
 
 
 @pytest.mark.parametrize("testCase", InvalidScriptTestCases, ids=idTestFunc)
@@ -446,11 +421,7 @@ def test_derive_native_script_hash_deny(
 
     assert testCase.script is not None
     with pytest.raises(ExceptionRAPDU) as err:
-        _deriveNativeScriptHash_addScript(
-            nav_ctx, client, testCase.script, testCase.name, step_counter
-        )
+        _deriveNativeScriptHash_addScript(nav_ctx, client, testCase.script, testCase.name, step_counter)
 
     assert testCase.unit_test_expect is not None
-    assert_expected_deny_and_app_alive(
-        backend, err.value, testCase.unit_test_expect.swo
-    )
+    assert_expected_deny_and_app_alive(backend, err.value, testCase.unit_test_expect.swo)

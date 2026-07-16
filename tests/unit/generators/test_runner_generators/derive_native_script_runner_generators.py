@@ -3,14 +3,12 @@
 import re
 from pathlib import Path
 
-
 from tests.unit.generators.common import (
     read_file_safe,
-    write_generated_c_file,
     sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_NATIVE_SCRIPT_DIR
-
 
 # ======================================================================
 # Compiled Regex Patterns (module level for performance)
@@ -93,9 +91,7 @@ def _build_test_functions(fixture_names: list[str]) -> tuple[str, list[str]]:
         if fixture_base.startswith(prefix):
             fixture_base = fixture_base[len(prefix) :]
         test_case_name_sanitized = sanitize_c_identifier(fixture_base, uppercase=False)
-        test_function_name = (
-            f"test_derive_native_script_{test_case_name_sanitized}_{test_case_index}"
-        )
+        test_function_name = f"test_derive_native_script_{test_case_name_sanitized}_{test_case_index}"
 
         test_functions_lines.extend(
             [
@@ -155,9 +151,7 @@ def generate_native_script_test_runners() -> int:
     and creates the corresponding test_derive_native_script.c runner file.
     """
 
-    fixture_header_path = (
-        GENERATED_NATIVE_SCRIPT_DIR / "test_derive_native_script_fixtures.h"
-    )
+    fixture_header_path = GENERATED_NATIVE_SCRIPT_DIR / "test_derive_native_script_fixtures.h"
     test_c_file = GENERATED_NATIVE_SCRIPT_DIR / "test_native_script.c"
 
     if not fixture_header_path.exists():

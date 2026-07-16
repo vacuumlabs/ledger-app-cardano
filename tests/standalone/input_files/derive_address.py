@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -8,18 +7,17 @@ This module provides Ragger tests for Address check
 """
 
 import hashlib
-from typing import Optional
 from dataclasses import dataclass
 
 from bip_utils import (
+    Bip32Path,
+    Bip32PathParser,
     Bip39SeedGenerator,
     Bip44,
     Bip44Changes,
     Bip44Coins,
-    Bip32Path,
-    Bip32PathParser,
 )
-from ragger.bip import calculate_public_key_and_chaincode, CurveChoice
+from ragger.bip import CurveChoice, calculate_public_key_and_chaincode
 
 from tests.application_client.command_builder import (
     AddressParams,
@@ -32,10 +30,7 @@ from tests.application_client.command_builder import (
 from tests.application_client.status_words import StatusWord
 from tests.standalone.input_files.pubkey import convert_ragger_bip_pubkey_to_app_pubkey
 
-UNIT_TEST_MNEMONIC = (
-    "abandon abandon abandon abandon abandon abandon abandon abandon abandon "
-    "abandon abandon about"
-)
+UNIT_TEST_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 SPECULOS_MNEMONIC = (
     "glory promote mansion idle axis finger extra february uncover one trip "
     "resource lawn turtle enact monster seven myth punch hobby comfort wild "
@@ -71,12 +66,8 @@ def _derive_pubkey_for_mnemonic(path: str, mnemonic: str) -> bytes:
 def _derive_shelley_address_hex(params: AddressParams, mnemonic: str) -> str:
     address_hex = f"{(int(params.addrType) << 4) | int(params.netDesc.networkId):02x}"
     if params.spendingValue.startswith("m/"):
-        spending_public_key = _derive_pubkey_for_mnemonic(
-            params.spendingValue, mnemonic
-        )
-        address_hex += (
-            hashlib.blake2b(spending_public_key, digest_size=28).digest().hex()
-        )
+        spending_public_key = _derive_pubkey_for_mnemonic(params.spendingValue, mnemonic)
+        address_hex += hashlib.blake2b(spending_public_key, digest_size=28).digest().hex()
     else:
         address_hex += params.spendingValue
 
@@ -90,9 +81,7 @@ def _derive_shelley_address_hex(params: AddressParams, mnemonic: str) -> str:
     assert params.stakingValue is not None
     if params.stakingValue.startswith("m/"):
         staking_public_key = _derive_pubkey_for_mnemonic(params.stakingValue, mnemonic)
-        address_hex += (
-            hashlib.blake2b(staking_public_key, digest_size=28).digest().hex()
-        )
+        address_hex += hashlib.blake2b(staking_public_key, digest_size=28).digest().hex()
     else:
         address_hex += params.stakingValue
     return address_hex
@@ -103,9 +92,7 @@ def _derive_byron_address_string(path: str, mnemonic: str) -> str:
     bip44_context = Bip44.FromSeed(seed_bytes, Bip44Coins.CARDANO_BYRON_LEDGER)
     bip32_path: Bip32Path = Bip32PathParser.Parse(path).ToList()
     bip44_account = bip44_context.Purpose().Coin().Account(bip32_path[2])
-    bip44_change = bip44_account.Change(
-        Bip44Changes.CHAIN_EXT if bip32_path[3] == 0 else Bip44Changes.CHAIN_INT
-    )
+    bip44_change = bip44_account.Change(Bip44Changes.CHAIN_EXT if bip32_path[3] == 0 else Bip44Changes.CHAIN_INT)
     bip44_address = bip44_change.AddressIndex(bip32_path[4])
     return str(bip44_address.PublicKey().ToAddress())
 
@@ -113,7 +100,7 @@ def _derive_byron_address_string(path: str, mnemonic: str) -> str:
 @dataclass(kw_only=True, frozen=True)
 class DeriveAddressExpectedResult:
     addressHex: str
-    human_readable_address: Optional[str] = None
+    human_readable_address: str | None = None
 
 
 @dataclass(kw_only=True, frozen=True)
@@ -121,9 +108,9 @@ class DeriveAddressTestCase:
     name: str
     params: AddressParams
     p1: int = P1Type.P1_ADDRESS_RETURN
-    unit_test_expect: Optional[DeriveAddressExpectedResult] = None
-    ragger_expect: Optional[DeriveAddressExpectedResult] = None
-    expected_swo: Optional[StatusWord] = None
+    unit_test_expect: DeriveAddressExpectedResult | None = None
+    ragger_expect: DeriveAddressExpectedResult | None = None
+    expected_swo: StatusWord | None = None
 
 
 def pointer_to_str(blockIndex: int, txIndex: int, certificateIndex: int) -> str:
@@ -499,12 +486,8 @@ shelleyTestCasesNoConfirm = [
             netDesc=Testnet,
             spendingValue="m/1852'/1815'/0'/0/1",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="605a53103829a7382c2ab76111fb69f13e69d616824c62058e44f1a8b3"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="609dbd71e1951a09cede32a2411b34f55a476f85540aecdfba4d9c6563"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="605a53103829a7382c2ab76111fb69f13e69d616824c62058e44f1a8b3"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="609dbd71e1951a09cede32a2411b34f55a476f85540aecdfba4d9c6563"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_fakenet_enterprise_path_2",
@@ -513,12 +496,8 @@ shelleyTestCasesNoConfirm = [
             netDesc=FakeNet,
             spendingValue="m/1852'/1815'/0'/0/1",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="635a53103829a7382c2ab76111fb69f13e69d616824c62058e44f1a8b3"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="639dbd71e1951a09cede32a2411b34f55a476f85540aecdfba4d9c6563"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="635a53103829a7382c2ab76111fb69f13e69d616824c62058e44f1a8b3"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="639dbd71e1951a09cede32a2411b34f55a476f85540aecdfba4d9c6563"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_testnet_enterprise_script_1",
@@ -527,12 +506,8 @@ shelleyTestCasesNoConfirm = [
             netDesc=Testnet,
             spendingValue="122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="70122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="70122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="70122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="70122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_fakenet_enterprise_script_2",
@@ -541,12 +516,8 @@ shelleyTestCasesNoConfirm = [
             netDesc=FakeNet,
             spendingValue="122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="73122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="73122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="73122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="73122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_testnet_pointer_path_1",
@@ -559,9 +530,7 @@ shelleyTestCasesNoConfirm = [
         unit_test_expect=DeriveAddressExpectedResult(
             addressHex="405a53103829a7382c2ab76111fb69f13e69d616824c62058e44f1a8b3010203"
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="409dbd71e1951a09cede32a2411b34f55a476f85540aecdfba4d9c6563010203"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="409dbd71e1951a09cede32a2411b34f55a476f85540aecdfba4d9c6563010203"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_fakenet_pointer_path_2",
@@ -589,9 +558,7 @@ shelleyTestCasesNoConfirm = [
         unit_test_expect=DeriveAddressExpectedResult(
             addressHex="435a53103829a7382c2ab76111fb69f13e69d616824c62058e44f1a8b3000000"
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="439dbd71e1951a09cede32a2411b34f55a476f85540aecdfba4d9c6563000000"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="439dbd71e1951a09cede32a2411b34f55a476f85540aecdfba4d9c6563000000"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_testnet_pointer_script_1",
@@ -604,9 +571,7 @@ shelleyTestCasesNoConfirm = [
         unit_test_expect=DeriveAddressExpectedResult(
             addressHex="50122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277010203"
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="50122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277010203"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="50122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277010203"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_fakenet_pointer_script_2",
@@ -634,9 +599,7 @@ shelleyTestCasesNoConfirm = [
         unit_test_expect=DeriveAddressExpectedResult(
             addressHex="53122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277000000"
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="53122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277000000"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="53122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277000000"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_testnet_reward_path_1",
@@ -645,12 +608,8 @@ shelleyTestCasesNoConfirm = [
             netDesc=Testnet,
             stakingValue="m/1852'/1815'/0'/2/0",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="e01d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="e0db219ee5ce9a74f98fdadc2de13efced5a154ef8d4d41929d5bf9ff6"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="e01d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="e0db219ee5ce9a74f98fdadc2de13efced5a154ef8d4d41929d5bf9ff6"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_fakenet_reward_path_2",
@@ -659,12 +618,8 @@ shelleyTestCasesNoConfirm = [
             netDesc=FakeNet,
             stakingValue="m/1852'/1815'/0'/2/0",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="e31d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="e3db219ee5ce9a74f98fdadc2de13efced5a154ef8d4d41929d5bf9ff6"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="e31d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="e3db219ee5ce9a74f98fdadc2de13efced5a154ef8d4d41929d5bf9ff6"),
     ),
     # LedgerJS: reward multidelegation usual
     DeriveAddressTestCase(
@@ -678,9 +633,7 @@ shelleyTestCasesNoConfirm = [
             addressHex="e02cb40ca18704f49908b18bdfb4eee1ec80e2c3534b6924c3e6f50dc4",
             human_readable_address="stake_test1uqktgr9psuz0fxggkx9ald8wu8kgpckr2d9kjfxrum6sm3qp87652",
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="e042bffc523b76535a17dee330dddf21334cb9da9616c560c43458cbdc"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="e042bffc523b76535a17dee330dddf21334cb9da9616c560c43458cbdc"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_testnet_reward_script_1",
@@ -689,12 +642,8 @@ shelleyTestCasesNoConfirm = [
             netDesc=Testnet,
             stakingValue="122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="f0122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="f0122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="f0122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="f0122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_fakenet_reward_script_2",
@@ -703,12 +652,8 @@ shelleyTestCasesNoConfirm = [
             netDesc=FakeNet,
             stakingValue="122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="f3122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="f3122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="f3122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="f3122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"),
     ),
 ]
 
@@ -896,9 +841,7 @@ shelleyTestCasesWithConfirm = [
             addressHex="400ec65e2f75b3add1df5190e453fce43c2fbc233db2e9080f71088ee9010000",
             human_readable_address="addr_test1gq8vvh30wke6m5wl2xgwg5luus7zl0pr8kewjzq0wyyga6gpqqqqze3mqg",
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="4021d1f24c49ebcecfbe5079ca2594c23b87a6f19a32ecd52129f78d7c010000"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="4021d1f24c49ebcecfbe5079ca2594c23b87a6f19a32ecd52129f78d7c010000"),
     ),
     # LedgerJS: pointer address unusual address index
     DeriveAddressTestCase(
@@ -913,9 +856,7 @@ shelleyTestCasesWithConfirm = [
             addressHex="40433895dc2f44713298d5a85b65f2571bb908955733f0c252c75a97a5000700",
             human_readable_address="addr_test1gppn39wu9az8zv5c6k59ke0j2udmjzy42uelpsjjcadf0fgqquqqpn6uug",
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="408ea7ec4df052418690cce387cde8674be95b77f9f38070c1627bbb3f000700"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="408ea7ec4df052418690cce387cde8674be95b77f9f38070c1627bbb3f000700"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_testnet_reward_multidelegation_unusual_account",
@@ -928,9 +869,7 @@ shelleyTestCasesWithConfirm = [
             addressHex="e05fcdb2be38b326b0931b5bd6b642c0973ded41bc010f7b08b939dbe8",
             human_readable_address="stake_test1up0umv478zejdvynrddaddjzcztnmm2phsqs77cghyuah6qnjw5hh",
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="e0a9ac9841a1cd182f72c2cd42a502767a01ef8e582020c60631d11c86"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="e0a9ac9841a1cd182f72c2cd42a502767a01ef8e582020c60631d11c86"),
     ),
     DeriveAddressTestCase(
         name="Derive_address_shelley_testnet_reward_multidelegation_unusual_index",
@@ -939,12 +878,8 @@ shelleyTestCasesWithConfirm = [
             netDesc=Testnet,
             stakingValue="m/1852'/1815'/0'/2/20000000",
         ),
-        unit_test_expect=DeriveAddressExpectedResult(
-            addressHex="e0d132d41c7e5cb5e93efd601d4b7464994e45165e5822575050265512"
-        ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="e08f2df9048352042b2693df894e52311ca0322d78db4493cf446a4045"
-        ),
+        unit_test_expect=DeriveAddressExpectedResult(addressHex="e0d132d41c7e5cb5e93efd601d4b7464994e45165e5822575050265512"),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="e08f2df9048352042b2693df894e52311ca0322d78db4493cf446a4045"),
     ),
     # LedgerJS: reward path unusual account
     DeriveAddressTestCase(
@@ -958,8 +893,6 @@ shelleyTestCasesWithConfirm = [
             addressHex="e3cf7d34dd943bd5cfb627c6da85b748d9e147f612200d3d376665c33d",
             human_readable_address="stake1u08h6dxajsaatnakylrd4pdhfrv7z3lkzgsq60fhvejux0gpcrd2j",
         ),
-        ragger_expect=DeriveAddressExpectedResult(
-            addressHex="e398153c743f2a67aa612db8292c48e6cdb65282c71f6020078068eb6f"
-        ),
+        ragger_expect=DeriveAddressExpectedResult(addressHex="e398153c743f2a67aa612db8292c48e6cdb65282c71f6020078068eb6f"),
     ),
 ]

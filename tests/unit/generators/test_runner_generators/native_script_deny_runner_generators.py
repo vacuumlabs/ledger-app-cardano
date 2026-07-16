@@ -15,8 +15,8 @@ from pathlib import Path
 
 from tests.unit.generators.common import (
     read_file_safe,
-    write_generated_c_file,
     sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_NATIVE_SCRIPT_DIR
 
@@ -246,9 +246,7 @@ def _build_test_functions(fixture_names: list[str]) -> tuple[str, list[str]]:
     lines: list[str] = []
     func_names: list[str] = []
     for idx, name in enumerate(fixture_names):
-        sanitized = sanitize_c_identifier(
-            name, uppercase=False, handle_leading_digit=True
-        )
+        sanitized = sanitize_c_identifier(name, uppercase=False, handle_leading_digit=True)
         func_name = f"test_derive_native_script_hash_deny_{idx}_{sanitized}"
         lines.append(f"static void {func_name}(void **state) {{")
         lines.append("    (void) state;")
@@ -276,9 +274,7 @@ def _build_main(func_names: list[str]) -> str:
 
 
 def generate_native_script_deny_test_runners() -> int:
-    fixture_header = (
-        GENERATED_NATIVE_SCRIPT_DIR / "test_derive_native_script_deny_fixtures.h"
-    )
+    fixture_header = GENERATED_NATIVE_SCRIPT_DIR / "test_derive_native_script_deny_fixtures.h"
     test_c_file = GENERATED_NATIVE_SCRIPT_DIR / "test_native_script_deny_tests.c"
 
     fixture_names = _extract_deny_fixture_names(fixture_header)

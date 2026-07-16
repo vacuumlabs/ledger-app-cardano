@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -8,26 +7,18 @@ This module provides Ragger tests for Public Key check
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
-from ragger.bip import calculate_public_key_and_chaincode, CurveChoice
+from ragger.bip import CurveChoice, calculate_public_key_and_chaincode
 
-UNIT_TEST_MNEMONIC = (
-    "abandon abandon abandon abandon abandon abandon abandon abandon abandon "
-    "abandon abandon about"
-)
+UNIT_TEST_MNEMONIC = "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 
 
 def convert_ragger_bip_pubkey_to_app_pubkey(public_key_hex: str) -> str:
     normalized_public_key_hex = public_key_hex.removeprefix("0x")
     if len(normalized_public_key_hex) != 66:
-        raise ValueError(
-            f"ragger bip pubkey has unexpected length: {len(normalized_public_key_hex)} hex chars"
-        )
+        raise ValueError(f"ragger bip pubkey has unexpected length: {len(normalized_public_key_hex)} hex chars")
     if not normalized_public_key_hex.startswith("00"):
-        raise ValueError(
-            "ragger bip pubkey is expected to use the 0x00-prefixed 33-byte representation"
-        )
+        raise ValueError("ragger bip pubkey is expected to use the 0x00-prefixed 33-byte representation")
     return normalized_public_key_hex[2:]
 
 
@@ -52,10 +43,10 @@ class PubKeyExpectedResult:
 @dataclass(kw_only=True, frozen=True)
 class PubKeyTestCase:
     name: str
-    path: Optional[str] = None
-    nav: Optional[bool] = True
-    unit_test_expect: Optional[PubKeyExpectedResult] = None
-    ragger_expect: Optional[PubKeyExpectedResult] = None
+    path: str | None = None
+    nav: bool | None = True
+    unit_test_expect: PubKeyExpectedResult | None = None
+    ragger_expect: PubKeyExpectedResult | None = None
 
 
 # pylint: disable=line-too-long
@@ -67,9 +58,7 @@ testsByron = [
             publicKeyHex="70da3cf4d0c498b81f82887fe114bb7134e3a35bb081bfedbda7c59bcf7fc3af",
         ),
         path="m/44'/1815'/1'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/44'/1815'/1'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/44'/1815'/1'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_byronpath_2",
@@ -78,9 +67,7 @@ testsByron = [
             publicKeyHex="34dc3723b1cfad45456b14dbc29e15dee18973554c98e9d3cb957c07fa2dde31",
         ),
         path="m/44'/1815'/1'/0/55'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/44'/1815'/1'/0/55'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/44'/1815'/1'/0/55'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_byronpath_3",
@@ -89,9 +76,7 @@ testsByron = [
             publicKeyHex="85ca3f6784caf2ba90529368696e1568aaa199b3343d738886a6fbd7a3f04c1f",
         ),
         path="m/44'/1815'/1'/0/12'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/44'/1815'/1'/0/12'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/44'/1815'/1'/0/12'", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -103,9 +88,7 @@ testsShelleyUsual = [
             publicKeyHex="a8ae477a709323aa3ec782863f29edf86fec9e25edac6893133265f5728c0283",
         ),
         path="m/1852'/1815'/4'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/4'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/4'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_usual_path_1",
@@ -114,9 +97,7 @@ testsShelleyUsual = [
             publicKeyHex="80a3ae98db92602aaee7170bc48b15ef9274d62521d37660561938066d16f658",
         ),
         path="m/1852'/1815'/0'/0/1",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/0/1", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/0/1", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_usual_path_2",
@@ -125,9 +106,7 @@ testsShelleyUsual = [
             publicKeyHex="d78976ce65cc3409a6b037dc1d378beeb1369a4136b191e3079fa53fdbc4b4fa",
         ),
         path="m/1852'/1815'/0'/2/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/2/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/2/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_usual_path_3",
@@ -136,9 +115,7 @@ testsShelleyUsual = [
             publicKeyHex="c4b83c7a5280ad1ccf234f28db7d579eec5fcf91ed1440cae9a894ec7df5ec50",
         ),
         path="m/1852'/1815'/0'/2/1001",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/2/1001", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/2/1001", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_usual_path_4",
@@ -147,9 +124,7 @@ testsShelleyUsual = [
             publicKeyHex="450d42914a4b8c738fde9b83d8648c244633b9ee9f9ace3a9809f13f1fc6404d",
         ),
         path="m/1852'/1815'/0'/3/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/3/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/3/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_usual_path_5",
@@ -158,9 +133,7 @@ testsShelleyUsual = [
             publicKeyHex="4d215c6bd6ba313cd42489028e5809cfea3c5c5198a696f5a9d08a23a1536fa3",
         ),
         path="m/1852'/1815'/0'/4/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/4/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/4/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_usual_path_6",
@@ -169,9 +142,7 @@ testsShelleyUsual = [
             publicKeyHex="b25ab473176e90123d42197155b7d6a80605a2abca63b9188f3cf55af7e6f84c",
         ),
         path="m/1852'/1815'/1'/5/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/1'/5/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/1'/5/0", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -183,9 +154,7 @@ testsShelleyUnusual = [
             publicKeyHex="3d2e4d0594d0fcb11190cc7a492e65c7a1d8ce466c008be1f943c5a31f241470",
         ),
         path="m/1852'/1815'/101'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/101'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/101'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_unusual_path_2",
@@ -194,9 +163,7 @@ testsShelleyUnusual = [
             publicKeyHex="260e58c70331c28a1d73acf39062f109ef55566371f07d5eb30f60bf11fa96eb",
         ),
         path="m/1852'/1815'/100'/0/1000001'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/100'/0/1000001'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/100'/0/1000001'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_unusual_path_3",
@@ -205,9 +172,7 @@ testsShelleyUnusual = [
             publicKeyHex="21f05225d4cb568f2a91dccd40ccb47e6e12288f6ab171c447bd57b14a06dcef",
         ),
         path="m/1852'/1815'/0'/2/1000001",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/2/1000001", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/2/1000001", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_unusual_path_4",
@@ -216,9 +181,7 @@ testsShelleyUnusual = [
             publicKeyHex="1f1a452164b1ded176b712c714e8161e3cb33225336e094c61e8e8e607bd556d",
         ),
         path="m/1852'/1815'/101'/3/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/101'/3/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/101'/3/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_unusual_path_5",
@@ -227,9 +190,7 @@ testsShelleyUnusual = [
             publicKeyHex="f3019ec48400ee8350435080ad157f031fff3ed5001b00ce7df3b2ce4c6be69b",
         ),
         path="m/1852'/1815'/101'/4/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/101'/4/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/101'/4/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_shelley_unusual_path_6",
@@ -238,9 +199,7 @@ testsShelleyUnusual = [
             publicKeyHex="494fffd71df2e0a76e1c1507c68e52a4fae102ed179a2c10ae176671fd5ecdee",
         ),
         path="m/1852'/1815'/101'/5/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/101'/5/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/101'/5/0", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -252,9 +211,7 @@ testsMultisig = [
             publicKeyHex="1790a860cede80a4df302a76b8cd6eb806dc789179fab49f2c7676923abf2f6b",
         ),
         path="m/1854'/1815'/0'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1854'/1815'/0'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1854'/1815'/0'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_multisig_payment_path_0",
@@ -263,9 +220,7 @@ testsMultisig = [
             publicKeyHex="66b5700de1d8e5ac3f7d9950c32e93de74a4f21aa3cc4590381b9655ef2e5f27",
         ),
         path="m/1854'/1815'/0'/0/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1854'/1815'/0'/0/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1854'/1815'/0'/0/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_multisig_staking_path_0",
@@ -274,9 +229,7 @@ testsMultisig = [
             publicKeyHex="fb6a4df9503b7bb7d80c21fd3b66e0568aa0f7b18be8db9718a87f5a1cc913a1",
         ),
         path="m/1854'/1815'/0'/2/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1854'/1815'/0'/2/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1854'/1815'/0'/2/0", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -288,9 +241,7 @@ testsColdKeys = [
             publicKeyHex="09dc9a6c151df265b4dbce84457fea3366aa95edc8a7a23b8da039e2db288d60",
         ),
         path="m/1853'/1815'/0'/0'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1853'/1815'/0'/0'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1853'/1815'/0'/0'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_cold_unusual_case",
@@ -299,9 +250,7 @@ testsColdKeys = [
             publicKeyHex="6cdf197de70dd9cbc1b96a7d8d6e361b799d078f8a2ec4bb60f8f87a3dcc12e9",
         ),
         path="m/1853'/1815'/0'/101'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1853'/1815'/0'/101'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1853'/1815'/0'/101'", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -313,9 +262,7 @@ testsCVoteKeysUsual = [
             publicKeyHex="971503b7341d2fb537bb5a186d87a64f8afdc5d7bbe40c78ccbc0196c8e8dd6c",
         ),
         path="m/1694'/1815'/100'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1694'/1815'/100'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1694'/1815'/100'", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -327,9 +274,7 @@ testsCVoteKeysUnusual = [
             publicKeyHex="b27a927781de0a463397c566ebff6b3bd357ae09a802156940a37ccfde47408c",
         ),
         path="m/1694'/1815'/0'/0/1",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1694'/1815'/0'/0/1", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1694'/1815'/0'/0/1", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_CVote_keys_path_3",
@@ -338,9 +283,7 @@ testsCVoteKeysUnusual = [
             publicKeyHex="1339902f1c89dc90a9971197c16ef91549c7303c70386b9fef727ada4cb2f54f",
         ),
         path="m/1694'/1815'/101'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1694'/1815'/101'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1694'/1815'/101'", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -352,9 +295,7 @@ testsDRepKeys = [
             publicKeyHex="450d42914a4b8c738fde9b83d8648c244633b9ee9f9ace3a9809f13f1fc6404d",
         ),
         path="m/1852'/1815'/0'/3/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/3/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/3/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_multisig_drep_key_path_0",
@@ -363,9 +304,7 @@ testsDRepKeys = [
             chainCodeHex="b85f39b418dc2ca1c9622b04caa3fa33f94879f38f1ea05f2498f8040b2a1c9e",
             publicKeyHex="b7e837b7b4a8f1afe3bd2e180dddeabdf5b49207d16a06c8a3401a8b9da5ce7b",
         ),
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1854'/1815'/0'/3/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1854'/1815'/0'/3/0", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -377,9 +316,7 @@ testsCommitteeColdKeys = [
             publicKeyHex="4d215c6bd6ba313cd42489028e5809cfea3c5c5198a696f5a9d08a23a1536fa3",
         ),
         path="m/1852'/1815'/0'/4/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/4/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/4/0", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -391,9 +328,7 @@ testsCommitteeHotKeys = [
             publicKeyHex="d485fbcd9bb1efe65672d27d3325178b58b155eb7f1e498ab19a0b59f770a53f",
         ),
         path="m/1852'/1815'/0'/5/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/5/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/5/0", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -405,9 +340,7 @@ testsMintKeys = [
             publicKeyHex="4a07232e8d10d8e0912ee395a678f1379c53915814e2394bb8e41477475fa711",
         ),
         path="m/1855'/1815'/0'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1855'/1815'/0'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1855'/1815'/0'", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -419,9 +352,7 @@ testsSilentExportRareKeys = [
             publicKeyHex="450d42914a4b8c738fde9b83d8648c244633b9ee9f9ace3a9809f13f1fc6404d",
         ),
         path="m/1852'/1815'/0'/3/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/3/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/3/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_committee_cold_key_path_0_silent",
@@ -430,9 +361,7 @@ testsSilentExportRareKeys = [
             publicKeyHex="4d215c6bd6ba313cd42489028e5809cfea3c5c5198a696f5a9d08a23a1536fa3",
         ),
         path="m/1852'/1815'/0'/4/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/4/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/4/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_committee_hot_key_path_0_silent",
@@ -441,9 +370,7 @@ testsSilentExportRareKeys = [
             publicKeyHex="d485fbcd9bb1efe65672d27d3325178b58b155eb7f1e498ab19a0b59f770a53f",
         ),
         path="m/1852'/1815'/0'/5/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/5/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/5/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_mint_key_path_0_silent",
@@ -452,9 +379,7 @@ testsSilentExportRareKeys = [
             publicKeyHex="4a07232e8d10d8e0912ee395a678f1379c53915814e2394bb8e41477475fa711",
         ),
         path="m/1855'/1815'/0'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1855'/1815'/0'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1855'/1815'/0'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_cold_case_silent",
@@ -463,9 +388,7 @@ testsSilentExportRareKeys = [
             publicKeyHex="09dc9a6c151df265b4dbce84457fea3366aa95edc8a7a23b8da039e2db288d60",
         ),
         path="m/1853'/1815'/0'/0'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1853'/1815'/0'/0'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1853'/1815'/0'/0'", UNIT_TEST_MNEMONIC),
     ),
 ]
 
@@ -531,92 +454,66 @@ denyTestCases = [
     PubKeyTestCase(
         name="Export_pubkey_path_shorter_than_3_indexes",
         path="m/44'/1815'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/44'/1815'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/44'/1815'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_path_not_matching_cold_key_structure",
         path="m/1853'/1900'/0'/0/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1853'/1900'/0'/0/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1853'/1900'/0'/0/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_vote_key_path_1",
         path="m/1694'/1815'/0'/1/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1694'/1815'/0'/1/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1694'/1815'/0'/1/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_vote_key_path_2",
         path="m/1694'/1815'/17",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1694'/1815'/17", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1694'/1815'/17", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_vote_key_path_3",
         path="m/1694'/1815'/0'/1",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1694'/1815'/0'/1", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1694'/1815'/0'/1", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_multisig_account_not_hardened",
         path="m/1854'/1815'/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1854'/1815'/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1854'/1815'/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_multisig_chain",
         path="m/1854'/1815'/0'/6/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1854'/1815'/0'/6/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1854'/1815'/0'/6/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_multisig_address_hardened",
         path="m/1854'/1815'/0'/0/0'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1854'/1815'/0'/0/0'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1854'/1815'/0'/0/0'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_mint_policy_not_hardened",
         path="m/1855'/1815'/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1855'/1815'/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1855'/1815'/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_drep_chain",
         path="m/1852'/1815'/0'/6/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/6/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/6/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_committee_cold_address_hardened",
         path="m/1852'/1815'/0'/4/0'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0'/4/0'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0'/4/0'", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_committee_hot_account_not_hardened",
         path="m/1852'/1815'/0/5/0",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1852'/1815'/0/5/0", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1852'/1815'/0/5/0", UNIT_TEST_MNEMONIC),
     ),
     PubKeyTestCase(
         name="Export_pubkey_invalid_pool_cold_usecase",
         path="m/1853'/1815'/1'/0'",
-        unit_test_expect=_derive_pubkey_expected_result(
-            "m/1853'/1815'/1'/0'", UNIT_TEST_MNEMONIC
-        ),
+        unit_test_expect=_derive_pubkey_expected_result("m/1853'/1815'/1'/0'", UNIT_TEST_MNEMONIC),
     ),
 ]

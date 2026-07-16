@@ -2,18 +2,17 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 from tests.unit.generators.common import (
     extract_brace_delimited_entries,
     read_file_safe,
-    write_generated_c_file,
     sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_DERIVE_ADDRESS_DIR
-
 
 # ======================================================================
 # Compiled Regex Patterns (module level for performance)
@@ -38,9 +37,7 @@ class FixtureDetails:
     """
 
     name: str  # .name field (e.g., "Mainnet 1")
-    data_array_name: (
-        str  # .data field (e.g., "DERIVE_ADDRESS_byronTestCases_000_MAINNET_1_APDU")
-    )
+    data_array_name: str  # .data field (e.g., "DERIVE_ADDRESS_byronTestCases_000_MAINNET_1_APDU")
     check_expected: int  # .check_expected field (e.g., SWO_SUCCESS)
     index: int  # Position in array (0-based)
 
@@ -94,9 +91,7 @@ def extract_fixture_array_names_from_header(fixture_header_path: Path) -> list[s
     return fixture_array_names
 
 
-def extract_complete_fixture_details_from_array(
-    header_content: str, array_name: str
-) -> list[FixtureDetails]:
+def extract_complete_fixture_details_from_array(header_content: str, array_name: str) -> list[FixtureDetails]:
     """
     Extract complete fixture details from a specific array.
 
@@ -136,39 +131,27 @@ def extract_complete_fixture_details_from_array(
         # Extract .name field
         name_match = re.search(r'\.name\s*=\s*"([^"]+)"', struct_body)
         if not name_match:
-            raise ValueError(
-                f"Missing .name field in fixture {index} of array {array_name}"
-            )
+            raise ValueError(f"Missing .name field in fixture {index} of array {array_name}")
         fixture_name = name_match.group(1)
 
         # Extract .p1 field
         p1_match = re.search(r"\.p1\s*=\s*(P1_\w+|0x[0-9A-Fa-f]+|\d+)", struct_body)
         if not p1_match:
-            raise ValueError(
-                f"Missing .p1 field in fixture {index} of array {array_name}"
-            )
+            raise ValueError(f"Missing .p1 field in fixture {index} of array {array_name}")
         # Extract .data field (the APDU array name)
         data_match = re.search(r"\.data\s*=\s*([A-Z0-9_]+)", struct_body)
         if not data_match:
-            raise ValueError(
-                f"Missing .data field in fixture {index} of array {array_name}"
-            )
+            raise ValueError(f"Missing .data field in fixture {index} of array {array_name}")
         data_array_name = data_match.group(1)
 
         # Validate data array name format
         if not data_array_name.startswith("DERIVE_ADDRESS_"):
-            raise ValueError(
-                f"Unexpected data array name format in fixture {index}: {data_array_name}"
-            )
+            raise ValueError(f"Unexpected data array name format in fixture {index}: {data_array_name}")
 
         # Extract .check_expected field
-        check_match = re.search(
-            r"\.check_expected\s*=\s*(SWO_\w+|0x[0-9A-Fa-f]+|\d+)", struct_body
-        )
+        check_match = re.search(r"\.check_expected\s*=\s*(SWO_\w+|0x[0-9A-Fa-f]+|\d+)", struct_body)
         if not check_match:
-            raise ValueError(
-                f"Missing .check_expected field in fixture {index} of array {array_name}"
-            )
+            raise ValueError(f"Missing .check_expected field in fixture {index} of array {array_name}")
         check_str = check_match.group(1)
 
         # Convert check_expected to integer
@@ -216,14 +199,10 @@ def extract_all_fixture_array_details(
 
     for array_name in array_names:
         # Extract complete fixture details
-        fixtures = extract_complete_fixture_details_from_array(
-            header_content, array_name
-        )
+        fixtures = extract_complete_fixture_details_from_array(header_content, array_name)
 
         # Create complete array info
-        array_details = FixtureArrayDetails(
-            array_name=array_name, fixture_count=len(fixtures), fixtures=fixtures
-        )
+        array_details = FixtureArrayDetails(array_name=array_name, fixture_count=len(fixtures), fixtures=fixtures)
 
         all_array_details.append(array_details)
 
@@ -253,9 +232,7 @@ def _build_test_file_header() -> str:
 """
 
 
-def _build_main_function(
-    all_fixture_array_details: Sequence[FixtureArrayDetails], test_c_file: str
-) -> str:
+def _build_main_function(all_fixture_array_details: Sequence[FixtureArrayDetails], test_c_file: str) -> str:
 
     all_test_function_names = []
     all_test_function_definitions = []
@@ -263,15 +240,11 @@ def _build_main_function(
     for fixture_array_details in all_fixture_array_details:
         # Extract array suffix for unique function names
         # Example: DERIVE_ADDRESS_FIXTURES_TEST_DERIVE_ADDRESS_BYRON -> byron
-        array_suffix = fixture_array_details.array_name.replace(
-            "DERIVE_ADDRESS_FIXTURES_TEST_DERIVE_ADDRESS_", ""
-        ).lower()
+        array_suffix = fixture_array_details.array_name.replace("DERIVE_ADDRESS_FIXTURES_TEST_DERIVE_ADDRESS_", "").lower()
 
         for fixture in fixture_array_details.fixtures:
             # Build unique test name for THIS fixture
-            sanitized_fixture_name = sanitize_c_identifier(
-                fixture.name, uppercase=False, handle_leading_digit=True
-            )
+            sanitized_fixture_name = sanitize_c_identifier(fixture.name, uppercase=False, handle_leading_digit=True)
             test_function_name = f"test_derive_address_{array_suffix}_{sanitized_fixture_name}_{fixture.index}"
 
             # Add to list of all test names
@@ -288,9 +261,7 @@ def _build_main_function(
 
     # Generate cmocka test registrations
     # Pattern from test_sign_tx_*.c: cmocka_unit_test(test_name),
-    test_registrations = ",\n        ".join(
-        f"cmocka_unit_test({name})" for name in all_test_function_names
-    )
+    test_registrations = ",\n        ".join(f"cmocka_unit_test({name})" for name in all_test_function_names)
 
     test_definitions_block = "\n\n".join(all_test_function_definitions)
 
@@ -317,9 +288,7 @@ def generate_address_derivation_test_runners() -> int:
     Generate address derivation test runner files.
 
     """
-    fixture_header_path = (
-        GENERATED_DERIVE_ADDRESS_DIR / "test_derive_address_fixtures.h"
-    )
+    fixture_header_path = GENERATED_DERIVE_ADDRESS_DIR / "test_derive_address_fixtures.h"
     test_c_file = GENERATED_DERIVE_ADDRESS_DIR / "test_derive_address.c"
 
     # Example: Access specific fixture data

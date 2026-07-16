@@ -7,8 +7,8 @@ from pathlib import Path
 
 from tests.unit.generators.common import (
     read_file_safe,
-    write_generated_c_file,
     sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_OPCERT_DIR
 
@@ -164,9 +164,7 @@ def _build_main(function_names: list[str]) -> str:
 
 def generate_opcert_test_runners() -> int:
     if not FIXTURE_HEADER.exists():
-        raise FileNotFoundError(
-            "Opcert fixtures missing. Run generate_unit_tests_from_ragger.py fixtures stage first."
-        )
+        raise FileNotFoundError("Opcert fixtures missing. Run generate_unit_tests_from_ragger.py fixtures stage first.")
 
     fixture_names = _extract_fixture_names(FIXTURE_HEADER)
     if not fixture_names:

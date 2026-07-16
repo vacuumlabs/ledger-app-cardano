@@ -4,9 +4,9 @@
 from typing import Any
 
 from tests.unit.generators.common import (
-    write_generated_c_file,
-    sanitize_c_identifier,
     format_bytes_as_c_array,
+    sanitize_c_identifier,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_PUBKEY_DIR
 
@@ -58,17 +58,11 @@ def _generate_fixture_code_for_deny_test_case(
 ) -> list[str]:
     code_lines: list[str] = []
 
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append(f"// Deny Test {test_number}: {test_case.name}")
     code_lines.append(f"// Path: {test_case.path}")
-    code_lines.append(
-        f"// Source: tests/standalone/input_files/pubkey.py > deny tests > {test_case.name}"
-    )
-    code_lines.append(
-        "// ----------------------------------------------------------------------"
-    )
+    code_lines.append(f"// Source: tests/standalone/input_files/pubkey.py > deny tests > {test_case.name}")
+    code_lines.append("// ----------------------------------------------------------------------")
     code_lines.append("")
 
     payload_bytes = _serialize_deny_test_case_to_apdu(test_case)
@@ -122,25 +116,15 @@ def _build_deny_fixtures() -> str:
         header_lines.append(f"static const pubkey_fixture_t {array_name}[] = {{")
         for idx, test_case in enumerate(deny_test_cases):
             safe_test_name = sanitize_c_identifier(test_case.name)
-            header_lines.append(
-                f"// Source: tests/standalone/input_files/pubkey.py > deny tests > {test_case.name}"
-            )
+            header_lines.append(f"// Source: tests/standalone/input_files/pubkey.py > deny tests > {test_case.name}")
             header_lines.append("{")
             header_lines.append(f'    .name = "{test_case.name}",')
-            header_lines.append(
-                f"    .data = PUBKEY_DENY_{idx:03d}_{safe_test_name}_APDU,"
-            )
-            header_lines.append(
-                f"    .data_len = sizeof(PUBKEY_DENY_{idx:03d}_{safe_test_name}_APDU),"
-            )
-            header_lines.append(
-                "    .check_expected = SWO_SECURITY_CONDITION_NOT_SATISFIED,"
-            )
+            header_lines.append(f"    .data = PUBKEY_DENY_{idx:03d}_{safe_test_name}_APDU,")
+            header_lines.append(f"    .data_len = sizeof(PUBKEY_DENY_{idx:03d}_{safe_test_name}_APDU),")
+            header_lines.append("    .check_expected = SWO_SECURITY_CONDITION_NOT_SATISFIED,")
             header_lines.append("    .expected_response = NULL,")
             header_lines.append("    .expected_response_len = 0,")
-            header_lines.append(
-                f"    .silent_export_enabled = {'true' if silent else 'false'},"
-            )
+            header_lines.append(f"    .silent_export_enabled = {'true' if silent else 'false'},")
             header_lines.append("    .expected_policy = 0,")
             header_lines.append("},")
         header_lines.append("};")

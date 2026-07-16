@@ -6,15 +6,15 @@
 # analogous to the eth app's settings.py approach.
 # This works with both DEBUG and production builds (no debug APDUs needed).
 
+from collections.abc import Mapping
 from enum import Enum, IntEnum, auto
-from typing import Mapping, Union
 from unittest.mock import Mock
 from weakref import WeakKeyDictionary
+
 import pytest
 from ledgered.devices import Device, DeviceType
 from ragger.backend import BackendInterface
-
-from ragger.navigator import Navigator, NavInsID, NavIns
+from ragger.navigator import Navigator, NavIns, NavInsID
 
 from tests.application_client.command_sender import CommandSender
 from tests.application_client.status_words import StatusWord
@@ -89,16 +89,14 @@ def _get_backend_setting_values(
     return known_setting_values
 
 
-def get_settings_moves(
-    device: Device, to_toggle: list[SettingID]
-) -> list[Union[NavIns, NavInsID]]:
+def get_settings_moves(device: Device, to_toggle: list[SettingID]) -> list[NavIns | NavInsID]:
     """Get the navigation instructions to toggle the given settings.
 
     Assumes the app is on the home page.
     For touch devices: opens settings, clicks the appropriate switches, exits.
     For Nano devices: navigates through settings menu items.
     """
-    moves: list[Union[NavIns, NavInsID]] = []
+    moves: list[NavIns | NavInsID] = []
 
     if device.is_nano:
         # Nano: right-click to Settings, both-click to enter
@@ -148,29 +146,20 @@ def settings_set(
     Fall back to UI toggles for production builds where only menu navigation exists.
     """
     if backend is None:
-        raise AssertionError(
-            "settings_set requires backend to probe debug APDU support"
-        )
+        raise AssertionError("settings_set requires backend to probe debug APDU support")
 
     known_setting_values = _get_backend_setting_values(backend)
 
     effective_target_setting_values = known_setting_values.copy()
     effective_target_setting_values.update(target_setting_values)
 
-    debug_settings_apdu_supported = _debug_settings_apdu_supported_by_backend.get(
-        backend
-    )
+    debug_settings_apdu_supported = _debug_settings_apdu_supported_by_backend.get(backend)
     if debug_settings_apdu_supported is not False:
         client = CommandSender(backend)
         response = client.try_set_debug_settings(
-            expert_mode=effective_target_setting_values[SettingID.EXPERT_MODE]
-            == SettingValue.ENABLED,
-            silent_export=effective_target_setting_values[
-                SettingID.SILENT_PUBKEY_EXPORT
-            ]
-            == SettingValue.ENABLED,
-            blind_signing=effective_target_setting_values[SettingID.BLIND_SIGNING]
-            == SettingValue.ENABLED,
+            expert_mode=effective_target_setting_values[SettingID.EXPERT_MODE] == SettingValue.ENABLED,
+            silent_export=effective_target_setting_values[SettingID.SILENT_PUBKEY_EXPORT] == SettingValue.ENABLED,
+            blind_signing=effective_target_setting_values[SettingID.BLIND_SIGNING] == SettingValue.ENABLED,
         )
         if response.status == StatusWord.SWO_SUCCESS:
             _debug_settings_apdu_supported_by_backend[backend] = True

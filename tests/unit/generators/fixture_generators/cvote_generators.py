@@ -2,21 +2,21 @@
 # SPDX-License-Identifier: Apache-2.0
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any
 
 from tests.unit.generators.common import (
     extract_apdu_payload,
-    write_generated_c_file,
-    sanitize_c_identifier,
     format_bytes_as_c_array,
+    sanitize_c_identifier,
     warning_expr_from_test_case,
+    write_generated_c_file,
 )
 from tests.unit.generators.paths import GENERATED_CVOTE_DIR
 
 FIXTURES_FILE = GENERATED_CVOTE_DIR / "test_cvote_fixtures.h"
 
 
-def _load_cvote_test_cases() -> List[Any]:
+def _load_cvote_test_cases() -> list[Any]:
     from tests.standalone.input_files.cvote import cvoteTestCases  # type: ignore
 
     return cvoteTestCases
@@ -57,15 +57,11 @@ def generate_cvote_fixtures() -> int:
         init_apdu = builder.sign_cvote_init(test_case)
         init_payload = extract_apdu_payload(init_apdu)
         init_array_name = f"{base_name}_INIT_APDU"
-        header_lines.extend(
-            format_bytes_as_c_array(
-                init_payload, init_array_name, bytes_per_line=8, return_as_list=True
-            )
-        )
+        header_lines.extend(format_bytes_as_c_array(init_payload, init_array_name, bytes_per_line=8, return_as_list=True))
         header_lines.append("")
 
         # CHUNK APDUs
-        chunk_apdus: List[bytes] = builder.sign_cvote_chunk(test_case)
+        chunk_apdus: list[bytes] = builder.sign_cvote_chunk(test_case)
         chunk_array_names: list[str] = []
         for chunk_idx, chunk_apdu in enumerate(chunk_apdus):
             chunk_payload = extract_apdu_payload(chunk_apdu)
@@ -83,9 +79,7 @@ def generate_cvote_fixtures() -> int:
 
         if chunk_array_names:
             chunks_struct_name = f"{base_name}_CHUNKS"
-            header_lines.append(
-                f"static const cvote_chunk_t {chunks_struct_name}[] = {{"
-            )
+            header_lines.append(f"static const cvote_chunk_t {chunks_struct_name}[] = {{")
             for chunk_array_name in chunk_array_names:
                 header_lines.extend(
                     [
@@ -117,9 +111,7 @@ def generate_cvote_fixtures() -> int:
         expected_witness_signature_array_name = "NULL"
         expected_witness_signature_len = "0"
         if getattr(test_case, "unit_test_expect", None) is not None:
-            expected_votecast_hash_bytes = bytes.fromhex(
-                test_case.unit_test_expect.votecastHashHex
-            )
+            expected_votecast_hash_bytes = bytes.fromhex(test_case.unit_test_expect.votecastHashHex)
             expected_votecast_hash_array_name = f"{base_name}_EXPECTED_VOTECAST_HASH"
             header_lines.extend(
                 format_bytes_as_c_array(
@@ -132,12 +124,8 @@ def generate_cvote_fixtures() -> int:
             header_lines.append("")
             expected_votecast_hash_len = f"sizeof({expected_votecast_hash_array_name})"
 
-            expected_witness_signature_bytes = bytes.fromhex(
-                test_case.unit_test_expect.witnessSignatureHex
-            )
-            expected_witness_signature_array_name = (
-                f"{base_name}_EXPECTED_WITNESS_SIGNATURE"
-            )
+            expected_witness_signature_bytes = bytes.fromhex(test_case.unit_test_expect.witnessSignatureHex)
+            expected_witness_signature_array_name = f"{base_name}_EXPECTED_WITNESS_SIGNATURE"
             header_lines.extend(
                 format_bytes_as_c_array(
                     expected_witness_signature_bytes,
@@ -147,17 +135,11 @@ def generate_cvote_fixtures() -> int:
                 )
             )
             header_lines.append("")
-            expected_witness_signature_len = (
-                f"sizeof({expected_witness_signature_array_name})"
-            )
+            expected_witness_signature_len = f"sizeof({expected_witness_signature_array_name})"
 
         # Fixture entry
         chunks_struct = f"{base_name}_CHUNKS" if chunk_array_names else "NULL"
-        chunk_count = (
-            f"sizeof({base_name}_CHUNKS) / sizeof(cvote_chunk_t)"
-            if chunk_array_names
-            else "0"
-        )
+        chunk_count = f"sizeof({base_name}_CHUNKS) / sizeof(cvote_chunk_t)" if chunk_array_names else "0"
         entry_lines = [
             "{",
             f'    .name = "{test_case.name}",',

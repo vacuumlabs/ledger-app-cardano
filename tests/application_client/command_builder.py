@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # SPDX-FileCopyrightText: 2024 Ledger SAS
 # SPDX-FileCopyrightText: 2025-2026 Vacuumlabs
 # SPDX-License-Identifier: Apache-2.0
@@ -14,13 +13,11 @@ module.
 from __future__ import annotations
 
 import ipaddress
-
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import IntEnum
-from typing import List, Optional, Sequence, Union
 
 from ragger.bip import pack_derivation_path
-
 
 # ---------------------------------------------------------------------------
 # Network / address protocol types (formerly app_def.py)
@@ -66,8 +63,8 @@ class StakingDataSourceType(IntEnum):
 
 @dataclass
 class NetworkDesc:
-    networkId: Union[NetworkIds, int]
-    protocol: Union[ProtocolMagics, int]
+    networkId: NetworkIds | int
+    protocol: ProtocolMagics | int
 
 
 class P1Type:
@@ -224,7 +221,7 @@ class RelayType(IntEnum):
 @dataclass
 class TxInput:
     txHashHex: str
-    path: Optional[str] = None
+    path: str | None = None
     outputIndex: int = 0
 
 
@@ -237,7 +234,7 @@ class Token:
 @dataclass
 class AssetGroup:
     policyIdHex: str
-    tokens: List[Token]
+    tokens: list[Token]
 
 
 @dataclass
@@ -248,7 +245,7 @@ class ThirdPartyAddressParams:
 @dataclass
 class TxOutputDestination:
     type: TxOutputDestinationType
-    params: Union[ThirdPartyAddressParams, AddressParams]
+    params: ThirdPartyAddressParams | AddressParams
 
 
 @dataclass
@@ -262,8 +259,8 @@ class TxOutputAlonzo:
     destination: TxOutputDestination
     amount: int
     format: TxOutputFormat = TxOutputFormat.ARRAY_LEGACY
-    tokenBundle: List[AssetGroup] = field(default_factory=list)
-    datum: Optional[Datum] = None
+    tokenBundle: list[AssetGroup] = field(default_factory=list)
+    datum: Datum | None = None
 
 
 @dataclass
@@ -271,12 +268,12 @@ class TxOutputBabbage:
     destination: TxOutputDestination
     amount: int
     format: TxOutputFormat = TxOutputFormat.MAP_BABBAGE
-    tokenBundle: List[AssetGroup] = field(default_factory=list)
-    datum: Optional[Datum] = None
-    referenceScriptHex: Optional[str] = None
+    tokenBundle: list[AssetGroup] = field(default_factory=list)
+    datum: Datum | None = None
+    referenceScriptHex: str | None = None
 
 
-TxOutput = Union[TxOutputAlonzo, TxOutputBabbage]
+TxOutput = TxOutputAlonzo | TxOutputBabbage
 
 
 @dataclass
@@ -297,29 +294,27 @@ class TxAuxiliaryDataCIP36:
     stakingPath: str
     paymentDestination: TxOutputDestination
     nonce: int
-    voteKey: Optional[str] = None
-    votingPurpose: Optional[int] = None
-    delegations: List[CIP36VoteDelegation] = field(default_factory=list)
+    voteKey: str | None = None
+    votingPurpose: int | None = None
+    delegations: list[CIP36VoteDelegation] = field(default_factory=list)
 
 
 @dataclass
 class TxAuxiliaryData:
     type: TxAuxiliaryDataType
-    params: Union[TxAuxiliaryDataHash, TxAuxiliaryDataCIP36]
+    params: TxAuxiliaryDataHash | TxAuxiliaryDataCIP36
 
 
 @dataclass
 class RequiredSigner:
     type: TxRequiredSignerType
-    pathOrHashHex: (
-        str  # BIP44 path (for PATH type) or 28-byte key hash hex (for HASH type)
-    )
+    pathOrHashHex: str  # BIP44 path (for PATH type) or 28-byte key hash hex (for HASH type)
 
 
 @dataclass
 class CredentialParams:
     type: CredentialParamsType
-    keyValue: Optional[str] = None  # keyPath, keyHash or scriptHash
+    keyValue: str | None = None  # keyPath, keyHash or scriptHash
 
 
 @dataclass
@@ -331,7 +326,7 @@ class Withdrawal:
 @dataclass
 class DRepParams:
     type: DRepParamsType
-    keyValue: Optional[str] = None  # keyPath, keyHash or scriptHash
+    keyValue: str | None = None  # keyPath, keyHash or scriptHash
 
 
 @dataclass
@@ -349,7 +344,7 @@ class AnchorParams:
 @dataclass
 class VotingProcedure:
     vote: VoteOption
-    anchor: Optional[AnchorParams] = None
+    anchor: AnchorParams | None = None
 
 
 @dataclass
@@ -367,7 +362,7 @@ class Vote:
 @dataclass
 class VoterVotes:
     voter: Voter
-    votes: List[Vote]
+    votes: list[Vote]
 
 
 @dataclass
@@ -431,20 +426,20 @@ class AuthorizeCommitteeParams:
 @dataclass
 class ResignCommitteeParams:
     coldCredential: CredentialParams
-    anchor: Optional[AnchorParams] = None
+    anchor: AnchorParams | None = None
 
 
 @dataclass
 class DRepRegistrationParams:
     dRepCredential: CredentialParams
     deposit: int
-    anchor: Optional[AnchorParams] = None
+    anchor: AnchorParams | None = None
 
 
 @dataclass
 class DRepUpdateParams:
     dRepCredential: CredentialParams
-    anchor: Optional[AnchorParams] = None
+    anchor: AnchorParams | None = None
 
 
 @dataclass
@@ -473,28 +468,26 @@ class PoolKey:  # same for PoolRewardAccount and PoolOwner
 
 @dataclass
 class SingleHostIpAddrRelayParams:
-    portNumber: Optional[int] = None
-    ipv4: Optional[str] = None
-    ipv6: Optional[str] = None
+    portNumber: int | None = None
+    ipv4: str | None = None
+    ipv6: str | None = None
 
 
 @dataclass
 class SingleHostHostnameRelayParams:
     portNumber: int
-    dnsName: Optional[str]
+    dnsName: str | None
 
 
 @dataclass
 class MultiHostRelayParams:
-    dnsName: Optional[str]
+    dnsName: str | None
 
 
 @dataclass
 class Relay:
     type: RelayType
-    params: Union[
-        SingleHostIpAddrRelayParams, SingleHostHostnameRelayParams, MultiHostRelayParams
-    ]
+    params: SingleHostIpAddrRelayParams | SingleHostHostnameRelayParams | MultiHostRelayParams
 
 
 @dataclass
@@ -505,54 +498,54 @@ class PoolRegistrationParams:
     cost: int
     margin: Margin
     rewardAccount: PoolKey
-    poolOwners: List[PoolKey]
-    relays: List[Relay]
-    metadata: Optional[PoolMetadataParams] = None
+    poolOwners: list[PoolKey]
+    relays: list[Relay]
+    metadata: PoolMetadataParams | None = None
 
 
 @dataclass
 class Certificate:
     type: CertificateType
-    params: Union[
-        StakeRegistrationParams,
-        StakeRegistrationConwayParams,
-        StakeDelegationParams,
-        VoteDelegationParams,
-        StakePoolAndDRepDelegationParams,
-        AccountRegistrationDelegationToStakePoolParams,
-        AccountRegistrationDelegationToDRepParams,
-        AccountRegistrationDelegationToStakePoolAndDRepParams,
-        AuthorizeCommitteeParams,
-        ResignCommitteeParams,
-        DRepRegistrationParams,
-        DRepUpdateParams,
-        PoolRegistrationParams,
-        PoolRetirementParams,
-    ]
+    params: (
+        StakeRegistrationParams
+        | StakeRegistrationConwayParams
+        | StakeDelegationParams
+        | VoteDelegationParams
+        | StakePoolAndDRepDelegationParams
+        | AccountRegistrationDelegationToStakePoolParams
+        | AccountRegistrationDelegationToDRepParams
+        | AccountRegistrationDelegationToStakePoolAndDRepParams
+        | AuthorizeCommitteeParams
+        | ResignCommitteeParams
+        | DRepRegistrationParams
+        | DRepUpdateParams
+        | PoolRegistrationParams
+        | PoolRetirementParams
+    )
 
 
 @dataclass(kw_only=True)
 class Transaction:
     network: NetworkDesc
-    inputs: List[TxInput]
-    outputs: List[TxOutput]
+    inputs: list[TxInput]
+    outputs: list[TxOutput]
     fee: int = 42
-    ttl: Optional[int] = 10
-    certificates: List[Certificate] = field(default_factory=list)
-    withdrawals: List[Withdrawal] = field(default_factory=list)
-    mint: List[AssetGroup] = field(default_factory=list)
-    collateralInputs: List[TxInput] = field(default_factory=list)
-    requiredSigners: List[RequiredSigner] = field(default_factory=list)
-    referenceInputs: List[TxInput] = field(default_factory=list)
-    votingProcedures: List[VoterVotes] = field(default_factory=list)
-    auxiliaryData: Optional[TxAuxiliaryData] = None
-    validityIntervalStart: Optional[int] = None
-    scriptDataHash: Optional[str] = None
-    includeNetworkId: Optional[bool] = None
-    collateralOutput: Optional[TxOutput] = None
-    totalCollateral: Optional[int] = None
-    treasury: Optional[int] = None
-    donation: Optional[int] = None
+    ttl: int | None = 10
+    certificates: list[Certificate] = field(default_factory=list)
+    withdrawals: list[Withdrawal] = field(default_factory=list)
+    mint: list[AssetGroup] = field(default_factory=list)
+    collateralInputs: list[TxInput] = field(default_factory=list)
+    requiredSigners: list[RequiredSigner] = field(default_factory=list)
+    referenceInputs: list[TxInput] = field(default_factory=list)
+    votingProcedures: list[VoterVotes] = field(default_factory=list)
+    auxiliaryData: TxAuxiliaryData | None = None
+    validityIntervalStart: int | None = None
+    scriptDataHash: str | None = None
+    includeNetworkId: bool | None = None
+    collateralOutput: TxOutput | None = None
+    totalCollateral: int | None = None
+    treasury: int | None = None
+    donation: int | None = None
 
 
 CLA: int = 0xD7
@@ -589,9 +582,9 @@ class OpCertExpectedResult:
 class OpCertTestCase:
     name: str
     opCert: OperationalCertificate
-    expected_warnings: List = field(default_factory=list)
-    unit_test_expect: Optional[OpCertExpectedResult] = None
-    ragger_expect: Optional[OpCertExpectedResult] = None
+    expected_warnings: list = field(default_factory=list)
+    unit_test_expect: OpCertExpectedResult | None = None
+    ragger_expect: OpCertExpectedResult | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -615,9 +608,9 @@ class CVoteExpectedResult:
 class CVoteTestCase:
     name: str
     cVote: CIP36Vote
-    expected_warnings: List
-    unit_test_expect: Optional[CVoteExpectedResult] = None
-    ragger_expect: Optional[CVoteExpectedResult] = None
+    expected_warnings: list
+    unit_test_expect: CVoteExpectedResult | None = None
+    ragger_expect: CVoteExpectedResult | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -647,13 +640,13 @@ class NativeScriptParamsPubkey:
 
 @dataclass
 class NativeScriptParamsScripts:
-    scripts: List[NativeScript] = field(default_factory=list)
+    scripts: list[NativeScript] = field(default_factory=list)
 
 
 @dataclass
 class NativeScriptParamsNofK:
     requiredCount: int
-    scripts: List[NativeScript] = field(default_factory=list)
+    scripts: list[NativeScript] = field(default_factory=list)
 
 
 @dataclass
@@ -661,12 +654,7 @@ class NativeScriptParamsInvalid:
     slot: int
 
 
-NativeScriptParams = Union[
-    NativeScriptParamsPubkey,
-    NativeScriptParamsScripts,
-    NativeScriptParamsNofK,
-    NativeScriptParamsInvalid,
-]
+NativeScriptParams = NativeScriptParamsPubkey | NativeScriptParamsScripts | NativeScriptParamsNofK | NativeScriptParamsInvalid
 
 
 @dataclass
@@ -694,7 +682,7 @@ class MessageData:
     hashPayload: bool
     isAscii: bool
     addressFieldType: MessageAddressFieldType
-    addressDesc: Optional[AddressParams] = None
+    addressDesc: AddressParams | None = None
 
 
 # Mirrors `src/apdu/dispatcher.h::command_e`.
@@ -730,21 +718,21 @@ class CVoteCredentialType(IntEnum):
     CVOTE_CREDENTIAL_KEY_PATH = 2
 
 
-def _credential_path_from_credential(credential: CredentialParams) -> Optional[str]:
+def _credential_path_from_credential(credential: CredentialParams) -> str | None:
     if credential.type.name == "KEY_PATH":
         return credential.keyValue
     return None
 
 
-def _pool_key_path(pool_key: PoolKey) -> Optional[str]:
+def _pool_key_path(pool_key: PoolKey) -> str | None:
     if pool_key.type == PoolKeyType.DEVICE_OWNED:
         return pool_key.key
     return None
 
 
-def _credential_paths_from_certificate(certificate: Certificate) -> List[str]:
+def _credential_paths_from_certificate(certificate: Certificate) -> list[str]:
     """Extract witness paths from a certificate (ledgerjs-compatible)."""
-    paths: List[str] = []
+    paths: list[str] = []
     params = certificate.params
 
     if certificate.type == CertificateType.STAKE_REGISTRATION:
@@ -821,12 +809,10 @@ def _credential_paths_from_certificate(certificate: Certificate) -> List[str]:
     return paths
 
 
-def gather_witness_paths(
-    tx: Transaction, signing_mode: int, additional_witness_paths: Sequence[str]
-) -> List[str]:
+def gather_witness_paths(tx: Transaction, signing_mode: int, additional_witness_paths: Sequence[str]) -> list[str]:
     """Return unique witness paths present in a transaction."""
 
-    witness_paths: List[str] = []
+    witness_paths: list[str] = []
 
     if signing_mode == TransactionSigningMode.MULTISIG:
         for additional_path in additional_witness_paths:
@@ -886,8 +872,8 @@ class TxInitParams:
     num_certificates: int
     num_withdrawals: int
     include_aux_data_hash: bool
-    aux_data_type: Optional[int]
-    aux_data_hash_hex: Optional[str]
+    aux_data_type: int | None
+    aux_data_hash_hex: str | None
     include_validity_interval_start: bool
     num_mint_asset_groups: int
     include_script_data_hash: bool
@@ -910,12 +896,10 @@ class CommandBuilder:
         ins: int,
         p1: int = P1Type.P1_UNUSED,
         p2: int = P2Type.P2_UNUSED,
-        cdata: bytes = bytes(),
+        cdata: bytes = b"",
     ) -> bytes:
         if len(cdata) > MAX_UINT8:
-            raise ValueError(
-                f"Extended-length APDUs are not supported: payload length {len(cdata)}"
-            )
+            raise ValueError(f"Extended-length APDUs are not supported: payload length {len(cdata)}")
 
         header = bytes(
             [
@@ -955,7 +939,7 @@ class CommandBuilder:
 
     def _serialize_address_params(self, params: AddressParams) -> bytes:
         """Serialize address parameters (shared by derive_address and sign_msg_init)"""
-        data = bytes()
+        data = b""
         data += params.addrType.to_bytes(1, "big")
         if params.addrType == AddressType.BYRON:
             data += params.netDesc.protocol.to_bytes(4, "big")
@@ -1008,9 +992,7 @@ class CommandBuilder:
 
     def get_pubkey_path(self, path: str) -> bytes:
         data = pack_derivation_path(path)
-        return self.serialize(
-            InsType.INS_GET_PUBLIC_KEY, P1Type.P1_UNUSED, P2Type.P2_UNUSED, data
-        )
+        return self.serialize(InsType.INS_GET_PUBLIC_KEY, P1Type.P1_UNUSED, P2Type.P2_UNUSED, data)
 
     def sign_opcert(self, test_case: OpCertTestCase) -> bytes:
         data = bytearray()
@@ -1018,9 +1000,7 @@ class CommandBuilder:
         data.extend(test_case.opCert.kesPeriod.to_bytes(8, "big"))
         data.extend(test_case.opCert.issueCounter.to_bytes(8, "big"))
         data.extend(pack_derivation_path(test_case.opCert.path))
-        return self.serialize(
-            InsType.INS_SIGN_OPCERT, P1Type.P1_UNUSED, P2Type.P2_UNUSED, bytes(data)
-        )
+        return self.serialize(InsType.INS_SIGN_OPCERT, P1Type.P1_UNUSED, P2Type.P2_UNUSED, bytes(data))
 
     def sign_cvote_init(self, testCase: CVoteTestCase) -> bytes:
         """APDU Builder for CIP36 Vote - INIT step
@@ -1035,18 +1015,16 @@ class CommandBuilder:
         # Serialization format:
         #    Full length of voteCastDataHex (4B)
         #    voteCastDataHex (first chunk, up to 250 B)
-        data = bytes()
+        data = b""
         payload_hex = testCase.cVote.voteCastDataHex
         # 2 hex chars per byte
         data_size = int(len(payload_hex) / 2)
         chunk_size = min(MAX_CIP36_PAYLOAD_SIZE * 2, len(payload_hex))
         data += data_size.to_bytes(4, "big")
         data += bytes.fromhex(payload_hex[:chunk_size])
-        return self.serialize(
-            InsType.INS_SIGN_CVOTE, P1Type.P1_CVOTE_INIT, P2Type.P2_UNUSED, data
-        )
+        return self.serialize(InsType.INS_SIGN_CVOTE, P1Type.P1_CVOTE_INIT, P2Type.P2_UNUSED, data)
 
-    def sign_cvote_chunk(self, testCase: CVoteTestCase) -> List[bytes]:
+    def sign_cvote_chunk(self, testCase: CVoteTestCase) -> list[bytes]:
         """APDU Builder for CIP36 Vote - CHUNK step
 
         Args:
@@ -1087,9 +1065,7 @@ class CommandBuilder:
         # Serialization format:
         #    Witness path (1B for length + [0-5] x 4B)
         data = pack_derivation_path(testCase.cVote.witnessPath)
-        return self.serialize(
-            InsType.INS_SIGN_CVOTE, P1Type.P1_CVOTE_CONFIRM, P2Type.P2_UNUSED, data
-        )
+        return self.serialize(InsType.INS_SIGN_CVOTE, P1Type.P1_CVOTE_CONFIRM, P2Type.P2_UNUSED, data)
 
     def sign_tx_init(self, params: TxInitParams) -> bytes:
         data = bytearray()
@@ -1102,57 +1078,35 @@ class CommandBuilder:
         data.append(FLAG_INCLUDED_YES if params.include_ttl else FLAG_INCLUDED_NO)
         data.extend(params.num_certificates.to_bytes(2, "big"))
         data.extend(params.num_withdrawals.to_bytes(2, "big"))
-        data.append(
-            FLAG_INCLUDED_YES if params.include_aux_data_hash else FLAG_INCLUDED_NO
-        )
+        data.append(FLAG_INCLUDED_YES if params.include_aux_data_hash else FLAG_INCLUDED_NO)
         if params.include_aux_data_hash:
             if params.aux_data_type is None:
-                raise ValueError(
-                    "Auxiliary data type is required when include_aux_data_hash is set"
-                )
+                raise ValueError("Auxiliary data type is required when include_aux_data_hash is set")
             data.append(params.aux_data_type)
             if params.aux_data_hash_hex is None:
                 if params.aux_data_type == TxAuxiliaryDataType.ARBITRARY_HASH:
-                    raise ValueError(
-                        "Auxiliary data hash is required for arbitrary-hash aux data"
-                    )
+                    raise ValueError("Auxiliary data hash is required for arbitrary-hash aux data")
             else:
                 data.extend(bytes.fromhex(params.aux_data_hash_hex))
-        data.append(
-            FLAG_INCLUDED_YES
-            if params.include_validity_interval_start
-            else FLAG_INCLUDED_NO
-        )
+        data.append(FLAG_INCLUDED_YES if params.include_validity_interval_start else FLAG_INCLUDED_NO)
         data.extend(params.num_mint_asset_groups.to_bytes(2, "big"))
-        data.append(
-            FLAG_INCLUDED_YES if params.include_script_data_hash else FLAG_INCLUDED_NO
-        )
+        data.append(FLAG_INCLUDED_YES if params.include_script_data_hash else FLAG_INCLUDED_NO)
         data.extend(params.num_collateral_inputs.to_bytes(2, "big"))
         data.extend(params.num_required_signers.to_bytes(2, "big"))
-        data.append(
-            FLAG_INCLUDED_YES if params.include_network_id else FLAG_INCLUDED_NO
-        )
-        data.append(
-            FLAG_INCLUDED_YES if params.include_collateral_output else FLAG_INCLUDED_NO
-        )
-        data.append(
-            FLAG_INCLUDED_YES if params.include_total_collateral else FLAG_INCLUDED_NO
-        )
+        data.append(FLAG_INCLUDED_YES if params.include_network_id else FLAG_INCLUDED_NO)
+        data.append(FLAG_INCLUDED_YES if params.include_collateral_output else FLAG_INCLUDED_NO)
+        data.append(FLAG_INCLUDED_YES if params.include_total_collateral else FLAG_INCLUDED_NO)
         data.extend(params.num_reference_inputs.to_bytes(2, "big"))
         data.extend(params.num_voters.to_bytes(2, "big"))
         data.append(FLAG_INCLUDED_YES if params.include_treasury else FLAG_INCLUDED_NO)
         data.append(FLAG_INCLUDED_YES if params.include_donation else FLAG_INCLUDED_NO)
         data.extend(params.num_witnesses.to_bytes(2, "big"))
         data.extend(params.raw_tx_total_length.to_bytes(2, "big"))
-        return self.serialize(
-            InsType.INS_SIGN_TX, P1Type.P1_TX_INIT, P2Type.P2_UNUSED, bytes(data)
-        )
+        return self.serialize(InsType.INS_SIGN_TX, P1Type.P1_TX_INIT, P2Type.P2_UNUSED, bytes(data))
 
     def derive_script_add_simple(self, script: NativeScript) -> bytes:
-        data = bytes()
-        script_type = (
-            0 if script.type == NativeScriptType.PUBKEY_THIRD_PARTY else script.type
-        )
+        data = b""
+        script_type = 0 if script.type == NativeScriptType.PUBKEY_THIRD_PARTY else script.type
         data += script_type.to_bytes(1, "big")
         if script.type in (
             NativeScriptType.PUBKEY_DEVICE_OWNED,
@@ -1186,11 +1140,11 @@ class CommandBuilder:
             InsType.INS_DERIVE_NATIVE_SCRIPT_HASH,
             P1Type.P1_NATIVE_SCRIPT_INIT,
             P2Type.P2_UNUSED,
-            bytes(),
+            b"",
         )
 
     def derive_script_add_complex(self, script: NativeScript) -> bytes:
-        data = bytes()
+        data = b""
         data += script.type.to_bytes(1, "big")
         if script.type in (NativeScriptType.ALL, NativeScriptType.ANY):
             assert isinstance(script.params, NativeScriptParamsScripts)
@@ -1219,7 +1173,7 @@ class CommandBuilder:
         self,
         tx: Transaction,
         signing_mode: int,
-        witness_paths: List[str],
+        witness_paths: list[str],
         options: int = 0,
     ) -> TxInitParams:
         include_aux_data_hash = tx.auxiliaryData is not None
@@ -1276,15 +1230,11 @@ class CommandBuilder:
         data.extend(aux_params.nonce.to_bytes(8, "big"))
 
         if aux_params.format == CIP36VoteRegistrationFormat.CIP_36:
-            voting_purpose = (
-                aux_params.votingPurpose if aux_params.votingPurpose is not None else 0
-            )
+            voting_purpose = aux_params.votingPurpose if aux_params.votingPurpose is not None else 0
             data.extend(voting_purpose.to_bytes(8, "big"))
             if len(aux_params.delegations) == 0:
                 if aux_params.voteKey is None:
-                    raise ValueError(
-                        "CIP-36 vote key is required when delegations are empty"
-                    )
+                    raise ValueError("CIP-36 vote key is required when delegations are empty")
                 data.extend(self._serialize_cvote_key_or_path(aux_params.voteKey))
         else:
             if aux_params.voteKey is None:
@@ -1311,13 +1261,9 @@ class CommandBuilder:
 
     def sign_tx_witness(self, path: str) -> bytes:
         data = pack_derivation_path(path)
-        return self.serialize(
-            InsType.INS_SIGN_TX, P1Type.P1_TX_SIGN_WITNESS, P2Type.P2_UNUSED, data
-        )
+        return self.serialize(InsType.INS_SIGN_TX, P1Type.P1_TX_SIGN_WITNESS, P2Type.P2_UNUSED, data)
 
-    def debug_set_settings(
-        self, expert_mode: bool, silent_export: bool, blind_signing: bool
-    ) -> bytes:
+    def debug_set_settings(self, expert_mode: bool, silent_export: bool, blind_signing: bool) -> bytes:
         """Build debug settings APDU (only works with DEBUG builds).
 
         Args:
@@ -1345,7 +1291,7 @@ class CommandBuilder:
         tx_data = self.serialize_transaction_unpacked_raw(tx)
         if not tx_data:
             raise ValueError("Serialized transaction must not be empty")
-        chunks: List[bytes] = []
+        chunks: list[bytes] = []
         offset = 0
         while offset < len(tx_data):
             chunk_size = min(MAX_SIGN_TX_CHUNK_SIZE, len(tx_data) - offset)
@@ -1353,9 +1299,7 @@ class CommandBuilder:
             offset += chunk_size
             more = offset < len(tx_data)
             p1 = P1Type.P1_TX_CHUNK if more else P1Type.P1_TX_CONFIRM
-            chunk_apdu = self.serialize(
-                InsType.INS_SIGN_TX, p1, P2Type.P2_UNUSED, chunk_data
-            )
+            chunk_apdu = self.serialize(InsType.INS_SIGN_TX, p1, P2Type.P2_UNUSED, chunk_data)
             chunks.append(chunk_apdu)
         return chunks
 
@@ -1455,10 +1399,7 @@ class CommandBuilder:
 
         has_datum = tx_output.datum is not None
         output_data.append(FLAG_INCLUDED_YES if has_datum else FLAG_INCLUDED_NO)
-        has_ref_script = (
-            isinstance(tx_output, TxOutputBabbage)
-            and tx_output.referenceScriptHex is not None
-        )
+        has_ref_script = isinstance(tx_output, TxOutputBabbage) and tx_output.referenceScriptHex is not None
         output_data.append(FLAG_INCLUDED_YES if has_ref_script else FLAG_INCLUDED_NO)
 
         num_asset_groups = len(tx_output.tokenBundle)
@@ -1484,20 +1425,14 @@ class CommandBuilder:
                 datum_bytes = bytes.fromhex(tx_output.datum.datumHex)
                 output_data.extend(len(datum_bytes).to_bytes(2, "big"))
                 output_data.extend(datum_bytes)
-        if (
-            has_ref_script
-            and isinstance(tx_output, TxOutputBabbage)
-            and tx_output.referenceScriptHex is not None
-        ):
+        if has_ref_script and isinstance(tx_output, TxOutputBabbage) and tx_output.referenceScriptHex is not None:
             script_bytes = bytes.fromhex(tx_output.referenceScriptHex)
             output_data.extend(len(script_bytes).to_bytes(2, "big"))
             output_data.extend(script_bytes)
 
         return output_data
 
-    def _serialize_output_destination(
-        self, tx_output_destination: TxOutputDestination
-    ) -> bytes:
+    def _serialize_output_destination(self, tx_output_destination: TxOutputDestination) -> bytes:
         destination_data = bytearray()
         destination_data.append(tx_output_destination.type)
 
@@ -1550,7 +1485,7 @@ class CommandBuilder:
                 result.extend(bytes.fromhex(drep.keyValue))
         return bytes(result)
 
-    def _serialize_anchor(self, anchor: Optional[AnchorParams]) -> bytes:
+    def _serialize_anchor(self, anchor: AnchorParams | None) -> bytes:
         result = bytearray()
         if anchor is None:
             result.append(FLAG_INCLUDED_NO)
@@ -1568,13 +1503,9 @@ class CommandBuilder:
 
     def _pool_key_to_credential(self, pool_key: PoolKey) -> CredentialParams:
         if pool_key.type == PoolKeyType.DEVICE_OWNED:
-            return CredentialParams(
-                type=CredentialParamsType.KEY_PATH, keyValue=pool_key.key
-            )
+            return CredentialParams(type=CredentialParamsType.KEY_PATH, keyValue=pool_key.key)
         if pool_key.type == PoolKeyType.THIRD_PARTY:
-            return CredentialParams(
-                type=CredentialParamsType.KEY_HASH, keyValue=pool_key.key.lower()
-            )
+            return CredentialParams(type=CredentialParamsType.KEY_HASH, keyValue=pool_key.key.lower())
         raise ValueError(f"Unsupported pool key type: {pool_key.type}")
 
     def _serialize_pool_key_reference(self, pool_key: PoolKey) -> bytes:
@@ -1660,9 +1591,7 @@ class CommandBuilder:
         data.extend(self._serialize_pool_key_reference(params.rewardAccount))
         data.extend(len(params.poolOwners).to_bytes(2, "big"))
         data.extend(len(params.relays).to_bytes(2, "big"))
-        data.append(
-            FLAG_INCLUDED_YES if params.metadata is not None else FLAG_INCLUDED_NO
-        )
+        data.append(FLAG_INCLUDED_YES if params.metadata is not None else FLAG_INCLUDED_NO)
         for owner in params.poolOwners:
             credential = self._pool_key_to_credential(owner)
             data.extend(self._serialize_credential_inline(credential))
@@ -1710,13 +1639,8 @@ class CommandBuilder:
             result.extend(self._serialize_credential_inline(params.stakeCredential))
             result.extend(self._serialize_drep(params.dRep))
             result.extend(params.coin.to_bytes(8, "big"))
-        elif (
-            cert_type
-            == CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP
-        ):
-            assert isinstance(
-                params, AccountRegistrationDelegationToStakePoolAndDRepParams
-            )
+        elif cert_type == CertificateType.ACCOUNT_REGISTRATION_DELEGATION_TO_STAKE_POOL_AND_DREP:
+            assert isinstance(params, AccountRegistrationDelegationToStakePoolAndDRepParams)
             result.extend(self._serialize_credential_inline(params.stakeCredential))
             result.extend(bytes.fromhex(params.poolKeyHash))
             result.extend(self._serialize_drep(params.dRep))
@@ -1751,9 +1675,7 @@ class CommandBuilder:
             assert isinstance(params, PoolRegistrationParams)
             pool_registration_payload = self._serialize_pool_registration(params)
             if len(pool_registration_payload) > MAX_UINT16:
-                raise ValueError(
-                    "Pool registration payload exceeds maximum encodable length"
-                )
+                raise ValueError("Pool registration payload exceeds maximum encodable length")
             result.extend(len(pool_registration_payload).to_bytes(2, "big"))
             result.extend(pool_registration_payload)
         elif cert_type == CertificateType.STAKE_POOL_RETIREMENT:
@@ -1784,9 +1706,7 @@ class CommandBuilder:
         data.extend(pack_derivation_path(testCase.msgData.signingPath))
 
         # Hash payload flag (1 byte)
-        data.append(
-            FLAG_INCLUDED_YES if testCase.msgData.hashPayload else FLAG_INCLUDED_NO
-        )
+        data.append(FLAG_INCLUDED_YES if testCase.msgData.hashPayload else FLAG_INCLUDED_NO)
 
         # Is ASCII flag (1 byte)
         data.append(FLAG_INCLUDED_YES if testCase.msgData.isAscii else FLAG_INCLUDED_NO)
@@ -1798,9 +1718,7 @@ class CommandBuilder:
         if testCase.msgData.addressFieldType == MessageAddressFieldType.ADDRESS:
             data.extend(self._serialize_address_params(testCase.msgData.addressDesc))
 
-        return self.serialize(
-            InsType.INS_SIGN_MSG, P1Type.P1_SIGN_MSG_INIT, P2Type.P2_UNUSED, bytes(data)
-        )
+        return self.serialize(InsType.INS_SIGN_MSG, P1Type.P1_SIGN_MSG_INIT, P2Type.P2_UNUSED, bytes(data))
 
     def build_sign_msg_chunk_payloads(self, testCase) -> list[bytes]:
         messageBytes = bytes.fromhex(testCase.msgData.messageHex)
@@ -1844,6 +1762,4 @@ class CommandBuilder:
         Returns:
             Serial data APDU (empty payload)
         """
-        return self.serialize(
-            InsType.INS_SIGN_MSG, P1Type.P1_SIGN_MSG_CONFIRM, P2Type.P2_UNUSED, bytes()
-        )
+        return self.serialize(InsType.INS_SIGN_MSG, P1Type.P1_SIGN_MSG_CONFIRM, P2Type.P2_UNUSED, b"")
