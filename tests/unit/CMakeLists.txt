@@ -378,6 +378,35 @@ cardano_unit_test(test_address_utils_shelley
         cx_crc_support
         mock_printf)
 
+cardano_unit_test(test_swap_check_address
+    SOURCES
+        test_swap_check_address.c
+        ../../src/swap/swap_check_address.c
+        ../../src/addressUtils/addressUtilsShelley.c
+        ../../src/addressUtils/addressUtilsByron.c
+        ../../src/keyDerivation/keyDerivation.c
+        ../../src/securityPolicy/securityPolicy_privkey.c
+    LIBS
+        crypto_mocks_lib
+        base58
+        bech32_lib
+        bip44_real
+        hex_utils
+        hash_mocks_lib
+        blake2b_lib
+        sha3_lib
+        cardano_buffer_lib
+        parsers_lib
+        cbor_lib
+        buffer
+        write
+        read
+        varint
+        bip32
+        cx_crc_support
+        mock_printf)
+target_compile_definitions(test_swap_check_address PRIVATE HAVE_SWAP)
+
 cardano_unit_test(test_key_derivation
     SOURCES
         test_key_derivation.c

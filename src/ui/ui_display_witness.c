@@ -81,12 +81,14 @@ void ui_display_witness(const bip44_path_t *witnessPath,
 
     TRACE_MODULE("isUnusual: %d", isUnusual);
 
-    // Format the witness path into static buffer
+    // Format the witness path into static buffer. Capture the context pointer once so the
+    // sizeof() operand below contains no function call (cpp/sizeof-side-effect false positive).
+    typeof(tx_witness_ctx()) witness_ctx = tx_witness_ctx();
     bool formatted = format_bip44_path(witnessPath,
-                                       tx_witness_ctx()->witness_path_str,
-                                       sizeof(tx_witness_ctx()->witness_path_str));
+                                       witness_ctx->witness_path_str,
+                                       sizeof(witness_ctx->witness_path_str));
     LEDGER_ASSERT(formatted, "Unable to format witness path");
-    LEDGER_ASSERT(strlen(tx_witness_ctx()->witness_path_str) <= MAX_BIP44_PATH_STRING_LENGTH,
+    LEDGER_ASSERT(strlen(witness_ctx->witness_path_str) <= MAX_BIP44_PATH_STRING_LENGTH,
                   "Witness path ui string buffer too short");
 
     if (isUnusual) {
@@ -94,7 +96,7 @@ void ui_display_witness(const bip44_path_t *witnessPath,
         // No immediate threat, just to be aware that the witness key is unusual
         nbgl_useCaseChoice(&WARNING_ICON,
                            "Sign with UNUSUAL key",
-                           tx_witness_ctx()->witness_path_str,
+                           witness_ctx->witness_path_str,
                            "Confirm",
                            "Reject",
                            witness_review_choice);
@@ -102,7 +104,7 @@ void ui_display_witness(const bip44_path_t *witnessPath,
         // Normal path display
         nbgl_useCaseChoice(&ICON_APP_CARDANO,
                            "Witness",
-                           tx_witness_ctx()->witness_path_str,
+                           witness_ctx->witness_path_str,
                            "Confirm",
                            "Reject",
                            witness_review_choice);

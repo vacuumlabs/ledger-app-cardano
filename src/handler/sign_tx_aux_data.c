@@ -136,8 +136,8 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
             break;
         // LCOV_EXCL_START
         case POLICY_HIDE:
-            // policyForCVoteRegistrationStakingKey currently never returns POLICY_HIDE;
-            // if it ever does, replace the assert with: aux_data->ui_show.staking_key = false;
+            // policyForCVoteRegistrationStakingKey currently never returns POLICY_HIDE; if it
+            // ever does, set ui_show.staking_key to false here instead of asserting.
             ASSERT(false);
             return false;
         default:
@@ -162,8 +162,8 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
         // LCOV_EXCL_START
         case POLICY_HIDE:
             // policyForCVoteRegistrationPaymentDestination currently never returns POLICY_HIDE;
-            // if it ever does, replace the assert with: aux_data->ui_show.payment_destination =
-            // false;
+            // if it ever does, set ui_show.payment_destination to false here instead of
+            // asserting.
             ASSERT(false);
             return false;
         default:
@@ -182,13 +182,13 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
             break;
         // LCOV_EXCL_START
         case POLICY_DENY:
-            // policyForCVoteRegistrationNonce currently never returns POLICY_DENY;
-            // if it ever does, replace the assert with: return false;
+            // policyForCVoteRegistrationNonce currently never returns POLICY_DENY; if it ever
+            // does, return false here instead of asserting.
             ASSERT(false);
             return false;
         case POLICY_HIDE:
-            // policyForCVoteRegistrationNonce currently never returns POLICY_HIDE;
-            // if it ever does, replace the assert with: aux_data->ui_show.nonce = false;
+            // policyForCVoteRegistrationNonce currently never returns POLICY_HIDE; if it ever
+            // does, set ui_show.nonce to false here instead of asserting.
             ASSERT(false);
             return false;
         default:
@@ -211,8 +211,8 @@ static bool cvote_aux_data_validate(cvote_aux_data_t *aux_data) {
             break;
         // LCOV_EXCL_START
         case POLICY_DENY:
-            // policyForCVoteRegistrationVotingPurpose currently never returns POLICY_DENY;
-            // if it ever does, replace the assert with: return false;
+            // policyForCVoteRegistrationVotingPurpose currently never returns POLICY_DENY; if it
+            // ever does, return false here instead of asserting.
             ASSERT(false);
             return false;
         default:

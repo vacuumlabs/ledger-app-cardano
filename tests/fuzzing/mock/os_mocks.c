@@ -63,6 +63,14 @@ void __attribute__((noreturn)) os_sched_exit(bolos_task_status_t exit_code) {
     siglongjmp(fuzz_exit_jump_ctx.jmp_buf, 1);
 }
 
+
+void __wrap_os_explicit_zero_BSS_segment(void) {
+}
+
+void __attribute__((noreturn)) os_lib_end(void) {
+    siglongjmp(fuzz_exit_jump_ctx.jmp_buf, 1);
+}
+
 try_context_t *current_context = NULL;
 try_context_t *try_context_get(void) {
     return current_context;

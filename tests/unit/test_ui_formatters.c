@@ -14,6 +14,7 @@
 #include "ui_formatters.h"
 #include "hexUtils.h"
 #include "cardano_constants.h"
+#include "bech32_cardano.h"
 static void test_format_hex_bytes(void **state) {
     (void) state;
 
@@ -388,6 +389,94 @@ static void test_format_asset_fingerprint_bech32(void **state) {
     }
 }
 
+static void test_format_governance_identifier(void **state) {
+    (void) state;
+
+    struct {
+        uint8_t headerByte;
+        const char *bech32Prefix;
+        size_t expectedHashLength;
+        const char *credentialHashHex;
+        const char *expectedBech32;
+    } testVectors[] = {
+        // Test vectors from CIP-0129
+        {0x02,
+         BECH32_PREFIX_COMMITTEE_HOT,
+         ADDRESS_KEY_HASH_LENGTH,
+         "00000000000000000000000000000000000000000000000000000000",
+         "cc_hot1qgqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqvcdjk7"},
+
+        {0x13,
+         BECH32_PREFIX_COMMITTEE_COLD,
+         SCRIPT_HASH_LENGTH,
+         "00000000000000000000000000000000000000000000000000000000",
+         "cc_cold1zvqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq6kflvs"},
+
+        {0x22,
+         BECH32_PREFIX_DREP,
+         ADDRESS_KEY_HASH_LENGTH,
+         "00000000000000000000000000000000000000000000000000000000",
+         "drep1ygqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq7vlc9n"},
+    };
+
+    for (size_t i = 0; i < sizeof(testVectors) / sizeof(testVectors[0]); i++) {
+        uint8_t credentialHash[SCRIPT_HASH_LENGTH] = {0};
+        size_t credentialHashSize = 0;
+        bool success_hash = decode_hex(testVectors[i].credentialHashHex,
+                                       credentialHash,
+                                       sizeof(credentialHash),
+                                       &credentialHashSize);
+        assert_true(success_hash);
+        assert_int_equal(credentialHashSize, testVectors[i].expectedHashLength);
+
+        char identifier[200] = {0};
+        bool success = format_governance_identifier(testVectors[i].bech32Prefix,
+                                                    testVectors[i].headerByte,
+                                                    credentialHash,
+                                                    credentialHashSize,
+                                                    identifier,
+                                                    sizeof(identifier));
+        assert_true(success);
+        assert_string_equal(identifier, testVectors[i].expectedBech32);
+    }
+}
+
+static void test_format_governance_action_id(void **state) {
+    (void) state;
+
+    struct {
+        const char *txHashHex;
+        uint32_t govActionIndex;
+        const char *expectedBech32;
+    } testVectors[] = {
+        // Test vectors from CIP-0129
+        {"0000000000000000000000000000000000000000000000000000000000000000",
+         17,
+         "gov_action1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqpzklpgpf"},
+
+        {"1111111111111111111111111111111111111111111111111111111111111111",
+         0,
+         "gov_action1zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zyg3zygsq6dmejn"},
+    };
+
+    for (size_t i = 0; i < sizeof(testVectors) / sizeof(testVectors[0]); i++) {
+        uint8_t txHash[TX_HASH_LENGTH] = {0};
+        size_t txHashSize = 0;
+        bool success_hash =
+            decode_hex(testVectors[i].txHashHex, txHash, sizeof(txHash), &txHashSize);
+        assert_true(success_hash);
+        assert_int_equal(txHashSize, TX_HASH_LENGTH);
+
+        char identifier[200] = {0};
+        bool success = format_governance_action_id(txHash,
+                                                   testVectors[i].govActionIndex,
+                                                   identifier,
+                                                   sizeof(identifier));
+        assert_true(success);
+        assert_string_equal(identifier, testVectors[i].expectedBech32);
+    }
+}
+
 int main(void) {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_format_hex_bytes),
@@ -406,6 +495,8 @@ int main(void) {
         cmocka_unit_test(test_format_decimal_amount_buffer_too_small),
         cmocka_unit_test(test_format_input_with_index_buffer_too_small),
         cmocka_unit_test(test_format_asset_fingerprint_bech32),
+        cmocka_unit_test(test_format_governance_identifier),
+        cmocka_unit_test(test_format_governance_action_id),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

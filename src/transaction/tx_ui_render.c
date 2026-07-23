@@ -22,11 +22,13 @@
 #include "securityPolicy.h"
 #include "tx_certificate_types.h"
 #include "tx_credential_types.h"
+#include "tx_ui_governance_id.h"
 #include "tx_ui_pair_counts.h"
 #include "tx_ui_render.h"
 #include "ui_constants.h"
 #include "ui_formatters.h"
 #include "ui_utils.h"
+#include "cardano_constants.h"
 #include "cardano_tokens.h"
 
 void tx_ui_plan_or_render_network_details(const tx_processing_mode_t *mode,
@@ -372,19 +374,23 @@ void tx_ui_plan_or_render_voter(const tx_processing_mode_t *mode,
                 break;
             case EXT_VOTER_COMMITTEE_HOT_KEY_HASH:
                 ASSERT(parsed_voter->keyHash != NULL);
-                UI_ADD_FORMAT3(UI_LABEL_BY_SCREEN("Committee hot key hash", "Cmte hot key"),
+                UI_ADD_FORMAT4(UI_LABEL_BY_SCREEN("Committee hot key hash", "Cmte hot key"),
                                MAX_BECH32_STRING_LENGTH,
-                               format_bech32,
-                               BECH32_PREFIX_COMMITTEE_HOT_KEY_HASH,
+                               format_governance_identifier,
+                               BECH32_PREFIX_COMMITTEE_HOT,
+                               governance_id_header(GOVERNANCE_ID_KEY_TYPE_COMMITTEE_HOT,
+                                                    GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
                                parsed_voter->keyHash,
                                ADDRESS_KEY_HASH_LENGTH);
                 break;
             case EXT_VOTER_COMMITTEE_HOT_SCRIPT_HASH:
                 ASSERT(parsed_voter->scriptHash != NULL);
-                UI_ADD_FORMAT3(UI_LABEL_BY_SCREEN("Committee hot script hash", "Cmte hot script"),
+                UI_ADD_FORMAT4(UI_LABEL_BY_SCREEN("Committee hot script hash", "Cmte hot script"),
                                MAX_BECH32_STRING_LENGTH,
-                               format_bech32,
-                               BECH32_PREFIX_COMMITTEE_HOT_SCRIPT_HASH,
+                               format_governance_identifier,
+                               BECH32_PREFIX_COMMITTEE_HOT,
+                               governance_id_header(GOVERNANCE_ID_KEY_TYPE_COMMITTEE_HOT,
+                                                    GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
                                parsed_voter->scriptHash,
                                SCRIPT_HASH_LENGTH);
                 break;
@@ -396,19 +402,23 @@ void tx_ui_plan_or_render_voter(const tx_processing_mode_t *mode,
                 break;
             case EXT_VOTER_DREP_KEY_HASH:
                 ASSERT(parsed_voter->keyHash != NULL);
-                UI_ADD_FORMAT3(UI_LABEL_BY_SCREEN("DRep key hash", "DRep key hash"),
+                UI_ADD_FORMAT4(UI_LABEL_BY_SCREEN("DRep key hash", "DRep key hash"),
                                MAX_BECH32_STRING_LENGTH,
-                               format_bech32,
-                               BECH32_PREFIX_DREP_KEY_HASH,
+                               format_governance_identifier,
+                               BECH32_PREFIX_DREP,
+                               governance_id_header(GOVERNANCE_ID_KEY_TYPE_DREP,
+                                                    GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
                                parsed_voter->keyHash,
                                ADDRESS_KEY_HASH_LENGTH);
                 break;
             case EXT_VOTER_DREP_SCRIPT_HASH:
                 ASSERT(parsed_voter->scriptHash != NULL);
-                UI_ADD_FORMAT3(UI_LABEL_BY_SCREEN("DRep script hash", "DRep script"),
+                UI_ADD_FORMAT4(UI_LABEL_BY_SCREEN("DRep script hash", "DRep script"),
                                MAX_BECH32_STRING_LENGTH,
-                               format_bech32,
-                               BECH32_PREFIX_DREP_SCRIPT_HASH,
+                               format_governance_identifier,
+                               BECH32_PREFIX_DREP,
+                               governance_id_header(GOVERNANCE_ID_KEY_TYPE_DREP,
+                                                    GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
                                parsed_voter->scriptHash,
                                SCRIPT_HASH_LENGTH);
                 break;
@@ -441,11 +451,25 @@ void tx_ui_plan_or_render_vote(const tx_processing_mode_t *mode, const vote_item
     ASSERT(mode != NULL);
     ASSERT(parsed_vote != NULL);
 
+    // The CIP-0129 gov action ID is shown in addition to the raw tx hash and index;
+    // it encodes the index in a single byte, so it is omitted for larger indexes
+    const bool fits_governance_action_id =
+        parsed_vote->govActionId.govActionIndex <= GOVERNANCE_ACTION_ID_MAX_INDEX;
+    const uint16_t expected_ui_pairs =
+        fits_governance_action_id ? UI_PAIRS_VOTE_WITH_ID : UI_PAIRS_VOTE_WITHOUT_ID;
+
     if (mode->ui_count_pairs) {
-        tx_body_ctx()->total_ui_pairs += UI_PAIRS_VOTE;
+        tx_body_ctx()->total_ui_pairs += expected_ui_pairs;
     } else if (mode->ui_render) {
         START_COUNT();
         ui_pairs_force_new_page();
+        if (fits_governance_action_id) {
+            UI_ADD_FORMAT2(UI_LABEL_BY_SCREEN("Gov action ID", "Action ID"),
+                           MAX_BECH32_STRING_LENGTH,
+                           format_governance_action_id,
+                           parsed_vote->govActionId.txHash,
+                           parsed_vote->govActionId.govActionIndex);
+        }
         UI_ADD_FORMAT2(UI_LABEL_BY_SCREEN("Gov action tx hash", "Action tx hash"),
                        MAX_TX_HASH_DISPLAY_LENGTH,
                        format_hex_bytes,
@@ -459,7 +483,7 @@ void tx_ui_plan_or_render_vote(const tx_processing_mode_t *mode, const vote_item
                        MAX_VOTE_OPTION_LENGTH,
                        format_vote_option,
                        parsed_vote->voteOption);
-        CHECK_COUNT(UI_PAIRS_VOTE);
+        CHECK_COUNT(expected_ui_pairs);
     }
 }
 

@@ -517,3 +517,54 @@ bool format_incomplete_hex_with_length(const uint8_t *data,
                   "Incomplete hex string does not fit in output buffer");
     return true;
 }
+
+/**
+ * Format a governance identifier (CIP-0129)
+ *
+ * Prepends the header byte (key type + credential type) to the credential hash
+ * and encodes the result as bech32.
+ */
+bool format_governance_identifier(const char *bech32Prefix,
+                                  uint8_t headerByte,
+                                  const uint8_t *credentialHash,
+                                  size_t credentialHashSize,
+                                  char *out,
+                                  size_t outSize) {
+    ASSERT(bech32Prefix != NULL);
+    ASSERT(credentialHash != NULL);
+
+    uint8_t credentialType = headerByte & 0x0F;
+    switch (credentialType) {
+        case GOVERNANCE_ID_CREDENTIAL_KEY_HASH:
+            ASSERT(credentialHashSize == ADDRESS_KEY_HASH_LENGTH);
+            break;
+        case GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH:
+            ASSERT(credentialHashSize == SCRIPT_HASH_LENGTH);
+            break;
+        default:
+            LEDGER_ASSERT(false, "invalid governance credential type");
+    }
+
+    uint8_t identifierBytes[GOVERNANCE_ID_LENGTH];
+    identifierBytes[0] = headerByte;
+    LEDGER_ASSERT(credentialHashSize + 1 <= sizeof(identifierBytes),
+                  "credential hash does not fit in identifier buffer");
+    memcpy(identifierBytes + 1, credentialHash, credentialHashSize);
+    return format_bech32(bech32Prefix, identifierBytes, sizeof(identifierBytes), out, outSize);
+}
+
+bool format_governance_action_id(const uint8_t *txHash,
+                                 uint32_t govActionIndex,
+                                 char *out,
+                                 size_t outSize) {
+    ASSERT(txHash != NULL);
+    ASSERT(govActionIndex <= UINT8_MAX);
+    uint8_t idBytes[GOVERNANCE_ACTION_ID_LENGTH];
+    memcpy(idBytes, txHash, TX_HASH_LENGTH);
+    idBytes[TX_HASH_LENGTH] = (uint8_t) govActionIndex;
+    return format_bech32(BECH32_PREFIX_GOV_ACTION,
+                         idBytes,
+                         GOVERNANCE_ACTION_ID_LENGTH,
+                         out,
+                         outSize);
+}
