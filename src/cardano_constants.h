@@ -48,11 +48,9 @@ _Static_assert(LOVELACE_MAX_SUPPLY < LOVELACE_INVALID, "LOVELACE_INVALID must ex
 #define GOVERNANCE_ID_KEY_TYPE_DREP           0x2
 #define GOVERNANCE_ID_CREDENTIAL_KEY_HASH     0x2
 #define GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH  0x3
-#define GOVERNANCE_ID_HEADER(keyType, credentialType) \
-    ((uint8_t) (((keyType) << 4) | (credentialType)))
-#define GOVERNANCE_ID_LENGTH                  (1 + SCRIPT_HASH_LENGTH)
+#define GOVERNANCE_ID_LENGTH                  29
 #define GOVERNANCE_ACTION_ID_LENGTH           (TX_HASH_LENGTH + 1)
-#define GOVERNANCE_ACTION_ID_MAX_BECH32_INDEX 255
+#define GOVERNANCE_ACTION_ID_MAX_INDEX        255
 
 /**
  * Network IDs and protocol magics.

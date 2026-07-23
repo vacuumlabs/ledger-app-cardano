@@ -268,10 +268,10 @@ bool format_mint_summary(uint16_t num_groups, char *out, size_t outSize);
  * Encodes a DRep or committee credential as bech32 over a 1-byte header
  * followed by the 28-byte credential hash. The header combines the key type
  * (DRep, committee hot/cold) with the credential type (key hash / script hash);
- * build it with GOVERNANCE_ID_HEADER.
+ * build it with governance_id_header().
  *
  * @param bech32Prefix        Bech32 prefix (BECH32_PREFIX_DREP / _COMMITTEE_HOT / _COMMITTEE_COLD)
- * @param headerByte          CIP-0129 header byte (see GOVERNANCE_ID_HEADER)
+ * @param headerByte          CIP-0129 header byte (see governance_id_header())
  * @param credentialHash      Credential hash bytes
  * @param credentialHashSize  Size of credential hash (must be SCRIPT_HASH_LENGTH)
  * @param out                 Output buffer for formatted string
@@ -290,7 +290,7 @@ bool format_governance_identifier(const char *bech32Prefix,
  *
  * Encodes the ID as bech32 ("gov_action" prefix) over the 32-byte transaction
  * hash followed by the action index as a single byte. Only indexes up to
- * GOVERNANCE_ACTION_ID_MAX_BECH32_INDEX can be encoded this way; the caller
+ * GOVERNANCE_ACTION_ID_MAX_INDEX can be encoded this way; the caller
  * must check this and fall back to displaying tx hash and index separately.
  *
  * @param txHash          Hash of the transaction that submitted the governance action

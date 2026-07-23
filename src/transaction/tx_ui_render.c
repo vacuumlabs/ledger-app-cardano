@@ -22,6 +22,7 @@
 #include "securityPolicy.h"
 #include "tx_certificate_types.h"
 #include "tx_credential_types.h"
+#include "tx_ui_governance_id.h"
 #include "tx_ui_pair_counts.h"
 #include "tx_ui_render.h"
 #include "ui_constants.h"
@@ -377,7 +378,7 @@ void tx_ui_plan_or_render_voter(const tx_processing_mode_t *mode,
                                MAX_BECH32_STRING_LENGTH,
                                format_governance_identifier,
                                BECH32_PREFIX_COMMITTEE_HOT,
-                               GOVERNANCE_ID_HEADER(GOVERNANCE_ID_KEY_TYPE_COMMITTEE_HOT,
+                               governance_id_header(GOVERNANCE_ID_KEY_TYPE_COMMITTEE_HOT,
                                                     GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
                                parsed_voter->keyHash,
                                ADDRESS_KEY_HASH_LENGTH);
@@ -388,7 +389,7 @@ void tx_ui_plan_or_render_voter(const tx_processing_mode_t *mode,
                                MAX_BECH32_STRING_LENGTH,
                                format_governance_identifier,
                                BECH32_PREFIX_COMMITTEE_HOT,
-                               GOVERNANCE_ID_HEADER(GOVERNANCE_ID_KEY_TYPE_COMMITTEE_HOT,
+                               governance_id_header(GOVERNANCE_ID_KEY_TYPE_COMMITTEE_HOT,
                                                     GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
                                parsed_voter->scriptHash,
                                SCRIPT_HASH_LENGTH);
@@ -405,7 +406,7 @@ void tx_ui_plan_or_render_voter(const tx_processing_mode_t *mode,
                                MAX_BECH32_STRING_LENGTH,
                                format_governance_identifier,
                                BECH32_PREFIX_DREP,
-                               GOVERNANCE_ID_HEADER(GOVERNANCE_ID_KEY_TYPE_DREP,
+                               governance_id_header(GOVERNANCE_ID_KEY_TYPE_DREP,
                                                     GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
                                parsed_voter->keyHash,
                                ADDRESS_KEY_HASH_LENGTH);
@@ -416,7 +417,7 @@ void tx_ui_plan_or_render_voter(const tx_processing_mode_t *mode,
                                MAX_BECH32_STRING_LENGTH,
                                format_governance_identifier,
                                BECH32_PREFIX_DREP,
-                               GOVERNANCE_ID_HEADER(GOVERNANCE_ID_KEY_TYPE_DREP,
+                               governance_id_header(GOVERNANCE_ID_KEY_TYPE_DREP,
                                                     GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
                                parsed_voter->scriptHash,
                                SCRIPT_HASH_LENGTH);
@@ -453,11 +454,12 @@ void tx_ui_plan_or_render_vote(const tx_processing_mode_t *mode, const vote_item
     // The CIP-0129 gov action ID is shown in addition to the raw tx hash and index;
     // it encodes the index in a single byte, so it is omitted for larger indexes
     const bool fits_governance_action_id =
-        parsed_vote->govActionId.govActionIndex <= GOVERNANCE_ACTION_ID_MAX_BECH32_INDEX;
+        parsed_vote->govActionId.govActionIndex <= GOVERNANCE_ACTION_ID_MAX_INDEX;
+    const uint16_t expected_ui_pairs =
+        fits_governance_action_id ? UI_PAIRS_VOTE_WITH_ID : UI_PAIRS_VOTE_WITHOUT_ID;
 
     if (mode->ui_count_pairs) {
-        tx_body_ctx()->total_ui_pairs +=
-            fits_governance_action_id ? UI_PAIRS_VOTE : UI_PAIRS_VOTE_WITHOUT_ID;
+        tx_body_ctx()->total_ui_pairs += expected_ui_pairs;
     } else if (mode->ui_render) {
         START_COUNT();
         ui_pairs_force_new_page();
@@ -481,7 +483,7 @@ void tx_ui_plan_or_render_vote(const tx_processing_mode_t *mode, const vote_item
                        MAX_VOTE_OPTION_LENGTH,
                        format_vote_option,
                        parsed_vote->voteOption);
-        CHECK_COUNT(fits_governance_action_id ? UI_PAIRS_VOTE : UI_PAIRS_VOTE_WITHOUT_ID);
+        CHECK_COUNT(expected_ui_pairs);
     }
 }
 

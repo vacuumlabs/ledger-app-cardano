@@ -94,7 +94,7 @@
 #define UI_PAIRS_REFERENCE_INPUT          1  // key 18: "Ref input"
 #define UI_PAIRS_VOTER \
     2  // key 19: "Voter" index header + voter credential (Committee hot key, DRep key, SPO key)
-#define UI_PAIRS_VOTE \
+#define UI_PAIRS_VOTE_WITH_ID \
     4  // key 19: "Gov action ID" (CIP-0129), "Gov action tx hash", "Gov action index", "Vote"
 #define UI_PAIRS_VOTE_WITHOUT_ID 3  // key 19: as above without "Gov action ID"
 #define UI_PAIRS_ANCHOR          2  // key 19: "Anchor URL", "Anchor hash" (if anchor included)

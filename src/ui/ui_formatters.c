@@ -531,11 +531,24 @@ bool format_governance_identifier(const char *bech32Prefix,
                                   char *out,
                                   size_t outSize) {
     ASSERT(bech32Prefix != NULL);
-    ASSERT(credentialHash != NULL && credentialHashSize == SCRIPT_HASH_LENGTH);
-    STATIC_ASSERT(ADDRESS_KEY_HASH_LENGTH == SCRIPT_HASH_LENGTH,
-                  "governance credential hash length mismatch");
+    ASSERT(credentialHash != NULL);
+
+    uint8_t credentialType = headerByte & 0x0F;
+    switch (credentialType) {
+        case GOVERNANCE_ID_CREDENTIAL_KEY_HASH:
+            ASSERT(credentialHashSize == ADDRESS_KEY_HASH_LENGTH);
+            break;
+        case GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH:
+            ASSERT(credentialHashSize == SCRIPT_HASH_LENGTH);
+            break;
+        default:
+            LEDGER_ASSERT(false, "invalid governance credential type");
+    }
+
     uint8_t identifierBytes[GOVERNANCE_ID_LENGTH];
     identifierBytes[0] = headerByte;
+    LEDGER_ASSERT(credentialHashSize + 1 <= sizeof(identifierBytes),
+                  "credential hash does not fit in identifier buffer");
     memcpy(identifierBytes + 1, credentialHash, credentialHashSize);
     return format_bech32(bech32Prefix, identifierBytes, sizeof(identifierBytes), out, outSize);
 }
@@ -545,7 +558,7 @@ bool format_governance_action_id(const uint8_t *txHash,
                                  char *out,
                                  size_t outSize) {
     ASSERT(txHash != NULL);
-    ASSERT(govActionIndex <= GOVERNANCE_ACTION_ID_MAX_BECH32_INDEX);
+    ASSERT(govActionIndex <= UINT8_MAX);
     uint8_t idBytes[GOVERNANCE_ACTION_ID_LENGTH];
     memcpy(idBytes, txHash, TX_HASH_LENGTH);
     idBytes[TX_HASH_LENGTH] = (uint8_t) govActionIndex;

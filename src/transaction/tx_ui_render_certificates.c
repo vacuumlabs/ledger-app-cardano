@@ -23,6 +23,7 @@
 #include "mem.h"
 #include "tx_certificate_types.h"
 #include "tx_credential_types.h"
+#include "tx_ui_governance_id.h"
 #include "tx_ui_pair_counts.h"
 #include "tx_ui_render_certificates.h"
 #include "ui_constants.h"
@@ -96,7 +97,7 @@ static void render_governance_credential(const ext_credential_t *credential,
                            MAX_BECH32_STRING_LENGTH,
                            format_governance_identifier,
                            bech32_prefix,
-                           GOVERNANCE_ID_HEADER(key_type, GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
+                           governance_id_header(key_type, GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
                            credential->keyHash,
                            ADDRESS_KEY_HASH_LENGTH);
             break;
@@ -106,7 +107,7 @@ static void render_governance_credential(const ext_credential_t *credential,
                            MAX_BECH32_STRING_LENGTH,
                            format_governance_identifier,
                            bech32_prefix,
-                           GOVERNANCE_ID_HEADER(key_type, GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
+                           governance_id_header(key_type, GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
                            credential->scriptHash,
                            SCRIPT_HASH_LENGTH);
             break;
@@ -176,7 +177,7 @@ static void render_drep(const ext_drep_t *drep, const char *label) {
                            MAX_BECH32_STRING_LENGTH,
                            format_governance_identifier,
                            BECH32_PREFIX_DREP,
-                           GOVERNANCE_ID_HEADER(GOVERNANCE_ID_KEY_TYPE_DREP,
+                           governance_id_header(GOVERNANCE_ID_KEY_TYPE_DREP,
                                                 GOVERNANCE_ID_CREDENTIAL_KEY_HASH),
                            drep->keyHash,
                            ADDRESS_KEY_HASH_LENGTH);
@@ -187,7 +188,7 @@ static void render_drep(const ext_drep_t *drep, const char *label) {
                            MAX_BECH32_STRING_LENGTH,
                            format_governance_identifier,
                            BECH32_PREFIX_DREP,
-                           GOVERNANCE_ID_HEADER(GOVERNANCE_ID_KEY_TYPE_DREP,
+                           governance_id_header(GOVERNANCE_ID_KEY_TYPE_DREP,
                                                 GOVERNANCE_ID_CREDENTIAL_SCRIPT_HASH),
                            drep->scriptHash,
                            SCRIPT_HASH_LENGTH);
