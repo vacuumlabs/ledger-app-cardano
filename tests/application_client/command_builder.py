@@ -119,6 +119,8 @@ class TransactionSigningMode(IntEnum):
     PLUTUS = 0x07
     UNRESTRICTED = 0x09
     AUTO = 0x08
+    POOL_REGISTRATION_PAYER = 0x0A
+    POOL_RETIREMENT_PAYER = 0x0B
 
 
 class TxAuxiliaryDataType(IntEnum):

@@ -529,6 +529,8 @@ def _load_sign_tx_tests() -> dict[str, Any]:
         TxAuxiliaryDataType,
         poolRegistrationOperatorTestCases,
         poolRegistrationOwnerTestCases,
+        poolRegistrationPayerTestCases,
+        poolRetirementPayerTestCases,
         testsAllegra,
         testsAlonzo,
         testsAlonzoTrezorComparison,
@@ -564,7 +566,10 @@ def _load_sign_tx_tests() -> dict[str, Any]:
         "multisig": testsMultisig + testsConwayMultisig,
         "alonzo_catalyst": testsCatalystRegistration,
         "alonzo_cip36": testsCVoteRegistrationCIP36,
-        "pool_registration": poolRegistrationOwnerTestCases + poolRegistrationOperatorTestCases,
+        "pool_registration": poolRegistrationOwnerTestCases
+        + poolRegistrationOperatorTestCases
+        + poolRegistrationPayerTestCases
+        + poolRetirementPayerTestCases,
     }
 
     return {

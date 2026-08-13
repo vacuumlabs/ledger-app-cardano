@@ -35,6 +35,8 @@ from tests.standalone.input_files.signTx import (
     poolRegistrationOperatorTestCases,
     poolRegistrationOwnerDenyTestCases,
     poolRegistrationOwnerTestCases,
+    poolRegistrationPayerTestCases,
+    poolRetirementPayerTestCases,
     singleAccountDenyTestCases,
     stakePoolRegistrationPoolIdDenyTestCases,
     testsAllegra,
@@ -380,6 +382,8 @@ def _run_sign_tx_test(
         pool_or_plutus_modes = (
             TransactionSigningMode.POOL_REGISTRATION_OWNER,
             TransactionSigningMode.POOL_REGISTRATION_OPERATOR,
+            TransactionSigningMode.POOL_REGISTRATION_PAYER,
+            TransactionSigningMode.POOL_RETIREMENT_PAYER,
             TransactionSigningMode.PLUTUS,
             TransactionSigningMode.AUTO,
             TransactionSigningMode.UNRESTRICTED,
@@ -468,6 +472,8 @@ all_sign_tx_test_cases = (
     + testsMultisig
     + poolRegistrationOwnerTestCases
     + poolRegistrationOperatorTestCases
+    + poolRegistrationPayerTestCases
+    + poolRetirementPayerTestCases
 )
 
 
