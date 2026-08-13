@@ -1412,6 +1412,34 @@ static const apdu_segment_t
         },
 };
 
+// Source: tests/standalone/input_files/signTx.py > certificateStakePoolRetirementDenyTestCases >
+// Path_sent_in_for_Pool_Retirement_Payer_Tx
+static const apdu_segment_t
+    SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIRE_PATH_SENT_IN_FOR_POOL_RETIREMENT_PAYER_TX[] = {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A04"
+                           "02048000073D800007178000000080000000000000000000002A",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "048000073D800007178000000080000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
 // Source: tests/standalone/input_files/signTx.py > withdrawalDenyTestCases >
 // Deny_withdrawal_with_key_hash_in_ordinary_tx
 static const apdu_segment_t
@@ -1824,6 +1852,61 @@ static const apdu_segment_t SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_MULT
         .p2 = P2_UNUSED,
         .more = false,
     },
+};
+
+// Source: tests/standalone/input_files/signTx.py > witnessDenyTestCases >
+// Pool_cold_path_in_Payer_Tx
+static const apdu_segment_t SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_PAYER_TX[] = {
+    {
+        .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                       "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                       "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                       "8B0900000000000000010001010000000000000000002A000000000000000A03"
+                       "00CB0013381D918EC0283CEEFF60F7F4FC21E1540E053CCF8A77307A7A32AD07"
+                       "821CD344D7FD7E3AE5F2ED863218CB979FF1D59E50C4276BDC479B0D08445000"
+                       "00000BA43B7400000000001443FD000000000000000003000000000000006400"
+                       "E1794D9B3408C9FB67B950A48A0690F070F117E9978F7FC1D120",
+        .p1 = P1_TX_CHUNK,
+        .p2 = P2_UNUSED,
+        .more = true,
+    },
+    {
+        .hex_payload = "FC58AD0000000002002968747470733A2F2F7777772E76616375756D6C616273"
+                       "2E636F6D2F73616D706C6555726C2E6A736F6ECDB714FD722C24AEB10C93DBB0"
+                       "FF03BD4783441CD5BA2A8B6F373390520535BB",
+        .p1 = P1_TX_CONFIRM,
+        .p2 = P2_UNUSED,
+        .more = false,
+    },
+    {
+        .hex_payload = "048000073D800007178000000080000000",
+        .p1 = P1_TX_SIGN_WITNESS,
+        .p2 = P2_UNUSED,
+        .more = false,
+    },
+};
+
+// Source: tests/standalone/input_files/signTx.py > witnessDenyTestCases >
+// Pool_cold_path_in_Retirement_Payer_Tx
+static const apdu_segment_t SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_RETIREMENT_PAYER_TX[] =
+    {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A04"
+                           "0013381D918EC0283CEEFF60F7F4FC21E1540E053CCF8A77307A7A32AD000000"
+                           "000000002A",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "048000073D800007178000000080000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
 };
 
 // Source: tests/standalone/input_files/signTx.py > witnessDenyTestCases >
@@ -3251,6 +3334,39 @@ static const apdu_segment_t
         },
         {
             .hex_payload = "058000073C80000717800000000000000200000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
+// Source: tests/standalone/input_files/signTx.py > stakePoolRegistrationPoolIdDenyTestCases >
+// Path_sent_in_for_Pool_Registration_Payer_Tx
+static const apdu_segment_t
+    SIGN_TX_SEGMENTS_DENY_POOL_ID_PATH_SENT_IN_FOR_POOL_REGISTRATION_PAYER_TX[] = {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A03"
+                           "00C402058000073C8000071780000000000000000000000007821CD344D7FD7E"
+                           "3AE5F2ED863218CB979FF1D59E50C4276BDC479B0D0844500000000BA43B7400"
+                           "000000001443FD000000000000000003000000000000006400E1794D9B3408C9"
+                           "FB67B950A48A0690F070F117E9978F7FC1D120FC58AD00000000",
+            .p1 = P1_TX_CHUNK,
+            .p2 = P2_UNUSED,
+            .more = true,
+        },
+        {
+            .hex_payload = "02002968747470733A2F2F7777772E76616375756D6C6162732E636F6D2F7361"
+                           "6D706C6555726C2E6A736F6ECDB714FD722C24AEB10C93DBB0FF03BD4783441C"
+                           "D5BA2A8B6F373390520535BB",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
             .p1 = P1_TX_SIGN_WITNESS,
             .p2 = P2_UNUSED,
             .more = false,
@@ -4934,6 +5050,19 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .expect_init_failure = false,
         .skip_reason = NULL,
     },
+    // Source: tests/standalone/input_files/signTx.py > certificateStakePoolRetirementDenyTestCases
+    // > Path_sent_in_for_Pool_Retirement_Payer_Tx
+    {
+        .name = "[DENY_CERT_POOL_RETIRE] Path_sent_in_for_Pool_Retirement_Payer_Tx",
+        .init_hex = "0000000000000000012D964A090B000100010200010000010100000100000000"
+                    "0101010000000001010002009A",
+        .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIRE_PATH_SENT_IN_FOR_POOL_RETIREMENT_PAYER_TX,
+        .chunk_count = ARRAY_LEN(
+            SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIRE_PATH_SENT_IN_FOR_POOL_RETIREMENT_PAYER_TX),
+        .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
     // Source: tests/standalone/input_files/signTx.py > withdrawalDenyTestCases >
     // Deny_withdrawal_with_key_hash_in_ordinary_tx
     {
@@ -5190,6 +5319,31 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
                     "01010100000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_MULTISIG_TX),
+        .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > witnessDenyTestCases >
+    // Pool_cold_path_in_Payer_Tx
+    {
+        .name = "[DENY_WITNESS] Pool_cold_path_in_Payer_Tx",
+        .init_hex = "0000000000000000012D964A090A000100010200010000010100000100000000"
+                    "0101010000000001010001014D",
+        .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_PAYER_TX,
+        .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_PAYER_TX),
+        .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > witnessDenyTestCases >
+    // Pool_cold_path_in_Retirement_Payer_Tx
+    {
+        .name = "[DENY_WITNESS] Pool_cold_path_in_Retirement_Payer_Tx",
+        .init_hex = "0000000000000000012D964A090B000100010200010000010100000100000000"
+                    "010101000000000101000100A5",
+        .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_RETIREMENT_PAYER_TX,
+        .chunk_count =
+            ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_RETIREMENT_PAYER_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
         .expect_init_failure = false,
         .skip_reason = NULL,
@@ -5925,6 +6079,19 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_ID_PATH_SENT_IN_FOR_POOL_REGISTRATION_OWNER_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_ID_PATH_SENT_IN_FOR_POOL_REGISTRATION_OWNER_TX),
+        .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > stakePoolRegistrationPoolIdDenyTestCases >
+    // Path_sent_in_for_Pool_Registration_Payer_Tx
+    {
+        .name = "[DENY_POOL_ID] Path_sent_in_for_Pool_Registration_Payer_Tx",
+        .init_hex = "0000000000000000012D964A090A000100010200010000010100000100000000"
+                    "01010100000000010100010146",
+        .chunks = SIGN_TX_SEGMENTS_DENY_POOL_ID_PATH_SENT_IN_FOR_POOL_REGISTRATION_PAYER_TX,
+        .chunk_count =
+            ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_ID_PATH_SENT_IN_FOR_POOL_REGISTRATION_PAYER_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
         .expect_init_failure = false,
         .skip_reason = NULL,

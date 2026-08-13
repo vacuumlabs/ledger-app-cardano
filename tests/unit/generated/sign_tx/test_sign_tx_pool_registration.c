@@ -457,6 +457,68 @@ test_sign_tx_witness_pool_registration_as_operator_with_multiple_owners_and_all_
         true);
 }
 
+static void test_sign_tx_witness_pool_registration_as_payer_with_no_owners_and_no_relays_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_POOL_REGISTRATION_AS_PAYER_WITH_NO_OWNERS_AND_NO_RELAYS,
+        false);
+}
+
+static void
+test_sign_tx_witness_pool_registration_as_payer_with_no_owners_and_no_relays_reject_tx_expert_off(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_POOL_REGISTRATION_AS_PAYER_WITH_NO_OWNERS_AND_NO_RELAYS,
+        false);
+}
+
+static void test_sign_tx_witness_pool_registration_as_payer_with_no_owners_and_no_relays_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_POOL_REGISTRATION_AS_PAYER_WITH_NO_OWNERS_AND_NO_RELAYS,
+        true);
+}
+
+static void
+test_sign_tx_witness_pool_registration_as_payer_with_no_owners_and_no_relays_reject_tx_expert_on(
+    void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_POOL_REGISTRATION_AS_PAYER_WITH_NO_OWNERS_AND_NO_RELAYS,
+        true);
+}
+
+static void test_sign_tx_witness_pool_retirement_as_payer_expert_off(void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_POOL_RETIREMENT_AS_PAYER,
+        false);
+}
+
+static void test_sign_tx_witness_pool_retirement_as_payer_reject_tx_expert_off(void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_POOL_RETIREMENT_AS_PAYER,
+        false);
+}
+
+static void test_sign_tx_witness_pool_retirement_as_payer_expert_on(void **state) {
+    (void) state;
+    run_fixture_with_expert_mode(
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_POOL_RETIREMENT_AS_PAYER,
+        true);
+}
+
+static void test_sign_tx_witness_pool_retirement_as_payer_reject_tx_expert_on(void **state) {
+    (void) state;
+    run_fixture_reject_tx_with_expert_mode(
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_POOL_RETIREMENT_AS_PAYER,
+        true);
+}
+
 // ======================================================================
 // Main
 // ======================================================================
@@ -553,6 +615,18 @@ int main(void) {
             test_sign_tx_witness_pool_registration_as_operator_with_multiple_owners_and_all_relays_expert_on),
         cmocka_unit_test(
             test_sign_tx_witness_pool_registration_as_operator_with_multiple_owners_and_all_relays_reject_tx_expert_on),
+        cmocka_unit_test(
+            test_sign_tx_witness_pool_registration_as_payer_with_no_owners_and_no_relays_expert_off),
+        cmocka_unit_test(
+            test_sign_tx_witness_pool_registration_as_payer_with_no_owners_and_no_relays_reject_tx_expert_off),
+        cmocka_unit_test(
+            test_sign_tx_witness_pool_registration_as_payer_with_no_owners_and_no_relays_expert_on),
+        cmocka_unit_test(
+            test_sign_tx_witness_pool_registration_as_payer_with_no_owners_and_no_relays_reject_tx_expert_on),
+        cmocka_unit_test(test_sign_tx_witness_pool_retirement_as_payer_expert_off),
+        cmocka_unit_test(test_sign_tx_witness_pool_retirement_as_payer_reject_tx_expert_off),
+        cmocka_unit_test(test_sign_tx_witness_pool_retirement_as_payer_expert_on),
+        cmocka_unit_test(test_sign_tx_witness_pool_retirement_as_payer_reject_tx_expert_on),
     };
     return _cmocka_run_group_tests("test_sign_tx_pool_registration",
                                    tests,
