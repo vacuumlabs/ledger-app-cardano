@@ -405,6 +405,8 @@ All other bits must be zero.
 | `0x07` | `PLUTUS` | Transaction with Plutus scripts |
 | `0x08` | `AUTO` | Device auto-detects from Plutus indicators; returns `SWO_AMBIGUOUS_TX_SIGNING_MODE` if ambiguous |
 | `0x09` | `UNRESTRICTED` | Relaxed policy; use only when instructed |
+| `0x0A` | `POOL_REGISTRATION_PAYER` | Third party pays the fee for a pool registration; pool key and all owners given as hashes |
+| `0x0B` | `POOL_RETIREMENT_PAYER` | Third party pays the fee for pool retirement(s); pool key given as a hash |
 
 **Response:** `SW=9000` (no data)
 
@@ -523,7 +525,9 @@ The host is responsible for wrapping this into the appropriate Cardano witness f
 | `ORDINARY` | `m/1852'/1815'/a'/{0,1}/i`, `m/1852'/1815'/a'/2/0`, `m/1855'/1815'/…` (mint) |
 | `MULTISIG` | `m/1854'/1815'/…` |
 | `POOL_REGISTRATION_OWNER` | `m/1852'/1815'/a'/2/0` |
-| `POOL_REGISTRATION_OPERATOR` | `m/1853'/1815'/a'/0/0` (cold key) |
+| `POOL_REGISTRATION_OPERATOR` | `m/1853'/1815'/a'/0/0` (cold key) and `m/1852'/1815'/a'/{0,1}/i` (payment, for the inputs) |
+| `POOL_REGISTRATION_PAYER` | `m/1852'/1815'/a'/{0,1}/i` (payment only) |
+| `POOL_RETIREMENT_PAYER` | `m/1852'/1815'/a'/{0,1}/i` (payment only) |
 | `PLUTUS` | All of the above |
 
 Witnesses with paths violating these policies return `SWO_SECURITY_CONDITION_NOT_SATISFIED`.

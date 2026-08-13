@@ -102,7 +102,7 @@ Security policies are evaluated during Phase 1 (validation). Each field validato
 Security policies enforce critical constraints:
 - **Single-account constraint**: All witness paths must use the same BIP44 account.
 - **Credential type restrictions**: For example, script hashes are forbidden in ordinary signing mode to prevent deception attacks.
-- **Certificate type restrictions**: Depends on signing mode (ordinary, pool owner, pool operator, multisig, Plutus).
+- **Certificate type restrictions**: Depends on the signing mode; see the `txSigningMode` table in `doc/apdu_reference.md` for the current list of modes.
 - **Address validations**: Ensures change outputs and collateral returns use device-owned addresses.
 - **Path validations**: All BIP44 paths must pass security policy checks before use.
 
