@@ -54,6 +54,8 @@ typedef enum {
     // mode before any security-policy check runs; no policy function ever sees
     // this value.
     SIGN_TX_SIGNINGMODE_AUTO = 8,
+    SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER = 10,
+    SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER = 11,
 } sign_tx_signingmode_t;
 
 // Transaction parameters parsed from SIGN_TX INIT APDU.

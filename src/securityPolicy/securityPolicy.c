@@ -462,6 +462,7 @@ security_policy_t policyForSignTxInit(const tx_params_t *txParams, warning_bits_
     switch (txParams->txSigningMode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
             // necessary to avoid intermingling witnesses from several certs
             DENY_UNLESS(txParams->num_certificates == 1);
 
@@ -482,6 +483,30 @@ security_policy_t policyForSignTxInit(const tx_params_t *txParams, warning_bits_
             DENY_IF(txParams->num_reference_inputs > 0);
 
             // no voting, treasuries, donations for pool registrations
+            // we don't need them and we want to avoid overlap in witnesses
+            DENY_IF(txParams->num_voters > 0);
+            DENY_IF(txParams->includeTreasury);
+            DENY_IF(txParams->includeDonation);
+            break;
+
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
+            // the payer witnesses only its own payment key, so it could never
+            // authorize a withdrawal anyway; forbidding them keeps the payer
+            // session narrowly scoped, same as for pool registration
+            DENY_UNLESS(txParams->num_withdrawals == 0);
+
+            // mint must not be combined with pool retirement certificates
+            DENY_IF(txParams->num_mint_asset_groups > 0);
+
+            // no Plutus elements for pool retirements
+            DENY_IF(txParams->includeScriptDataHash);
+            DENY_IF(txParams->num_required_signers > 0);
+            DENY_IF(txParams->num_collateral_inputs > 0);
+            DENY_IF(txParams->includeCollateralOutput);
+            DENY_IF(txParams->includeTotalCollateral);
+            DENY_IF(txParams->num_reference_inputs > 0);
+
+            // no voting, treasuries, donations for pool retirements
             // we don't need them and we want to avoid overlap in witnesses
             DENY_IF(txParams->num_voters > 0);
             DENY_IF(txParams->includeTreasury);
@@ -585,6 +610,8 @@ security_policy_t policyForSignTxInput(sign_tx_signingmode_t txSigningMode,
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
             // inputs are not interesting for the user (transferred funds are shown in the outputs)
             HIDE();
@@ -682,6 +709,8 @@ static bool contains_forbidden_plutus_elements(const tx_output_description_t *ou
 
             case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
             case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+            case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+            case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
                 return true;
 
             // LCOV_EXCL_START
@@ -731,6 +760,8 @@ static security_policy_t policyForSignTxOutputAddressBytes(const tx_output_descr
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
         case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
             // utxo on a Plutus script address without datum hash is unspendable
@@ -815,6 +846,8 @@ static security_policy_t policyForSignTxOutputAddressParams(const tx_output_desc
 
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
         case SIGN_TX_SIGNINGMODE_ORDINARY: {
             if (!is_standard_base_address(params)) {
                 SHOW_IF(mark_unusual_key_derivation(w, &params->paymentKeyPath));
@@ -1229,6 +1262,8 @@ security_policy_t policyForSignTxFee(sign_tx_signingmode_t txSigningMode,
 
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
         case SIGN_TX_SIGNINGMODE_ORDINARY:
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
@@ -1325,7 +1360,9 @@ static security_policy_t _policyForSignTxCertificateStakeCredential(
     warning_bits_t *w) {
     POLICY_INIT();
     DENY_IF(txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER ||
-            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR);
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER);
     DENY_IF(_forbiddenCredential(txSigningMode, stakeCredential));
 
     switch (stakeCredential->type) {
@@ -1368,7 +1405,9 @@ static inline security_policy_t _policyForSignTxCertificateDRep(sign_tx_signingm
                                                                 warning_bits_t *w) {
     POLICY_INIT();
     DENY_IF(txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER ||
-            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR);
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER);
     switch (drep->type) {
         case EXT_DREP_KEY_PATH:
             DENY_UNLESS(bip44_isOrdinaryDRepKeyPath(&drep->keyPath));
@@ -1409,7 +1448,9 @@ security_policy_t policyForSignTxCertificateStaking(sign_tx_signingmode_t txSign
                                                     warning_bits_t *w) {
     POLICY_INIT();
     DENY_IF(txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER ||
-            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR);
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER);
     switch (certificateType) {
         case CERTIFICATE_STAKE_REGISTRATION:
         case CERTIFICATE_STAKE_REGISTRATION_CONWAY:
@@ -1454,7 +1495,9 @@ security_policy_t policyForSignTxCertificateAccountRegistrationDelegationToStake
     warning_bits_t *w) {
     POLICY_INIT();
     DENY_IF(txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER ||
-            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR);
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER);
     RETURN(_policyForSignTxCertificateStakeCredential(txSigningMode, stakeCredential, w));
 }
 
@@ -1486,7 +1529,9 @@ security_policy_t policyForSignTxCertificateCommitteeAuth(sign_tx_signingmode_t 
                                                           warning_bits_t *w) {
     POLICY_INIT();
     DENY_IF(txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER ||
-            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR);
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER);
     DENY_IF(_forbiddenCredential(txSigningMode, coldCredential));
 
     switch (coldCredential->type) {
@@ -1542,7 +1587,9 @@ security_policy_t policyForSignTxCertificateCommitteeResign(sign_tx_signingmode_
                                                             warning_bits_t *w) {
     POLICY_INIT();
     DENY_IF(txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER ||
-            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR);
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER);
     DENY_IF(_forbiddenCredential(txSigningMode, coldCredential));
 
     switch (coldCredential->type) {
@@ -1583,7 +1630,9 @@ security_policy_t policyForSignTxCertificateDRep(sign_tx_signingmode_t txSigning
                                                  warning_bits_t *w) {
     POLICY_INIT();
     DENY_IF(txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER ||
-            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR);
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER ||
+            txSigningMode == SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER);
     DENY_IF(_forbiddenCredential(txSigningMode, dRepCredential));
 
     switch (dRepCredential->type) {
@@ -1635,9 +1684,16 @@ security_policy_t policyForSignTxCertificateStakePoolRetirement(
             SHOW();
             break;
 
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
+            // payer never holds the cold key; it must arrive as a hash
+            DENY_UNLESS(poolCredential->type == EXT_CREDENTIAL_KEY_HASH);
+            SHOW();
+            break;
+
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
             DENY();
             break;
         // LCOV_EXCL_START
@@ -1674,6 +1730,7 @@ security_policy_t policyForSignTxStakePoolRegistrationInit(sign_tx_signingmode_t
             break;
 
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
             // Operator mode never witnesses pool owners; all owners must be hashes.
             DENY_UNLESS(numPathOwners == 0);
             // In unified review, pool registration must always be visible.
@@ -1684,6 +1741,7 @@ security_policy_t policyForSignTxStakePoolRegistrationInit(sign_tx_signingmode_t
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_PLUTUS:
         case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
             DENY();
             break;
 
@@ -1702,7 +1760,8 @@ security_policy_t policyForSignTxStakePoolRegistrationPoolId(sign_tx_signingmode
     POLICY_INIT();
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
-            // owner should see a hash
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+            // owner and payer should see a hash
             DENY_UNLESS(poolId->keyReferenceType == KEY_REFERENCE_HASH);
             SHOW();
             break;
@@ -1727,6 +1786,7 @@ security_policy_t policyForSignTxStakePoolRegistrationVrfKey(sign_tx_signingmode
     POLICY_INIT();
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
             // not interesting for an owner, show only in expert mode
             SHOW_IF(is_expert_mode());
             HIDE();
@@ -1776,6 +1836,7 @@ security_policy_t policyForSignTxStakePoolRegistrationRewardAccount(
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
             SHOW();
             break;
 
@@ -1817,6 +1878,7 @@ security_policy_t policyForSignTxStakePoolRegistrationOwner(
             break;
 
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
             // operator should receive owners given by hash
             DENY_UNLESS(ownerCredential->type == EXT_CREDENTIAL_KEY_HASH);
             SHOW();
@@ -1838,6 +1900,7 @@ security_policy_t policyForSignTxStakePoolRegistrationRelay(
     // Relay details are intentionally ignored; visibility depends only on signer role/mode.
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
             // not interesting for an owner, show only in expert mode
             SHOW_IF(is_expert_mode());
             HIDE();
@@ -1894,7 +1957,9 @@ security_policy_t policyForSignTxWithdrawal(sign_tx_signingmode_t txSigningMode,
     // Withdrawals can be signed by staking keys used to sign pool registration certificates,
     // so we do not allow them.
     LEDGER_ASSERT(txSigningMode != SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER &&
-                      txSigningMode != SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR,
+                      txSigningMode != SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR &&
+                      txSigningMode != SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER &&
+                      txSigningMode != SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER,
                   "Withdrawal in pool registration mode");
     switch (stakeCredential->type) {
         case EXT_CREDENTIAL_KEY_PATH:
@@ -2049,7 +2114,7 @@ security_policy_t policyForSignTxMintInit(const sign_tx_signingmode_t txSigningM
 
         // LCOV_EXCL_START
         default:
-            // in POOL_REGISTRATION signing modes, non-empty mint field
+            // in POOL_REGISTRATION and POOL_RETIREMENT signing modes, non-empty mint field
             // should have already been reported as invalid
             ASSERT(false);
             // LCOV_EXCL_STOP
@@ -2077,8 +2142,10 @@ security_policy_t policyForSignTxScriptDataHash(const sign_tx_signingmode_t txSi
         // LCOV_EXCL_START
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
-            // unreachable: pool registration modes are rejected at tx init before script data hash
-            // processing
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
+            // unreachable: pool registration/retirement modes are rejected at tx init before
+            // script data hash processing
             DENY();
             break;
         default:
@@ -2121,6 +2188,8 @@ security_policy_t policyForSignTxCollateralInput(const sign_tx_signingmode_t txS
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
             // unreachable: these modes are rejected at tx init before collateral input processing
             DENY();
             break;
@@ -2281,6 +2350,8 @@ security_policy_t policyForSignTxReferenceInput(const sign_tx_signingmode_t txSi
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
             DENY();
             break;
 
@@ -2446,6 +2517,8 @@ security_policy_t policyForSignTxDisplayTxHash(sign_tx_signingmode_t signingMode
         case SIGN_TX_SIGNINGMODE_MULTISIG:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
             SHOW_IF(is_expert_mode());
             HIDE();
             break;
@@ -2661,6 +2734,29 @@ static inline security_policy_t _poolRegistrationOperatorWitnessPolicy(const bip
     }
 }
 
+// Shared by both pool-lifecycle payer modes (registration and retirement): a payer never holds
+// the pool's own credential (cold key), so regardless of which certificate is being paid for,
+// the only witness it may ever produce is its own ordinary payment key.
+static inline security_policy_t _poolPayerWitnessPolicy(const bip44_path_t *path,
+                                                         warning_bits_t *w) {
+    POLICY_INIT();
+    ASSERT(path != NULL);
+    switch (bip44_classifyPath(path)) {
+        case PATH_ORDINARY_PAYMENT_KEY:
+            // only ordinary payment key paths (because of inputs) are allowed
+            SHOW_IF(mark_unusual_key_derivation(w, path));
+            // it might be safe to hide the witnesses, but txs related to stake pools
+            // are rare, so it would not help much and might introduce some unknown risk
+            SHOW();
+            break;
+
+        default:
+            DENY();
+            break;
+    }
+}
+
+
 static inline security_policy_t _swapWitnessPolicy(const sign_tx_signingmode_t txSigningMode,
                                                    const bip44_path_t *path,
                                                    warning_bits_t *w) {
@@ -2722,7 +2818,10 @@ security_policy_t policyForSignTxWitness(sign_tx_signingmode_t txSigningMode,
 
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
             RETURN(_poolRegistrationOperatorWitnessPolicy(witnessPath, w));
-
+        
+        case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
+        case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
+            RETURN(_poolPayerWitnessPolicy(witnessPath, w));
         // LCOV_EXCL_START
         default:
             ASSERT(false);
