@@ -2738,7 +2738,7 @@ static inline security_policy_t _poolRegistrationOperatorWitnessPolicy(const bip
 // the pool's own credential (cold key), so regardless of which certificate is being paid for,
 // the only witness it may ever produce is its own ordinary payment key.
 static inline security_policy_t _poolPayerWitnessPolicy(const bip44_path_t *path,
-                                                         warning_bits_t *w) {
+                                                        warning_bits_t *w) {
     POLICY_INIT();
     ASSERT(path != NULL);
     switch (bip44_classifyPath(path)) {
@@ -2755,7 +2755,6 @@ static inline security_policy_t _poolPayerWitnessPolicy(const bip44_path_t *path
             break;
     }
 }
-
 
 static inline security_policy_t _swapWitnessPolicy(const sign_tx_signingmode_t txSigningMode,
                                                    const bip44_path_t *path,
@@ -2818,7 +2817,7 @@ security_policy_t policyForSignTxWitness(sign_tx_signingmode_t txSigningMode,
 
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
             RETURN(_poolRegistrationOperatorWitnessPolicy(witnessPath, w));
-        
+
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER:
         case SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER:
             RETURN(_poolPayerWitnessPolicy(witnessPath, w));
