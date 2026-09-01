@@ -66,7 +66,7 @@ void mem_utils_free_and_null(void **buffer, const char *file, int line) {
     }
 }
 
-bool mem_utils_calloc(void **buffer, uint16_t size, bool permanent, const char *file, int line) {
+bool mem_utils_calloc(void **buffer, size_t size, bool permanent, const char *file, int line) {
     (void) permanent;
     (void) file;
     (void) line;
