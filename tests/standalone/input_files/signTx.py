@@ -1115,6 +1115,23 @@ certificates: dict[str, Certificate] = {
             ),
         ),
     ),
+    "poolRegistrationPayerNoOwnersNoRelays": Certificate(
+        CertificateType.STAKE_POOL_REGISTRATION,
+        PoolRegistrationParams(
+            poolKeys["poolKeyHash"],
+            "07821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d084450",
+            50000000000,
+            340000000,
+            Margin(3, 100),
+            poolKeys["poolRewardAccountHash"],
+            [],
+            [],
+            PoolMetadataParams(
+                "https://www.vacuumlabs.com/sampleUrl.json",
+                "cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
+            ),
+        ),
+    ),
     "poolRegistrationOperatorOneOwnerOperatorNoRelays": Certificate(
         CertificateType.STAKE_POOL_REGISTRATION,
         PoolRegistrationParams(
@@ -1183,6 +1200,16 @@ certificates: dict[str, Certificate] = {
     "poolRetirementParam": Certificate(
         CertificateType.STAKE_POOL_RETIREMENT,
         PoolRetirementParams(CredentialParams(CredentialParamsType.KEY_PATH, "m/1853'/1815'/0'/1'"), 42),
+    ),
+    "poolRetirementPayerParam": Certificate(
+        CertificateType.STAKE_POOL_RETIREMENT,
+        PoolRetirementParams(
+            CredentialParams(
+                CredentialParamsType.KEY_HASH,
+                "13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad",
+            ),
+            42,
+        ),
     ),
     "stakeRegistrationPathParam": Certificate(
         CertificateType.STAKE_REGISTRATION,
@@ -6922,6 +6949,66 @@ poolRegistrationOperatorTestCases: list[SignTxTestCase] = [
     ),
 ]
 
+poolRegistrationPayerTestCases: list[SignTxTestCase] = [
+    SignTxTestCase(
+        name="Sign_tx_Witness_pool_registration_as_payer_with_no_owners_and_no_relays",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoWithPath0"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            certificates=[certificates["poolRegistrationPayerNoOwnersNoRelays"]],
+        ),
+        signingMode=TransactionSigningMode.POOL_REGISTRATION_PAYER,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad808082782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb"
+        ),
+        expected_warnings=(
+            WarningBit.WARNING_BIT_POOL_REGISTRATION_NO_OWNERS,
+            WarningBit.WARNING_BIT_POOL_REGISTRATION_NO_RELAYS,
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            # txHashHex computed via blake2b-256(txBodyHex) above -- deterministic, not from a live run.
+            txHashHex="873f16bfaf7a928810c58a26416ec832c615eb0df7faf2dccbf072969d779803",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="26e9bab890206b5d5086e1fb1f3cd3ad9ddaf49da534027710df93fa0c01285e0ce21e4c3858ad10673c796dcee3119665e93420a91b837546f4b4548c6b6007",
+                ),
+            ),
+        ),
+    ),
+]
+
+poolRetirementPayerTestCases: list[SignTxTestCase] = [
+    SignTxTestCase(
+        name="Sign_tx_Witness_pool_retirement_as_payer",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoWithPath0"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            certificates=[certificates["poolRetirementPayerParam"]],
+        ),
+        signingMode=TransactionSigningMode.POOL_RETIREMENT_PAYER,
+        unit_test_expect=SignTxUnitTestExpect(
+            # tx body computed via cbor2.dumps(..., canonical=True) on the equivalent Python
+            # structure (same input/output as the registration-payer case above, one
+            # STAKE_POOL_RETIREMENT cert = [4, poolKeyHash, epoch] per tx_hash_builder.c:1349-1364)
+            txBodyHex="a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818304581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad182a"
+        ),
+        expected_warnings=(),
+        ragger_expect=SignTxRaggerExpect(
+            # txHashHex computed via blake2b-256(txBodyHex) above -- deterministic, not from a live run.
+            txHashHex="788c0f68606bed9345f8855232cbc151e8e18d0dd122a8d0ff424814615ddb1a",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="6be532325b7f2d4fb50ac568546a9cc1c104d8e54eb6b5b52270f8482a8f2f6a78da5d0626b621f5b65ab8d4c949b16b83fe8d5c6454fad37d58aa498602050f",
+                ),
+            ),
+        ),
+    ),
+]
+
 requiredSignerDenyTestCases: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Required_signer_path_pool_cold_key",
@@ -8476,6 +8563,29 @@ certificateStakePoolRetirementDenyTestCases: list[SignTxTestCase] = [
         expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
         expected_warnings=(WarningBit.WARNING_BIT_NETWORK_UNUSUAL,),
     ),
+    SignTxTestCase(
+        name="Path_sent_in_for_Pool_Retirement_Payer_Tx",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoWithPath0"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            certificates=[
+                Certificate(
+                    type=CertificateType.STAKE_POOL_RETIREMENT,
+                    params=PoolRetirementParams(
+                        poolCredential=CredentialParams(
+                            type=CredentialParamsType.KEY_PATH,
+                            keyValue="m/1853'/1815'/0'/0'",
+                        ),
+                        retirementEpoch=42,
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.POOL_RETIREMENT_PAYER,
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        deny_before_review=True,
+    ),
 ]
 
 withdrawalDenyTestCases: list[SignTxTestCase] = [
@@ -8780,6 +8890,30 @@ witnessDenyTestCases: list[SignTxTestCase] = [
             outputs=[outputs["inlineByronMainnet3003112"]],
         ),
         signingMode=TransactionSigningMode.MULTISIG,
+        additionalWitnessPaths=("m/1853'/1815'/0'/0'",),
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+    ),
+    SignTxTestCase(
+        name="Pool_cold_path_in_Payer_Tx",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoWithPath0"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            certificates=[certificates["poolRegistrationPayerNoOwnersNoRelays"]],
+        ),
+        signingMode=TransactionSigningMode.POOL_REGISTRATION_PAYER,
+        additionalWitnessPaths=("m/1853'/1815'/0'/0'",),
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+    ),
+    SignTxTestCase(
+        name="Pool_cold_path_in_Retirement_Payer_Tx",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoWithPath0"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            certificates=[certificates["poolRetirementPayerParam"]],
+        ),
+        signingMode=TransactionSigningMode.POOL_RETIREMENT_PAYER,
         additionalWitnessPaths=("m/1853'/1815'/0'/0'",),
         expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
     ),
@@ -10424,6 +10558,39 @@ stakePoolRegistrationPoolIdDenyTestCases: list[SignTxTestCase] = [
             ],
         ),
         signingMode=TransactionSigningMode.POOL_REGISTRATION_OWNER,
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        deny_before_review=True,
+    ),
+    SignTxTestCase(
+        name="Path_sent_in_for_Pool_Registration_Payer_Tx",
+        tx=Transaction(
+            network=NetworkDesc(networkId=1, protocol=764824073),
+            inputs=[inputs["utxoMultisig"]],
+            outputs=[outputs["inlineShelleyBase1"]],
+            certificates=[
+                Certificate(
+                    type=CertificateType.STAKE_POOL_REGISTRATION,
+                    params=PoolRegistrationParams(
+                        poolKey=PoolKey(type=PoolKeyType.DEVICE_OWNED, key="m/1852'/1815'/0'/0/0"),
+                        vrfKeyHashHex="07821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d084450",
+                        pledge=50000000000,
+                        cost=340000000,
+                        margin=Margin(numerator=3, denominator=100),
+                        rewardAccount=PoolKey(
+                            type=PoolKeyType.THIRD_PARTY,
+                            key="e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad",
+                        ),
+                        poolOwners=[],
+                        relays=[],
+                        metadata=PoolMetadataParams(
+                            metadataUrl="https://www.vacuumlabs.com/sampleUrl.json",
+                            metadataHashHex="cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb",
+                        ),
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.POOL_REGISTRATION_PAYER,
         expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
         deny_before_review=True,
     ),

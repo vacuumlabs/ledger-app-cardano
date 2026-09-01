@@ -506,6 +506,8 @@ def assert_sign_tx_related_constants_match() -> None:
             "PLUTUS": tx_values["SIGN_TX_SIGNINGMODE_PLUTUS"],
             "UNRESTRICTED": tx_values["SIGN_TX_SIGNINGMODE_UNRESTRICTED"],
             "AUTO": tx_values["SIGN_TX_SIGNINGMODE_AUTO"],
+            "POOL_REGISTRATION_PAYER": tx_values["SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_PAYER"],
+            "POOL_RETIREMENT_PAYER": tx_values["SIGN_TX_SIGNINGMODE_POOL_RETIREMENT_PAYER"],
         },
     )
     _assert_exact_enum_mapping(

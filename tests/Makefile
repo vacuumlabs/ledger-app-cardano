@@ -82,6 +82,7 @@ tests-unit: generated-fixture-drift unit-build unit-run
 generated-fixture-drift:
 	cd $(ROOT_DIR) && PYTHONPATH=. $(PYTHON) -m tests.unit.generators.generate_unit_tests_from_ragger all
 	cd $(ROOT_DIR) && PYTHONPATH=. $(PYTHON) -m pytest -q tests/unit/test_mock_key_derivation.py
+	$(MAKE) clang-format-generated
 	$(MAKE) clang-format-generated-check
 	cd $(ROOT_DIR) && git diff --exit-code -- tests/unit/generated tests/unit/mock_crypto/crypto_mock_data.h
 

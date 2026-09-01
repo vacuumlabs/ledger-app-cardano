@@ -72,7 +72,7 @@ Ledger targets have materially different stack limits, and Nano X is tight enoug
 **Enforced Constraints:**
 - Single-account: All witness paths in a transaction must use the same BIP44 account.
 - Credential restrictions: Script hashes forbidden in ordinary signing mode (prevents deception attacks).
-- Signing mode restrictions: Certificate types allowed depend on signing mode (ordinary/pool owner/pool operator/multisig/Plutus).
+- Signing mode restrictions: Certificate types allowed depend on the signing mode; see the `txSigningMode` table in `doc/apdu_reference.md` for the current list of modes.
 - Address ownership: Change outputs and collateral returns must use device-owned addresses.
 
 Security policies are the gatekeeper that prevents the device from signing transactions that could deceive the user or result in loss of funds. See `doc/spec_*.md` for detailed rationale behind specific policy decisions.
@@ -162,7 +162,7 @@ The reasoning behind specific security restrictions is the result of years of di
 - **`spec_alonzo.md`**: Script support (Plutus v1, native scripts, script data hash).
 - **`spec_babbage.md`**: Plutus v2, inline datums, reference scripts, reference inputs.
 - **`spec_conway.md`**: Conway era features (DReps, constitutional committee, voting procedures, treasury, donation).
-- **`spec_pool_registration.md`**: Stake pool operator signing mode and pool registration certificates.
+- **`spec_pool_registration.md`**: Stake pool signing modes (owner / operator / payer) and pool registration and retirement certificates.
 - **`spec_multisig.md`**: Multisig/multi-account transaction validation rules.
 - **`spec_single_account.md`**: Single account constraint explanation.
 - **`spec_msg_signing.md`**: CIP8 message signing rules and restrictions.

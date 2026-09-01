@@ -19,7 +19,7 @@ endif()
 # sanitizer/coverage flags, mock libraries, etc.
 add_subdirectory(${BOLOS_SDK}/fuzzing ${CMAKE_CURRENT_BINARY_DIR}/ledger-secure-sdk EXCLUDE_FROM_ALL)
 
-set(DEFINES FUZZ)
+set(DEFINES FUZZ HAVE_SWAP)
 
 set(APP_SRC ${CMAKE_SOURCE_DIR}/../../src)
 
@@ -32,8 +32,6 @@ file(GLOB_RECURSE C_SOURCES
 list(REMOVE_ITEM C_SOURCES
   ${APP_SRC}/app_main.c
   ${APP_SRC}/handler/debug_settings.c
-  ${APP_SRC}/swap/swap_check_address.c
-  ${APP_SRC}/swap/swap_printable_amount.c
 )
 
 add_library(code_lib ${C_SOURCES})
@@ -91,6 +89,10 @@ foreach(HARNESS_FILE ${FUZZ_HARNESSES})
 
   # Override SDK's cx_ecdsa_verify_no_throw to avoid MemorySanitizer false positives
   target_link_options(${HARNESS_NAME} PRIVATE -Wl,--wrap=cx_ecdsa_verify_no_throw)
+
+  # Neutralize the SDK's real os_explicit_zero_BSS_segment (called by swap param copy):
+  # a live BSS wipe would clobber the fuzzer/sanitizer/heap globals.
+  target_link_options(${HARNESS_NAME} PRIVATE -Wl,--wrap=os_explicit_zero_BSS_segment)
 
   message(STATUS "Creating fuzzer target: ${HARNESS_NAME}")
 endforeach()
