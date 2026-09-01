@@ -66,7 +66,7 @@ The swap flow is deliberately much narrower than the app's normal signing surfac
 | Dimension       | Supported |
 |-----------------|-----------|
 | Network         | **Mainnet only.** Hardcoded `MAINNET_NETWORK_ID` in the address check; mainnet network id **and** protocol magic enforced by policy. See [`doc/non_bugs.md`](non_bugs.md). |
-| Address era     | **Shelley only.** `PURPOSE_BYRON` is explicitly rejected (`swap_check_address.c:89-93`). |
+| Address era     | **Shelley only.** Enforced by a `bip44_hasShelleyPrefix()` guard, which requires a hardened `1852'` purpose and the ADA `1815'` coin type; Byron (`44'`) is rejected (`swap_check_address.c:50-57`). |
 | Assets          | **Native ADA only.** Multi-asset outputs are denied; there is no token-ticker configuration parsing. |
 | Signing mode    | `SIGN_TX_SIGNINGMODE_ORDINARY` only. |
 | Outputs         | Exactly **one** third-party output (the swap destination). Remaining outputs must be device-owned change that the normal output policy already hides. |
@@ -249,7 +249,8 @@ Every `#ifdef HAVE_SWAP` site outside `src/swap/` (include blocks omitted):
 | `.github/workflows/build_and_functional_tests.yml` | `tests_swap` job, via `ledger-app-workflows/.github/workflows/reusable_swap_tests.yml@v1` |
 | `.github/workflows/python_client_checks.yml` | `lint_swap` job over `tests/swap` |
 | [`tests/unit/CMakeLists.txt`](../tests/unit/CMakeLists.txt) | `src/swap` and SDK `lib_standard_app` include paths; the `cardano_sign_tx_core_swap` library built with `HAVE_SWAP` |
-| [`tests/fuzzing/CMakeLists.txt`](../tests/fuzzing/CMakeLists.txt) | Removes `swap_check_address.c` and `swap_printable_amount.c` from the fuzz build; `HAVE_SWAP` is not defined there |
+| [`tests/fuzzing/CMakeLists.txt`](../tests/fuzzing/CMakeLists.txt) | `set(DEFINES FUZZ HAVE_SWAP)`; all of `src/swap/*.c` is compiled into `code_lib`, and the swap harnesses are built like any other |
+| [`.clusterfuzzlite/build.sh`](../.clusterfuzzlite/build.sh) | Builds the fuzzers for ClusterFuzzLite, zips `seeds/<fuzzer>/`, and copies `dict/cardano.dict` to `<fuzzer>.dict` |
 
 ---
 
@@ -308,17 +309,20 @@ This prevents a malicious host from naming a refund address it controls.
 2. Parses the derivation path from the packed wire format (one length byte followed by
    big-endian 4-byte components) using the existing `buffer_read_bip44_path()`, and
    rejects trailing bytes (`swap_check_address.c:36-48`).
-3. For `PURPOSE_SHELLEY`, builds a `BASE_PAYMENT_KEY_STAKE_KEY` address: payment key
-   from the supplied path, staking key from the **same account** with `chain = 2` and
-   `index = 0`, network id hardcoded to mainnet (`swap_check_address.c:57-69`). Two
-   `LEDGER_ASSERT`s guard the path length and the resulting staking-path
-   classification.
-4. Derives, formats via `format_address_human_readable()`, and `strcmp`s against
-   `params->address_to_check` (`swap_check_address.c:74-86`).
-5. Sets `params->result = 1` only on an exact match (`swap_check_address.c:97`).
+3. Requires a Shelley path prefix via `bip44_hasShelleyPrefix()`, which checks both a
+   hardened `1852'` purpose **and** the ADA `1815'` coin type — stricter than a bare
+   purpose comparison (`swap_check_address.c:50-57`).
+4. Builds a `BASE_PAYMENT_KEY_STAKE_KEY` address: payment key from the supplied path,
+   staking key from the **same account** with `chain = 2` and `index = 0`, network id
+   hardcoded to mainnet (`swap_check_address.c:59-76`). Two `LEDGER_ASSERT`s guard the
+   path length and the resulting staking-path classification.
+5. Derives, formats via `format_address_human_readable()`, and `strcmp`s against
+   `params->address_to_check` (`swap_check_address.c:78-90`).
+6. Sets `params->result = 1` only on an exact match (`swap_check_address.c:93`).
 
-`PURPOSE_BYRON` and every other purpose fall into the `default` branch and are
-rejected (`swap_check_address.c:89-93`).
+Byron (`44'`) and every other prefix are rejected at step 3. The check is a single early
+guard rather than a `switch` on the purpose, so a path with the right purpose but a wrong
+coin type is rejected too.
 
 Exchange wraps this call (and `GET_PRINTABLE_AMOUNT`) in a CRC check over its own BSS
 plus a stack canary: the callee must not disturb Exchange's memory. This callback
@@ -514,6 +518,20 @@ cmocka cases in three groups:
 Mechanically, these tests override `abort()` and `longjmp` out of the SDK's
 `os_lib_end()` so a NORETURN rejection can be observed and asserted.
 
+[`test_swap_check_address.c`](../tests/unit/test_swap_check_address.c) holds 7 cmocka
+cases against the **real** `swap_check_address.c` — it is the one swap source file linked
+unstubbed into a unit test, with `HAVE_SWAP` set on the target:
+
+- **Rejections**: `address_parameters == NULL`, `address_to_check == NULL`, a length byte
+  claiming more components than the payload provides, trailing bytes after the path, a
+  valid path against a non-matching address string, and a Byron (`44'`) prefix.
+- **Acceptance**: `test_valid_shelley_match` re-derives the expected base address
+  independently (same `BASE_PAYMENT_KEY_STAKE_KEY` / mainnet / `chain = 2, index = 0`
+  construction) and asserts `params->result == 1`.
+
+Every rejection case pre-sets `params->result = 1` so that the handler's own
+`params->result = 0` is what the assertion observes, not a zero-initialized field.
+
 [`test_security_policy_witness.c:273-399`](../tests/unit/test_security_policy_witness.c#L273)
 adds 8 swap-witness cases: non-ordinary mode, staking, multisig payment, pool cold key
 and DRep paths all deny; an ordinary payment path hides; a second account and an unusual
@@ -536,7 +554,8 @@ make -C tests tests-unit          # regenerate fixtures, build, run everything
 # or, targeted:
 cmake -S tests/unit -B tests/unit/build
 cmake --build tests/unit/build -j8
-ctest --test-dir tests/unit/build -R test_handler_sign_tx_swap --output-on-failure
+ctest --test-dir tests/unit/build -R 'test_handler_sign_tx_swap|test_swap_check_address' \
+    --output-on-failure
 ```
 
 ### 6.2 Functional tests (`tests/swap/`)
@@ -591,9 +610,41 @@ Two standing rules from [`doc/testing.md`](testing.md):
 
 ### 6.3 Fuzzing
 
-There is no swap fuzz harness. `swap_check_address.c` and `swap_printable_amount.c` are
-removed from the fuzz build, and `HAVE_SWAP` is undefined there, so every swap branch
-reachable from `fuzz_signTx` / `fuzz_all_handlers` is compiled out.
+The fuzz build defines `HAVE_SWAP` (`tests/fuzzing/CMakeLists.txt`), and no `src/swap/*.c`
+file is excluded from the `code_lib` glob. Swap branches are therefore compiled into
+**every** harness, though only the three swap harnesses below actually set
+`G_called_from_swap`, so `fuzz_signTx` / `fuzz_all_handlers` still exercise the
+non-swap path.
+
+| Harness | Target | Input layout |
+|---------|--------|--------------|
+| [`fuzz_swap_check_address.c`](../tests/fuzzing/harness/fuzz_swap_check_address.c) | `swap_handle_check_address()` | `[path_len][packed BIP44 path][address string]`; the address is copied into a `MAX_HUMAN_ADDRESS_LENGTH` buffer and NUL-terminated |
+| [`fuzz_swap_printable_amount.c`](../tests/fuzzing/harness/fuzz_swap_printable_amount.c) | `swap_handle_get_printable_amount()` | `[is_fee flag][amount bytes]`, `amount_length` clamped to `UINT8_MAX` |
+| [`fuzz_swap_sign_tx.c`](../tests/fuzzing/harness/fuzz_swap_sign_tx.c) | the whole library-mode sign flow | `[dest_len][dest][amt_len][amt<=8][fee_len][fee<=8][(p1,p2,lc,data)...]` |
+
+`fuzz_swap_sign_tx` is the only harness that reaches the real `swap_lib.c`: it fills a
+`create_transaction_parameters_t` from the input, calls the genuine
+`swap_copy_transaction_parameters()`, sets `G_called_from_swap`, then streams SIGN_TX
+APDUs through `apdu_dispatcher()` with `CLA` and `INS_SIGN_TX` forced and P1/P2/Lc/payload
+fuzzed, calling `apdu_response_state_force_reset()` between APDUs. All three harnesses
+point the SDK parameter structs straight at the fuzz input rather than heap copies, so a
+`swap_reject_and_exit()` `longjmp` mid-call cannot leak.
+
+Two SDK behaviors have to be neutralized for this to work, both in
+[`tests/fuzzing/mock/os_mocks.c`](../tests/fuzzing/mock/os_mocks.c):
+
+| Symbol | Treatment | Why |
+|--------|-----------|-----|
+| `os_explicit_zero_BSS_segment` | linker-wrapped (`-Wl,--wrap=`) to a no-op | the real BSS wipe inside the swap parameter copy would clobber the fuzzer, sanitizer, and heap globals |
+| `os_lib_end` | `siglongjmp` to the harness exit context | makes the NORETURN swap rejection observable instead of terminating the process |
+
+The shared dictionary and the seed corpora described in
+[`tests/fuzzing/FUZZING.md`](../tests/fuzzing/FUZZING.md) apply to these harnesses as well,
+but with a caveat: `generate_seed_corpus.py` produces **no** swap seeds, so all three swap
+fuzzers cold-start from `dict/cardano.dict` plus random bytes. `fuzz_swap_check_address` in
+particular is unlikely to reach the closing `strcmp` unaided, since that needs a valid
+Shelley path paired with the exact bech32 address the device derives from it. A hand-written
+seed for each swap harness would be the cheapest available coverage win.
 
 ### 6.4 CI
 
@@ -602,6 +653,9 @@ reachable from `fuzz_signTx` / `fuzz_all_handlers` is compiled out.
   the local helper scripts are for developer machines.
 - `lint_swap` in `python_client_checks.yml` runs pylint and mypy over `tests/swap`.
 - Swap unit tests are picked up by the generic unit-test workflow.
+- `.github/workflows/clusterfuzzlite.yml` runs the fuzzers, swap harnesses included, via
+  `ledger-app-workflows/.github/workflows/reusable_clusterfuzz_tests.yml@v1`. There is no
+  separate swap-fuzzing job.
 
 ---
 
@@ -612,13 +666,17 @@ Recorded for follow-up; none of these are changed by this document.
 1. **`swap_lib.c` is never compiled into unit tests.** It is replaced wholesale by
    `swap_test_stubs.c`, so `swap_copy_transaction_parameters()` (including the
    stack-copy / BSS-zero / commit sequence) and the actual string and integer
-   comparisons are covered only end-to-end by the functional suite.
-2. **`swap_check_address.c` and `swap_printable_amount.c` have no unit tests** and are
-   excluded from fuzzing. Their only coverage is indirect, through the Exchange
-   `swap_wrong_refund` scenario.
+   comparisons have no cmocka coverage. They are now exercised for real by
+   `fuzz_swap_sign_tx` and end-to-end by the functional suite, but never with asserted
+   expected values.
+2. **`swap_printable_amount.c` has no unit test.** Its coverage is `fuzz_swap_printable_amount`
+   plus the indirect Exchange path. `swap_check_address.c` is no longer in this gap — see
+   `test_swap_check_address.c` in 6.1.
 3. **The instruction allow-list and the menu gate are untested at any level**
    ([`dispatcher.c:142-151`](../src/apdu/dispatcher.c#L142),
-   [`app_main.c:103`](../src/app_main.c#L103)).
+   [`app_main.c:103`](../src/app_main.c#L103)). `fuzz_swap_sign_tx` does not close this:
+   it hardcodes `CLA` and `INS_SIGN_TX`, so no rejected instruction is ever dispatched in
+   swap mode.
 4. **Wrong-fee denial has no functional test.** The `*_wrong_fees` scenarios are
    excluded from the parametrization; coverage is unit-only.
 5. **`tests/fuzzing/mock/os_mocks.c` mocks `swap_check_validity()`**, a symbol that no
@@ -650,4 +708,6 @@ Recorded for follow-up; none of these are changed by this document.
 - [`doc/apdu_reference.md`](apdu_reference.md): status words, including `0x6001`.
 - [`doc/non_bugs.md`](non_bugs.md): the intentional mainnet-only address check.
 - [`doc/testing.md`](testing.md): testing entry point and workflow rules.
+- [`tests/fuzzing/FUZZING.md`](../tests/fuzzing/FUZZING.md): fuzzing setup, the shared
+  dictionary, and the seed corpora.
 - [Ledger Exchange documentation](https://ledgerhq.github.io/app-exchange/)
