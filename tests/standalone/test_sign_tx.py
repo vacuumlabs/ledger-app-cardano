@@ -54,6 +54,7 @@ from tests.standalone.input_files.signTx import (
     testsMary,
     testsMultidelegation,
     testsMultisig,
+    testsProgrammableTokens,
     testsShelleyNoCertificates,
     testsShelleyWithCertificates,
     testsStreaming,
@@ -462,6 +463,7 @@ all_sign_tx_test_cases = (
     + testsConwayWithoutCertificates
     + testsConwayVotingProcedures
     + testsConwayMultisig
+    + testsProgrammableTokens
     + testsMultidelegation
     + testsCatalystRegistration
     + testsCVoteRegistrationCIP36
