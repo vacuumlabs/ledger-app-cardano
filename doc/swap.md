@@ -9,15 +9,19 @@ integration point, the security model, and how the feature is tested.
 ## Table of Contents
 
 1. [Background and Scope](#1-background-and-scope)
-2. [SDK Contract (`lib_standard_app`)](#2-sdk-contract-lib_standard_app)
-3. [File Inventory](#3-file-inventory)
-4. [Flow](#4-flow)
-   - 4.1 [`CHECK_ADDRESS`](#41-check_address)
-   - 4.2 [`GET_PRINTABLE_AMOUNT`](#42-get_printable_amount)
-   - 4.3 [`SIGN_TRANSACTION` setup](#43-sign_transaction-setup)
-   - 4.4 [APDU phase](#44-apdu-phase)
-   - 4.5 [Return to Exchange](#45-return-to-exchange)
-   - 4.6 [Rejection path](#46-rejection-path)
+   - 1.1 [What a Swap Is](#what-a-swap-is)
+   - 1.2 [How Ledger Live Triggers a Swap](#how-ledger-live-triggers-a-swap)
+   - 1.3 [Consequences for This App](#consequences-for-this-app)
+   - 1.4 [Supported Scope](#supported-scope)
+2. [Flow](#2-flow)
+   - 2.1 [`CHECK_ADDRESS`](#21-check_address)
+   - 2.2 [`GET_PRINTABLE_AMOUNT`](#22-get_printable_amount)
+   - 2.3 [`SIGN_TRANSACTION` setup](#23-sign_transaction-setup)
+   - 2.4 [APDU phase](#24-apdu-phase)
+   - 2.5 [Return to Exchange](#25-return-to-exchange)
+   - 2.6 [Rejection path](#26-rejection-path)
+3. [SDK Contract (`lib_standard_app`)](#3-sdk-contract-lib_standard_app)
+4. [File Inventory](#4-file-inventory)
 5. [Security Model](#5-security-model)
    - 5.1 [Why `POLICY_HIDE` is legitimate here](#51-why-policy_hide-is-legitimate-here)
    - 5.2 [Init policy](#52-init-policy)
@@ -29,19 +33,61 @@ integration point, the security model, and how the feature is tested.
    - 6.1 [Unit tests (`tests/unit/`)](#61-unit-tests-testsunit)
    - 6.2 [Functional tests (`tests/swap/`)](#62-functional-tests-testsswap)
    - 6.3 [Fuzzing](#63-fuzzing)
-   - 6.4 [CI](#64-ci)
-7. [Known Gaps](#7-known-gaps)
 
 ---
 
 ## 1. Background and Scope
 
-In a swap, the user does not interact with the Cardano app at all. The **Exchange**
-app is the application the user launches. It receives a swap proposal from Ledger
-Live, verifies the swap partner's signature over that proposal, and displays the
-destination address, the amount and the fee for the user to confirm. Only then does
-Exchange call the Cardano app **as a library**, via the `os_lib_call()` syscall, to
-check an address, format an amount, and finally to sign the payment transaction.
+### What a Swap Is
+
+A **swap** exchanges one crypto asset for another — ADA for ETH, say — through a
+third-party exchange partner (Changelly, ChangeNOW, …), brokered by Ledger Live. The
+user does not send funds to the partner blindly: the partner returns a *signed*
+proposal naming the pay-in address, the pay-in amount, the refund address, the payout
+address and the fee, and the device verifies that signature and has the user confirm
+those values before any coin app signs anything. What the user approved and what the
+signed transaction actually moves must be identical.
+
+Ledger's Exchange protocol covers three operations — `SWAP` (crypto for crypto),
+`SELL` (crypto for fiat) and `FUND` (crypto into a Ledger-partner account) — plus
+their `_NG` variants. They differ in which addresses Exchange checks, not in what the
+coin app does; from the Cardano app's side all three look the same, and this document
+says "swap" for all of them.
+
+Three parties are involved:
+
+- **Ledger Live** (desktop or mobile) is the host. It requests the quote from the
+  partner backend, drives every APDU, and finally broadcasts the signed transaction to
+  the Cardano network. It is transport, not a trust anchor — the whole protocol is
+  designed on the assumption that a compromised host may lie about anything.
+- **The Exchange app** (`app-exchange`) is a separate embedded app on the device and
+  *is* the trust anchor. It enrols the partner's public key against a Ledger
+  signature, verifies the partner's signature over the proposal, owns the screen for
+  the user's confirmation, and calls coin apps as libraries via `os_lib_call()`.
+- **The Cardano app** runs as that library. It answers two questions for Exchange
+  (is this address mine? how do I print this amount?), then signs the payment
+  transaction — with no UI of its own at any point.
+
+> **`os_lib_call()`.** A BOLOS syscall (`os_lib.h:14`), not a function call: it asks
+> the OS to start another *installed* application as a library of the caller, which
+> is the only way one embedded app can invoke another — no host involvement. Its
+> argument is a flat array: `[0]` the library application's name, `[1]` a call
+> identifier (Exchange uses `0x100`), `[2+]` the arguments. The OS suspends the
+> caller and starts the callee's `main()` with that block as `arg0`, which the SDK
+> reads as a `libargs_t *`; the library returns control with `os_lib_end()`. There
+> is no return value — results are written straight into the parameter struct, which
+> lives in Exchange's memory.
+
+### How Ledger Live Triggers a Swap
+
+The user picks *Swap* in Ledger Live, selects source and target accounts and a
+provider, and accepts a quote. Ledger Live opens the Exchange app on the device and
+runs the sequence below (Exchange CLA `0xE0`; command values from `ExchangeClient` in
+the Exchange Python client, and the ordering from its `_perform_valid_exchange()`,
+which is exactly what [`tests/swap/test_cardano_swap.py`](../tests/swap/test_cardano_swap.py)
+drives).
+
+### Consequences for This App
 
 Two constraints follow from this, and nearly every design decision in the swap code
 traces back to one of them:
@@ -75,186 +121,7 @@ The swap flow is deliberately much narrower than the app's normal signing surfac
 
 ---
 
-## 2. SDK Contract (`lib_standard_app`)
-
-The swap protocol lives in the BOLOS SDK, not in this repository. The app supplies
-three callbacks and reads three globals; the SDK owns `main()`, the command dispatch
-and the return path back to Exchange.
-
-> **Note on paths.** The SDK is not checked out on the host filesystem. It exists only
-> inside the Ledger dev-tools container, as one tree per target:
-> `/opt/{ledger,flex,stax,nanox,nanosplus,apex}-secure-sdk`. To read these files:
->
-> ```bash
-> docker exec ledger-app-cardano-container \
->     grep -n 'library_app_main' /opt/flex-secure-sdk/lib_standard_app/main.c
-> ```
->
-> Line references below were taken from `/opt/flex-secure-sdk/lib_standard_app` and
-> may drift when the SDK is bumped.
-
-### Commands
-
-Exchange selects one of four library commands (`swap_lib_calls.h:19-22`):
-
-| Value | Command                | Used by this app |
-|-------|------------------------|------------------|
-| 1     | `RUN_APPLICATION`      | No. This is the "start me as a full app, not a library" command used by Ethereum clones and plugins; Exchange never sends it in a swap. |
-| 2     | `SIGN_TRANSACTION`     | Yes |
-| 3     | `CHECK_ADDRESS`        | Yes |
-| 4     | `GET_PRINTABLE_AMOUNT` | Yes |
-
-### Structures and Globals
-
-| Item | Location |
-|------|----------|
-| `check_address_parameters_t` | `swap_lib_calls.h:36-58` |
-| `get_printable_amount_parameters_t` | `swap_lib_calls.h:63-80` |
-| `create_transaction_parameters_t` | `swap_lib_calls.h:85-113` |
-| `libargs_t` (`id`, `command`, `unused`, union of the three parameter pointers) | `swap_lib_calls.h:119-128` |
-| `MAX_PRINTABLE_AMOUNT_SIZE` (50) | `swap_lib_calls.h:32` |
-| `G_called_from_swap` | `swap_utils.h:23` |
-| `G_swap_response_ready` | `swap_utils.h:27` |
-| `G_swap_signing_return_value_address` | `swap_utils.h:31` |
-| `swap_str_to_u64()` | `swap_utils.h:33` |
-| `swap_parse_config()` (token tickers, unused here) | `swap_utils.h:34` |
-| `swap_handle_check_address()` declaration | `swap_entrypoints.h:64` |
-| `swap_handle_get_printable_amount()` declaration | `swap_entrypoints.h:79` |
-| `swap_copy_transaction_parameters()` declaration | `swap_entrypoints.h:93` |
-| `swap_error_common_code_t` | `swap_error_code_helpers.h:62-70` |
-| `send_swap_error_simple()` (NORETURN) | `swap_error_code_helpers.h:81` |
-| `ENABLE_SWAP=1` -> `DEFINES += HAVE_SWAP` | `Makefile.standard_app` |
-
-The `result` field of `create_transaction_parameters_t` is **owned by the SDK**. The
-app never writes it; the SDK's IO path writes the success flag through
-`G_swap_signing_return_value_address` on the way out.
-
-### SDK Entry and Exit
-
-`main(int arg0)` (`main.c:167-193`) branches on its argument:
-
-- `arg0 == 0`: launched from the dashboard. `standalone_app_main()` clears the three
-  swap globals and runs the normal app.
-- `arg0 != 0`: launched as a library. `arg0` is a `libargs_t *`; the SDK checks
-  `args->id == 0x100` and calls `library_app_main(args)`, otherwise `app_exit()`.
-
-`library_app_main()` (`main.c:113-163`) dispatches on `args->command` and wraps the
-whole switch in `BEGIN_TRY` / `FINALLY { os_lib_end(); }` (`main.c:159`). Every path
-that returns from a handler therefore returns control to Exchange automatically.
-
-The `SIGN_TRANSACTION` case is different, because signing does not return from a
-handler; it runs the app's entire APDU loop. The SDK:
-
-1. calls `swap_copy_transaction_parameters(args->create_transaction)`;
-2. on success sets `G_called_from_swap = true`, `G_swap_response_ready = false`, and
-   stashes `G_swap_signing_return_value_address = &args->create_transaction->result`;
-3. calls `common_app_init()`, then `nbgl_useCaseSpinner("Signing")`, then `app_main()`.
-
-Exit happens from inside the IO layer instead (`io.c:142-152`): when a response is
-being transmitted and `G_called_from_swap && G_swap_response_ready` are both set, the
-SDK writes `*G_swap_signing_return_value_address = (sw == SWO_SUCCESS)` and calls
-`os_lib_end()`.
-
-**Two consequences:** `G_swap_response_ready` must be set **before** the final
-response is sent, and the app must never call `app_exit()` in swap mode.
-
-### Error Reporting
-
-Swap errors are reported with a status word plus two bytes of detail: an SDK-defined
-"common" code (`swap_error_code_helpers.h:62-70`) and an app-defined code. Exchange
-surfaces both, which is what makes a failed swap diagnosable.
-
-Common codes: `SWAP_EC_ERROR_INTERNAL` (0x00), `SWAP_EC_ERROR_WRONG_AMOUNT` (0x01),
-`SWAP_EC_ERROR_WRONG_DESTINATION` (0x02), `SWAP_EC_ERROR_WRONG_FEES` (0x03),
-`SWAP_EC_ERROR_WRONG_METHOD` (0x04), `SWAP_EC_ERROR_CROSSCHAIN_WRONG_MODE` (0x05),
-`SWAP_EC_ERROR_CROSSCHAIN_WRONG_METHOD` (0x06),
-`SWAP_EC_ERROR_CROSSCHAIN_WRONG_HASH` (0x07), `SWAP_EC_ERROR_GENERIC` (0xFF). The
-three cross-chain codes are unused by this app.
-
----
-
-## 3. File Inventory
-
-### Core Module (`src/swap/`)
-
-Every file is wrapped in `#ifdef HAVE_SWAP`, so a build without swap support compiles
-them to empty translation units.
-
-- [`swap_lib.h`](../src/swap/swap_lib.h): the module's public API, the app-specific
-  error codes `SWAP_APP_CODE_DEFAULT` / `_BAD_INS` / `_MULTI_SIGN` /
-  `_DENIED_WITNESS_POLICY` (`swap_lib.h:16-19`), and `SWO_SWAP_CHECKING_FAIL 0x6001`
-  (`swap_lib.h:22`).
-- [`swap_lib.c`](../src/swap/swap_lib.c): owns the swap-validated state and all
-  comparison checks. Module tracing is available via `-DTRACE_SWAP`
-  (`swap_lib.c:21-25`).
-
-  | Symbol | Line | Purpose |
-  |--------|------|---------|
-  | `swap_validated_t` / `G_swap_validated` | `27-34` | `initialized`, `amount`, `fee`, `destination[MAX_HUMAN_ADDRESS_LENGTH]` |
-  | `swap_transaction_params_initialized()` | `36` | Invariant probe used by asserts |
-  | `swap_reject_and_exit()` | `40` | NORETURN wrapper over `send_swap_error_simple()` |
-  | `swap_copy_transaction_parameters()` | `48` | SDK `SIGN_TRANSACTION` setup callback |
-  | `swap_check_destination_validity()` | `108` | Formats the tx output address and compares it to the Exchange-approved destination |
-  | `swap_check_amount_validity()` | `141` | Exact `uint64_t` compare |
-  | `swap_check_fee_validity()` | `152` | Exact `uint64_t` compare |
-
-- [`swap_check_address.c`](../src/swap/swap_check_address.c): the `CHECK_ADDRESS`
-  callback, `swap_handle_check_address()` at `swap_check_address.c:14`.
-- [`swap_printable_amount.c`](../src/swap/swap_printable_amount.c): the
-  `GET_PRINTABLE_AMOUNT` callback, `swap_handle_get_printable_amount()` at
-  `swap_printable_amount.c:13`.
-
-There is no app-owned `main.c` or `libargs` dispatcher; the SDK's
-`lib_standard_app/main.c` performs the dispatch.
-
-### Integration Hooks
-
-Every `#ifdef HAVE_SWAP` site outside `src/swap/` (include blocks omitted):
-
-| Site | What it does |
-|------|--------------|
-| [`app_main.c:103-108`](../src/app_main.c#L103) | Suppresses `ui_menu_main()`. The screen belongs to Exchange. |
-| [`apdu/dispatcher.c:142-151`](../src/apdu/dispatcher.c#L142) | Instruction allow-list: `INS_GET_VERSION`, `INS_GET_PUBLIC_KEY`, `INS_DERIVE_ADDRESS`, `INS_SIGN_TX`. Anything else -> `SWAP_EC_ERROR_WRONG_METHOD` / `SWAP_APP_CODE_BAD_INS`. |
-| [`handler/sign_tx.c:306-312`](../src/handler/sign_tx.c#L306) | Requires exactly one witness. A host-supplied witness count above one would let the device sign extra inputs. |
-| [`handler/sign_tx.c:371-381`](../src/handler/sign_tx.c#L371) | Runs `policyForSignTxSwapInit()` in place of the normal init policy. |
-| [`handler/sign_tx.c:394-401`](../src/handler/sign_tx.c#L394) | Skips the signing spinner. |
-| [`handler/sign_tx.c:492-503`](../src/handler/sign_tx.c#L492) | Double-sign guard: a second `P1_TX_INIT` after a completed swap signature aborts with `SWAP_APP_CODE_MULTI_SIGN`. Also resets `G_swap_response_ready = false`, because the tx hash is returned as an **intermediate** response and must not trigger `os_lib_end()`. |
-| [`handler/sign_tx.c:559-574`](../src/handler/sign_tx.c#L559) | On `P1_TX_CONFIRM`: frees `raw_tx`, skips `TX_STATE_UI_REVIEW`, transitions straight to `TX_STATE_APPROVED`, and returns the transaction hash. `finalize_sign_tx()` is not used in this flow. |
-| [`handler/sign_tx.c:655-663`](../src/handler/sign_tx.c#L655) | Sets `G_swap_response_ready = true` immediately before sending the **last** witness signature, so the SDK IO path returns to Exchange. |
-| [`handler/sign_tx.c:739-745`](../src/handler/sign_tx.c#L739) | Passes `isSwap` into `policyForSignTxWitness()`. |
-| [`handler/sign_tx.c:753-757`](../src/handler/sign_tx.c#L753) | Invariant: swap-validated parameters may only exist inside a swap invocation. |
-| [`handler/sign_tx.c:763-767`](../src/handler/sign_tx.c#L763) | Witness policy denial -> `SWAP_APP_CODE_DENIED_WITNESS_POLICY`. |
-| [`handler/sign_tx.c:782-785`](../src/handler/sign_tx.c#L782) | Invariant: the swap flow must have terminated before `finalize_witness()` returns. |
-| [`transaction/tx_processing.c:376-380`](../src/transaction/tx_processing.c#L376) | Fee check against the Exchange-approved fee. |
-| [`transaction/tx_processing.c:994-1001`](../src/transaction/tx_processing.c#L994) | Rejects any treasury donation; it is not part of the reviewed ADA amount. |
-| [`transaction/tx_processing_outputs.c:118-142`](../src/transaction/tx_processing_outputs.c#L118) | Per-output `policyForSignTxSwapOutput()`, plus destination and amount checks for the third-party output, plus the third-party output counter. |
-| [`transaction/tx_processing_outputs.c:483-487`](../src/transaction/tx_processing_outputs.c#L483) | Enforces exactly one third-party output after the output loop. |
-| [`transaction/tx_processing.h:74`](../src/transaction/tx_processing.h#L74) | `swap_third_party_output_count` in `tx_processing_state_t`. |
-
-### Security Policies
-
-| Function | Location |
-|----------|----------|
-| `policyForSignTxSwapInit()` | [`securityPolicy.c:537-565`](../src/securityPolicy/securityPolicy.c#L537) |
-| `policyForSignTxSwapOutput()` | [`securityPolicy.c:913-958`](../src/securityPolicy/securityPolicy.c#L913) |
-| `_swapWitnessPolicy()` (static) | [`securityPolicy.c:2664-2689`](../src/securityPolicy/securityPolicy.c#L2664) |
-| `policyForSignTxWitness(..., bool isSwap, ...)` | [`securityPolicy.c:2694-2705`](../src/securityPolicy/securityPolicy.c#L2694) |
-
-### Build and CI Configuration
-
-| File | Relevance |
-|------|-----------|
-| [`Makefile`](../Makefile) | `ENABLE_SWAP = 1`; `APP_SOURCE_PATH += src` pulls in `src/swap/*.c` |
-| [`ledger_app.toml`](../ledger_app.toml) | `[pytest.swap] directory = "./tests/swap/"` |
-| `.github/workflows/build_and_functional_tests.yml` | `tests_swap` job, via `ledger-app-workflows/.github/workflows/reusable_swap_tests.yml@v1` |
-| `.github/workflows/python_client_checks.yml` | `lint_swap` job over `tests/swap` |
-| [`tests/unit/CMakeLists.txt`](../tests/unit/CMakeLists.txt) | `src/swap` and SDK `lib_standard_app` include paths; the `cardano_sign_tx_core_swap` library built with `HAVE_SWAP` |
-| [`tests/fuzzing/CMakeLists.txt`](../tests/fuzzing/CMakeLists.txt) | `set(DEFINES FUZZ HAVE_SWAP)`; all of `src/swap/*.c` is compiled into `code_lib`, and the swap harnesses are built like any other |
-| [`.clusterfuzzlite/build.sh`](../.clusterfuzzlite/build.sh) | Builds the fuzzers for ClusterFuzzLite, zips `seeds/<fuzzer>/`, and copies `dict/cardano.dict` to `<fuzzer>.dict` |
-
----
-
-## 4. Flow
+## 2. Flow
 
 ```
  Ledger Live            Exchange app                 Cardano app (library)
@@ -297,7 +164,7 @@ On any validation failure the app calls `swap_reject_and_exit()` instead, which 
 `0x6001` with the two detail bytes and never returns. Control lands back in Exchange,
 which reports the failure to Ledger Live.
 
-### 4.1 `CHECK_ADDRESS`
+### 2.1 `CHECK_ADDRESS`
 
 Exchange asks whether the refund address is really derived from a key on this device.
 This prevents a malicious host from naming a refund address it controls.
@@ -328,7 +195,7 @@ Exchange wraps this call (and `GET_PRINTABLE_AMOUNT`) in a CRC check over its ow
 plus a stack canary: the callee must not disturb Exchange's memory. This callback
 therefore uses only locals and touches no app globals.
 
-### 4.2 `GET_PRINTABLE_AMOUNT`
+### 2.2 `GET_PRINTABLE_AMOUNT`
 
 [`swap_handle_get_printable_amount()`](../src/swap/swap_printable_amount.c#L13) zeroes
 the output buffer, converts the decimal-string amount with the SDK's
@@ -340,7 +207,7 @@ The SDK gives this callback no return value, so **the error convention is to lea
 `swap_str_to_u64()` is a legitimate outcome for malformed partner input; a failure of
 `format_ada_amount()` on an already-parsed `uint64_t` is not, and asserts.
 
-### 4.3 `SIGN_TRANSACTION` setup
+### 2.3 `SIGN_TRANSACTION` setup
 
 [`swap_copy_transaction_parameters()`](../src/swap/swap_lib.c#L48) first rejects a
 non-empty `destination_address_extra_id` (`swap_lib.c:53-61`). Cardano has no
@@ -367,7 +234,7 @@ the data it guards become visible atomically.
 
 Returning `false` from here aborts the swap before `G_called_from_swap` is ever set.
 
-### 4.4 APDU phase
+### 2.4 APDU phase
 
 Exchange is now suspended and Ledger Live talks to the Cardano app directly. Only four
 instructions are reachable
@@ -391,7 +258,7 @@ the swap with `SWAP_APP_CODE_BAD_INS`.
 - **`P1_WITNESS`**: `policyForSignTxWitness()` is called with `isSwap = true`. Because
   there is exactly one witness, that witness is also the last one.
 
-### 4.5 Return to Exchange
+### 2.5 Return to Exchange
 
 Immediately before the final witness signature is transmitted,
 [`sign_tx.c:655-663`](../src/handler/sign_tx.c#L655) sets
@@ -405,12 +272,194 @@ assumption ever broke.
 The app must never call `app_exit()` here. That would drop the user to the dashboard
 with Exchange's swap left unfinished.
 
-### 4.6 Rejection path
+### 2.6 Rejection path
 
 [`swap_reject_and_exit()`](../src/swap/swap_lib.c#L40) calls the SDK's
 `send_swap_error_simple(SWO_SWAP_CHECKING_FAIL, common_code, app_code)`, which is
 NORETURN. The trailing `LEDGER_ASSERT(false, ...)` documents that and keeps the
 contract explicit at every call site even if the SDK annotation regresses.
+
+---
+
+## 3. SDK Contract (`lib_standard_app`)
+
+The swap protocol lives in the BOLOS SDK, not in this repository. The app supplies
+three callbacks and reads three globals; the SDK owns `main()`, the command dispatch
+and the return path back to Exchange.
+
+> **Note on paths.** The SDK is not checked out on the host filesystem. It exists only
+> inside the Ledger dev-tools container, as one tree per target:
+> `/opt/{ledger,flex,stax,nanox,nanosplus,apex}-secure-sdk`. To read these files:
+>
+> ```bash
+> docker exec ledger-app-cardano-container \
+>     grep -n 'library_app_main' /opt/flex-secure-sdk/lib_standard_app/main.c
+> ```
+>
+> Line references below were taken from `/opt/flex-secure-sdk/lib_standard_app` and
+> may drift when the SDK is bumped.
+
+### Commands
+
+Exchange selects one of four library commands (`swap_lib_calls.h:19-22`):
+
+| Value | Command                | Used by this app |
+|-------|------------------------|------------------|
+| 1     | `RUN_APPLICATION`      | No. This is the "start me as a full app, not a library" command used by Ethereum clones and plugins; Exchange never sends it in a swap. |
+| 2     | `SIGN_TRANSACTION`     | Yes |
+| 3     | `CHECK_ADDRESS`        | Yes |
+| 4     | `GET_PRINTABLE_AMOUNT` | Yes |
+
+Which of these commands the app receives depends on whether ADA is the source or the
+destination currency of the swap; whichever ones it does receive always arrive in the
+same order. As the destination currency, the app gets `CHECK_ADDRESS` followed by
+`GET_PRINTABLE_AMOUNT` for the payout address, and nothing more. As the source
+currency, it gets that same pair for the refund address and then `SIGN_TRANSACTION`
+— the sequence drawn in [2](#2-flow). Each command is a separate library launch
+ending in `os_lib_end()`, so the app carries no state between them and must not
+assume a preceding call happened.
+
+### Structures and Globals
+
+| Item | Location |
+|------|----------|
+| `check_address_parameters_t` | `swap_lib_calls.h:36-58` |
+| `get_printable_amount_parameters_t` | `swap_lib_calls.h:63-80` |
+| `create_transaction_parameters_t` | `swap_lib_calls.h:85-113` |
+| `libargs_t` (`id`, `command`, `unused`, union of the three parameter pointers) | `swap_lib_calls.h:119-128` |
+| `MAX_PRINTABLE_AMOUNT_SIZE` (50) | `swap_lib_calls.h:32` |
+| `G_called_from_swap` | `swap_utils.h:23` |
+| `G_swap_response_ready` | `swap_utils.h:27` |
+| `G_swap_signing_return_value_address` | `swap_utils.h:31` |
+| `swap_str_to_u64()` | `swap_utils.h:33` |
+| `swap_parse_config()` (token tickers, unused here) | `swap_utils.h:34` |
+| `swap_handle_check_address()` declaration | `swap_entrypoints.h:64` |
+| `swap_handle_get_printable_amount()` declaration | `swap_entrypoints.h:79` |
+| `swap_copy_transaction_parameters()` declaration | `swap_entrypoints.h:93` |
+| `swap_error_common_code_t` | `swap_error_code_helpers.h:61-71` |
+| `send_swap_error_simple()` (NORETURN) | `swap_error_code_helpers.h:81` |
+| `ENABLE_SWAP=1` -> `DEFINES += HAVE_SWAP` | `Makefile.standard_app` |
+
+The `result` field of `create_transaction_parameters_t` is **owned by the SDK**. The
+app never writes it; the SDK's IO path writes the success flag through
+`G_swap_signing_return_value_address` on the way out.
+
+### SDK Entry and Exit
+
+`main(int arg0)` (`main.c:167-193`) branches on its argument:
+
+- `arg0 == 0`: launched from the dashboard. `standalone_app_main()` clears the three
+  swap globals and runs the normal app.
+- `arg0 != 0`: launched as a library. `arg0` is a `libargs_t *`; the SDK checks
+  `args->id == 0x100` and calls `library_app_main(args)`, otherwise `app_exit()`.
+
+`library_app_main()` (`main.c:113-163`) dispatches on `args->command` and wraps the
+whole switch in `BEGIN_TRY` / `FINALLY { os_lib_end(); }` (`main.c:159`). Every path
+that returns from a handler therefore returns control to Exchange automatically.
+
+The `SIGN_TRANSACTION` case is different, because signing does not return from a
+handler; it runs the app's entire APDU loop. The SDK:
+
+1. calls `swap_copy_transaction_parameters(args->create_transaction)`;
+2. on success sets `G_called_from_swap = true`, `G_swap_response_ready = false`, and
+   stashes `G_swap_signing_return_value_address = &args->create_transaction->result`;
+3. calls `common_app_init()`, then `nbgl_useCaseSpinner("Signing")`, then `app_main()`.
+
+Exit happens from inside the IO layer instead (`io.c:142-152`): when a response is
+being transmitted and `G_called_from_swap && G_swap_response_ready` are both set, the
+SDK writes `*G_swap_signing_return_value_address = (sw == SWO_SUCCESS)` and calls
+`os_lib_end()`.
+
+**Two consequences:** `G_swap_response_ready` must be set **before** the final
+response is sent, and the app must never call `app_exit()` in swap mode.
+
+### Error Reporting
+
+Swap errors are reported with a status word plus two bytes of detail: an SDK-defined
+"common" code (`swap_error_code_helpers.h:61-71`) and an app-defined code. Exchange
+surfaces both, which is what makes a failed swap diagnosable.
+
+Common codes: `SWAP_EC_ERROR_INTERNAL` (0x00), `SWAP_EC_ERROR_WRONG_AMOUNT` (0x01),
+`SWAP_EC_ERROR_WRONG_DESTINATION` (0x02), `SWAP_EC_ERROR_WRONG_FEES` (0x03),
+`SWAP_EC_ERROR_WRONG_METHOD` (0x04), `SWAP_EC_ERROR_CROSSCHAIN_WRONG_MODE` (0x05),
+`SWAP_EC_ERROR_CROSSCHAIN_WRONG_METHOD` (0x06),
+`SWAP_EC_ERROR_CROSSCHAIN_WRONG_HASH` (0x07), `SWAP_EC_ERROR_GENERIC` (0xFF). The
+three cross-chain codes are unused by this app.
+
+---
+
+## 4. File Inventory
+
+### Core Module (`src/swap/`)
+
+Every file is wrapped in `#ifdef HAVE_SWAP`, so a build without swap support compiles
+them to empty translation units.
+
+- [`swap_lib.h`](../src/swap/swap_lib.h): the module's public API, the app-specific
+  error codes `SWAP_APP_CODE_DEFAULT` / `_BAD_INS` / `_MULTI_SIGN` /
+  `_DENIED_WITNESS_POLICY` (`swap_lib.h:16-19`), and `SWO_SWAP_CHECKING_FAIL 0x6001`
+  (`swap_lib.h:22`).
+- [`swap_lib.c`](../src/swap/swap_lib.c): owns the swap-validated state and all
+  comparison checks. Module tracing is available via `-DTRACE_SWAP`
+  (`swap_lib.c:21-25`).
+
+  | Symbol | Line | Purpose |
+  |--------|------|---------|
+  | `swap_validated_t` / `G_swap_validated` | `27-34` | `initialized`, `amount`, `fee`, `destination[MAX_HUMAN_ADDRESS_LENGTH]` |
+  | `swap_transaction_params_initialized()` | `36` | Invariant probe used by asserts |
+  | `swap_reject_and_exit()` | `40` | NORETURN wrapper over `send_swap_error_simple()` |
+  | `swap_copy_transaction_parameters()` | `48` | SDK `SIGN_TRANSACTION` setup callback |
+  | `swap_check_destination_validity()` | `108` | Formats the tx output address and compares it to the Exchange-approved destination |
+  | `swap_check_amount_validity()` | `141` | Exact `uint64_t` compare |
+  | `swap_check_fee_validity()` | `152` | Exact `uint64_t` compare |
+
+- [`swap_check_address.c`](../src/swap/swap_check_address.c): the `CHECK_ADDRESS`
+  callback, `swap_handle_check_address()` at `swap_check_address.c:14`.
+- [`swap_printable_amount.c`](../src/swap/swap_printable_amount.c): the
+  `GET_PRINTABLE_AMOUNT` callback, `swap_handle_get_printable_amount()` at
+  `swap_printable_amount.c:13`.
+
+There is no app-owned `main.c` or `libargs` dispatcher; the SDK's
+`lib_standard_app/main.c` performs the dispatch.
+
+### Integration Hooks
+
+Every `#ifdef HAVE_SWAP` site outside `src/swap/` (include blocks omitted). Note that
+grepping for the guard does not find everything: the swap policies in
+[`securityPolicy.c`](../src/securityPolicy/securityPolicy.c) are unguarded and compile
+into every build; they are described in [5.2](#52-init-policy)-[5.4](#54-witness-policy).
+
+| Site | What it does |
+|------|--------------|
+| [`app_main.c:103-108`](../src/app_main.c#L103) | Suppresses `ui_menu_main()`. The screen belongs to Exchange. |
+| [`apdu/dispatcher.c:142-151`](../src/apdu/dispatcher.c#L142) | Instruction allow-list: `INS_GET_VERSION`, `INS_GET_PUBLIC_KEY`, `INS_DERIVE_ADDRESS`, `INS_SIGN_TX`. Anything else -> `SWAP_EC_ERROR_WRONG_METHOD` / `SWAP_APP_CODE_BAD_INS`. |
+| [`handler/sign_tx.c:306-312`](../src/handler/sign_tx.c#L306) | Requires exactly one witness. A host-supplied witness count above one would let the device sign extra inputs. |
+| [`handler/sign_tx.c:371-381`](../src/handler/sign_tx.c#L371) | Runs `policyForSignTxSwapInit()` in place of the normal init policy. |
+| [`handler/sign_tx.c:394-401`](../src/handler/sign_tx.c#L394) | Skips the signing spinner. |
+| [`handler/sign_tx.c:492-503`](../src/handler/sign_tx.c#L492) | Double-sign guard: a second `P1_TX_INIT` after a completed swap signature aborts with `SWAP_APP_CODE_MULTI_SIGN`. Also resets `G_swap_response_ready = false`, because the tx hash is returned as an **intermediate** response and must not trigger `os_lib_end()`. |
+| [`handler/sign_tx.c:559-574`](../src/handler/sign_tx.c#L559) | On `P1_TX_CONFIRM`: frees `raw_tx`, skips `TX_STATE_UI_REVIEW`, transitions straight to `TX_STATE_APPROVED`, and returns the transaction hash. `finalize_sign_tx()` is not used in this flow. |
+| [`handler/sign_tx.c:655-663`](../src/handler/sign_tx.c#L655) | Sets `G_swap_response_ready = true` immediately before sending the **last** witness signature, so the SDK IO path returns to Exchange. |
+| [`handler/sign_tx.c:739-745`](../src/handler/sign_tx.c#L739) | Passes `isSwap` into `policyForSignTxWitness()`. |
+| [`handler/sign_tx.c:753-757`](../src/handler/sign_tx.c#L753) | Invariant: swap-validated parameters may only exist inside a swap invocation. |
+| [`handler/sign_tx.c:763-767`](../src/handler/sign_tx.c#L763) | Witness policy denial -> `SWAP_APP_CODE_DENIED_WITNESS_POLICY`. |
+| [`handler/sign_tx.c:782-785`](../src/handler/sign_tx.c#L782) | Invariant: the swap flow must have terminated before `finalize_witness()` returns. |
+| [`transaction/tx_processing.c:376-380`](../src/transaction/tx_processing.c#L376) | Fee check against the Exchange-approved fee. |
+| [`transaction/tx_processing.c:994-1001`](../src/transaction/tx_processing.c#L994) | Rejects any treasury donation; it is not part of the reviewed ADA amount. |
+| [`transaction/tx_processing_outputs.c:118-142`](../src/transaction/tx_processing_outputs.c#L118) | Per-output `policyForSignTxSwapOutput()`, plus destination and amount checks for the third-party output, plus the third-party output counter. |
+| [`transaction/tx_processing_outputs.c:483-487`](../src/transaction/tx_processing_outputs.c#L483) | Enforces exactly one third-party output after the output loop. |
+| [`transaction/tx_processing.h:74`](../src/transaction/tx_processing.h#L74) | `swap_third_party_output_count` in `tx_processing_state_t`. |
+
+### Build and CI Configuration
+
+| File | Relevance |
+|------|-----------|
+| [`Makefile`](../Makefile) | `ENABLE_SWAP = 1`; `APP_SOURCE_PATH += src` pulls in `src/swap/*.c` |
+| [`ledger_app.toml`](../ledger_app.toml) | `[pytest.swap] directory = "./tests/swap/"` |
+| `.github/workflows/build_and_functional_tests.yml` | `tests_swap` job, via `ledger-app-workflows/.github/workflows/reusable_swap_tests.yml@v1` |
+| `.github/workflows/python_client_checks.yml` | `lint_swap` job over `tests/swap` |
+| [`tests/unit/CMakeLists.txt`](../tests/unit/CMakeLists.txt) | `src/swap` and SDK `lib_standard_app` include paths; the `cardano_sign_tx_core_swap` library built with `HAVE_SWAP` |
+| [`tests/fuzzing/CMakeLists.txt`](../tests/fuzzing/CMakeLists.txt) | `set(DEFINES FUZZ HAVE_SWAP)`; all of `src/swap/*.c` is compiled into `code_lib`, and the swap harnesses are built like any other |
+| [`.clusterfuzzlite/build.sh`](../.clusterfuzzlite/build.sh) | Builds the fuzzers for ClusterFuzzLite, zips `seeds/<fuzzer>/`, and copies `dict/cardano.dict` to `<fuzzer>.dict` |
 
 ---
 
@@ -501,8 +550,8 @@ and is not repeated here.
 
 ### 6.1 Unit tests (`tests/unit/`)
 
-[`test_handler_sign_tx_swap.c`](../tests/unit/test_handler_sign_tx_swap.c) holds 19
-cmocka cases in three groups:
+[`test_handler_sign_tx_swap.c`](../tests/unit/test_handler_sign_tx_swap.c) holds cmocka
+cases in three groups:
 
 - **Policy-only**: init policy accepts the plain-ADA shape and rejects required signers
   and unrestricted mode; output policy accepts plain device-owned change and rejects
@@ -518,8 +567,8 @@ cmocka cases in three groups:
 Mechanically, these tests override `abort()` and `longjmp` out of the SDK's
 `os_lib_end()` so a NORETURN rejection can be observed and asserted.
 
-[`test_swap_check_address.c`](../tests/unit/test_swap_check_address.c) holds 7 cmocka
-cases against the **real** `swap_check_address.c` — it is the one swap source file linked
+[`test_swap_check_address.c`](../tests/unit/test_swap_check_address.c) tests the
+**real** `swap_check_address.c` — it is the one swap source file linked
 unstubbed into a unit test, with `HAVE_SWAP` set on the target:
 
 - **Rejections**: `address_parameters == NULL`, `address_to_check == NULL`, a length byte
@@ -532,8 +581,8 @@ unstubbed into a unit test, with `HAVE_SWAP` set on the target:
 Every rejection case pre-sets `params->result = 1` so that the handler's own
 `params->result = 0` is what the assertion observes, not a zero-initialized field.
 
-[`test_security_policy_witness.c:273-399`](../tests/unit/test_security_policy_witness.c#L273)
-adds 8 swap-witness cases: non-ordinary mode, staking, multisig payment, pool cold key
+[`test_security_policy_witness.c`](../tests/unit/test_security_policy_witness.c)
+adds swap-witness cases: non-ordinary mode, staking, multisig payment, pool cold key
 and DRep paths all deny; an ordinary payment path hides; a second account and an unusual
 address index deny.
 
@@ -546,17 +595,6 @@ Supporting mocks:
 | `tests/unit/mock_includes/swap_error_code_helpers.h` | Local copy of the SDK error enum and `send_swap_error_simple` |
 | `tests/unit/mock_sources/os_lib_end_stub.c` | Asserts on an unexpected `os_lib_end()` in non-swap tests |
 | `tests/unit/test_utils/io_capture.c` | Reproduces the SDK behavior: calls `os_lib_end()` from the response path once `G_called_from_swap && G_swap_response_ready` |
-
-Run:
-
-```bash
-make -C tests tests-unit          # regenerate fixtures, build, run everything
-# or, targeted:
-cmake -S tests/unit -B tests/unit/build
-cmake --build tests/unit/build -j8
-ctest --test-dir tests/unit/build -R 'test_handler_sign_tx_swap|test_swap_check_address' \
-    --output-on-failure
-```
 
 ### 6.2 Functional tests (`tests/swap/`)
 
@@ -586,27 +624,13 @@ Local details worth knowing:
 - `conftest.py` pins per-xdist-worker Speculos API/APDU ports instead of relying on
   ragger's free-port search, which races under parallel execution.
 
-Run (full detail in [`tests/swap/README.md`](../tests/swap/README.md)):
+Setup and invocation are in [`tests/swap/README.md`](../tests/swap/README.md). One
+thing that README does not mention: `pytest.ini` sets `testpaths = tests/standalone`,
+so `tests/swap/` must always be named explicitly.
 
-```bash
-make ENABLE_SWAP=1
-source tests/venv/bin/activate
-python3 tests/swap/helper_tool_clone_dependencies.py
-# build the dependencies INSIDE the dev-tools container, so API levels match
-docker exec --user "$(id -u)":"$(id -g)" ledger-app-cardano-container \
-    bash -c "cd /app/tests/swap && python3 helper_tool_build_dependencies.py"
-pytest tests/swap/ --device stax          # or: flex | nanox | nanos+ | all
-```
-
-`pytest.ini` sets `testpaths = tests/standalone`, so `tests/swap/` must always be named
-explicitly.
-
-Two standing rules from [`doc/testing.md`](testing.md):
-
-- Swap and ragger tests are run **only on explicit request**; they are slow and require
-  built dependencies.
-- **Never** regenerate golden snapshots (`--golden_run`). Snapshots must be reviewed by
-  a human before being committed; a snapshot mismatch is reported, not fixed.
+In CI this suite runs as `tests_swap` in `build_and_functional_tests.yml`, through
+`reusable_swap_tests.yml@v1`, which clones and builds Exchange and Ethereum itself —
+the local helper scripts exist only for developer machines.
 
 ### 6.3 Fuzzing
 
@@ -643,59 +667,7 @@ The shared dictionary and the seed corpora described in
 but with a caveat: `generate_seed_corpus.py` produces **no** swap seeds, so all three swap
 fuzzers cold-start from `dict/cardano.dict` plus random bytes. `fuzz_swap_check_address` in
 particular is unlikely to reach the closing `strcmp` unaided, since that needs a valid
-Shelley path paired with the exact bech32 address the device derives from it. A hand-written
-seed for each swap harness would be the cheapest available coverage win.
-
-### 6.4 CI
-
-- `tests_swap` in `build_and_functional_tests.yml` runs the functional suite through
-  `reusable_swap_tests.yml@v1`, which clones and builds Exchange and Ethereum itself;
-  the local helper scripts are for developer machines.
-- `lint_swap` in `python_client_checks.yml` runs pylint and mypy over `tests/swap`.
-- Swap unit tests are picked up by the generic unit-test workflow.
-- `.github/workflows/clusterfuzzlite.yml` runs the fuzzers, swap harnesses included, via
-  `ledger-app-workflows/.github/workflows/reusable_clusterfuzz_tests.yml@v1`. There is no
-  separate swap-fuzzing job.
-
----
-
-## 7. Known Gaps
-
-Recorded for follow-up; none of these are changed by this document.
-
-1. **`swap_lib.c` is never compiled into unit tests.** It is replaced wholesale by
-   `swap_test_stubs.c`, so `swap_copy_transaction_parameters()` (including the
-   stack-copy / BSS-zero / commit sequence) and the actual string and integer
-   comparisons have no cmocka coverage. They are now exercised for real by
-   `fuzz_swap_sign_tx` and end-to-end by the functional suite, but never with asserted
-   expected values.
-2. **`swap_printable_amount.c` has no unit test.** Its coverage is `fuzz_swap_printable_amount`
-   plus the indirect Exchange path. `swap_check_address.c` is no longer in this gap — see
-   `test_swap_check_address.c` in 6.1.
-3. **The instruction allow-list and the menu gate are untested at any level**
-   ([`dispatcher.c:142-151`](../src/apdu/dispatcher.c#L142),
-   [`app_main.c:103`](../src/app_main.c#L103)). `fuzz_swap_sign_tx` does not close this:
-   it hardcodes `CLA` and `INS_SIGN_TX`, so no rejected instruction is ever dispatched in
-   swap mode.
-4. **Wrong-fee denial has no functional test.** The `*_wrong_fees` scenarios are
-   excluded from the parametrization; coverage is unit-only.
-5. **`tests/fuzzing/mock/os_mocks.c` mocks `swap_check_validity()`**, a symbol that no
-   longer exists in `src/` (the real API is `swap_check_amount_validity` /
-   `swap_check_destination_validity`). Dead mock.
-6. **Stale git-tracked stax snapshots** remain under the pre-rename
-   `test_cardano_swap_reject_*` directory names; the current tests emit `..._deny_...`.
-7. **Swap test dependencies are unpinned.** `_helper_tool.py` hard-resets Exchange and
-   Ethereum to `origin/develop`, which is the direct cause of the API-level and
-   `lists.h` build failures documented in the README's troubleshooting section.
-8. **`test_security_policy_witness.c` is built without `HAVE_SWAP`** yet passes
-   `isSwap = true`. This works only because `securityPolicy.c` has no `HAVE_SWAP`
-   guards; if guards were ever added there, those tests would silently diverge from a
-   swap-enabled build.
-9. **`tests/swap/README.md` contains two claims that no longer match the code.** Its
-   "Instruction Whitelist" note omits `INS_DERIVE_ADDRESS`, and its "Multi-Output
-   Transactions" note says the implementation "validates only the first matching
-   third-party output"; the code now requires exactly one and rejects any transaction
-   with more.
+Shelley path paired with the exact bech32 address the device derives from it.
 
 ---
 
