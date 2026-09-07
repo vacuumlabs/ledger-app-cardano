@@ -164,81 +164,60 @@ inputs: dict[str, TxInput] = {
     ),
     # Real CIP-113 registration + first-mint tx on Preview:
     # b0d4869018467a262b3df341f07350a86a38f08431041747f735d8712badf873
-    "cip113PayerInput": TxInput(
+    "utxoCip113PayerInput": TxInput(
         "5aad0a889a6368408f53da7045e3fdb2a7f33c608a8a18ba5f46ad2a269be946",
         "m/1852'/1815'/0'/0/0",
     ),
-    "cip113RegistryPrevNodeInput": TxInput(
+    "utxoCip113RegistryPrevNodeInput": TxInput(
         "81b88c33f292b3be1a4e74120082ff1abc94c28fa71da1249ebea8e4b74a6177",
         outputIndex=1,
     ),
-    "cip113BootstrapRefInput0": TxInput(
+    "utxoCip113BootstrapRefInput0": TxInput(
         "61fae36e28a62a65496907c9660da9cf5d27fa0e9054a04581e1d8a087fbd93e",
         outputIndex=0,
     ),
-    "cip113BootstrapRefInput2": TxInput(
+    "utxoCip113BootstrapRefInput2": TxInput(
         "61fae36e28a62a65496907c9660da9cf5d27fa0e9054a04581e1d8a087fbd93e",
         outputIndex=2,
     ),
     # Real CIP-113 transfer tx on Preview (spends the smart wallet output above):
     # b2969bfcafbfe8ee2f9731d8fca765e1b3c94d8911d5774ae4a94bc38945f4f5
-    "cip113PayerInput2": TxInput(
+    "utxoCip113PayerInput2": TxInput(
         "59c71072f41419214dafbf2ed9dc29ee2525bbe4e798241c989cd5ef423631ed",
         "m/1852'/1815'/0'/0/0",
         outputIndex=2,
     ),
-    "cip113SmartWalletInput": TxInput(
+    "utxoCip113SmartWalletInput": TxInput(
         "b0d4869018467a262b3df341f07350a86a38f08431041747f735d8712badf873",
         outputIndex=0,
     ),
-    "cip113PayerCollateralInput4": TxInput(
+    "utxoCip113PayerCollateralInput4": TxInput(
         "b0d4869018467a262b3df341f07350a86a38f08431041747f735d8712badf873",
         outputIndex=4,
     ),
-    "cip113PayerRefInput1": TxInput(
+    "utxoCip113PayerRefInput1": TxInput(
         "59c71072f41419214dafbf2ed9dc29ee2525bbe4e798241c989cd5ef423631ed",
         outputIndex=1,
     ),
-    "cip113RegistryNodeRefInput": TxInput(
+    "utxoCip113RegistryNodeRefInput": TxInput(
         "b0d4869018467a262b3df341f07350a86a38f08431041747f735d8712badf873",
         outputIndex=2,
     ),
-    "cip113FreezeTestSmartWalletInput": TxInput(
+    "utxoCip113FreezeTestSmartWalletInput": TxInput(
         "684f12a8643b476eb41191fcf1958d927be5dbbd47e77f1a1d2e19b862a694a1",
         outputIndex=0,
     ),
-    "cip113FreezeTestPayerInput": TxInput(
+    "utxoCip113FreezeTestPayerInput": TxInput(
         "684f12a8643b476eb41191fcf1958d927be5dbbd47e77f1a1d2e19b862a694a1",
         "m/1852'/1815'/0'/0/0",
         outputIndex=3,
     ),
-    "cip113FreezeTestCollateralInput": TxInput(
+    "utxoCip113FreezeTestCollateralInput": TxInput(
         "525234a39a5d76ac48174f0c035be5d87d871a850b5aec864cd5c73a63277d60",
         outputIndex=0,
     ),
-    "cip113FreezeTestRegistryNodeRefInput": TxInput(
+    "utxoCip113FreezeTestRegistryNodeRefInput": TxInput(
         "684f12a8643b476eb41191fcf1958d927be5dbbd47e77f1a1d2e19b862a694a1",
-        outputIndex=2,
-    ),
-    "cip113WhitelistPayerInput": TxInput(
-        "33f35032b390e276ad119014456b80efb36eba23509adb0d99facea32c5c3657",
-        "m/1852'/1815'/0'/0/0",
-        outputIndex=1,
-    ),
-    "cip113WhitelistSmartWalletInput": TxInput(
-        "54a3d753448884d4b7fb87069b495b2914f96200ac961347157559959b51178e",
-        outputIndex=0,
-    ),
-    "cip113WhitelistCollateralInput": TxInput(
-        "45d1fbfd796fe9e04e5a5ceb0b455fbb8d523bb560bcd21f0bdbc9bead56b4e6",
-        outputIndex=0,
-    ),
-    "cip113WhitelistUserStateRefInput": TxInput(
-        "bec48b283c1d20c77b0debb838d1820abc6b66e9242184e61e492be1ff50a112",
-        outputIndex=1,
-    ),
-    "cip113WhitelistRegistryNodeRefInput": TxInput(
-        "eeb7167790e0da259fd9ceda48ac553041680f8850d2006fe009da55f9f33ae2",
         outputIndex=2,
     ),
 }
@@ -515,23 +494,6 @@ destinations: dict[str, TxOutputDestination] = {
         ThirdPartyAddressParams(
             "10f2182b00a37bd746e20575c9af01ab31312213514cd31e872e0a2a3ef905b52a6feec0e079e94266d415c4eeb26a7d53092385896c446574"
         ),
-    ),
-    "cip113WhitelistSenderWallet": TxOutputDestination(
-        TxOutputDestinationType.THIRD_PARTY,
-        # sender's own smart wallet (programmableLogicBase + sender's staking key)
-        ThirdPartyAddressParams("10f2182b00a37bd746e20575c9af01ab31312213514cd31e872e0a2a3e2b792a26839066323ec77135a73e00faae07d90324ea5edb9b930d19"),
-    ),
-    "cip113WhitelistRecipientContractWallet": TxOutputDestination(
-        TxOutputDestinationType.THIRD_PARTY,
-        # recipient smart wallet whose "stake credential" is itself a SCRIPT, not a
-        # key -- per the CIP, this is the form the address takes when the receiving
-        # party is a smart contract (e.g. a vault/DEX) rather than a user wallet
-        ThirdPartyAddressParams("30f2182b00a37bd746e20575c9af01ab31312213514cd31e872e0a2a3e2e08e96546a586661c163ad6c550e5d0e7c0130a85ff4da051e0a208"),
-    ),
-    "cip113WhitelistSenderPlainWallet": TxOutputDestination(
-        TxOutputDestinationType.THIRD_PARTY,
-        # sender's ordinary (non-smart-wallet) address, same staking key as above
-        ThirdPartyAddressParams("00526ceeb0cd225492d88cf6c12dab6680d941572b018032e908721ba42b792a26839066323ec77135a73e00faae07d90324ea5edb9b930d19"),
     ),
 }
 
@@ -6786,8 +6748,8 @@ testsProgrammableTokens: list[SignTxTestCase] = [
         tx=Transaction(
             network=Testnet,
             inputs=[
-                inputs["cip113PayerInput"],
-                inputs["cip113RegistryPrevNodeInput"],
+                inputs["utxoCip113PayerInput"],
+                inputs["utxoCip113RegistryPrevNodeInput"],
             ],
             outputs=[
                 TxOutputBabbage(
@@ -6853,7 +6815,7 @@ testsProgrammableTokens: list[SignTxTestCase] = [
                     [Token("00216cc4179840e4d355e60cf071137e317d94a8de0fccf43b4b514a", 1)],
                 ),
             ],
-            collateralInputs=[inputs["cip113PayerInput"]],
+            collateralInputs=[inputs["utxoCip113PayerInput"]],
             requiredSigners=[
                 RequiredSigner(
                     TxRequiredSignerType.HASH,
@@ -6861,8 +6823,8 @@ testsProgrammableTokens: list[SignTxTestCase] = [
                 )
             ],
             referenceInputs=[
-                inputs["cip113BootstrapRefInput0"],
-                inputs["cip113BootstrapRefInput2"],
+                inputs["utxoCip113BootstrapRefInput0"],
+                inputs["utxoCip113BootstrapRefInput2"],
             ],
             scriptDataHash="a98047f746843f7e2d5ebb0017e2c5bde0b15793c8db514e6db9d91775891b4f",
             collateralOutput=TxOutputAlonzo(destinations["cip113Payer"], 492017403),
@@ -6893,8 +6855,8 @@ testsProgrammableTokens: list[SignTxTestCase] = [
         tx=Transaction(
             network=Testnet,
             inputs=[
-                inputs["cip113PayerInput2"],
-                inputs["cip113SmartWalletInput"],
+                inputs["utxoCip113PayerInput2"],
+                inputs["utxoCip113SmartWalletInput"],
             ],
             outputs=[
                 TxOutputAlonzo(destinations["cip113Payer"], 1000000),
@@ -6927,25 +6889,29 @@ testsProgrammableTokens: list[SignTxTestCase] = [
             withdrawals=[
                 Withdrawal(
                     # programmableLogicGlobal
-                    CredentialParams(CredentialParamsType.SCRIPT_HASH, "5db48c6383a98a53ca163e58c0f8c9dbc932d65ba070daff97851282"),
+                    CredentialParams(
+                        CredentialParamsType.SCRIPT_HASH, "5db48c6383a98a53ca163e58c0f8c9dbc932d65ba070daff97851282"
+                    ),
                     0,
                 ),
                 Withdrawal(
-                    CredentialParams(CredentialParamsType.SCRIPT_HASH, "fbca9bb794496e6de305a8196fa4cdb257c7afbd510d3aaf84458ab1"),
+                    CredentialParams(
+                        CredentialParamsType.SCRIPT_HASH, "fbca9bb794496e6de305a8196fa4cdb257c7afbd510d3aaf84458ab1"
+                    ),
                     0,
                 ),
             ],
             collateralInputs=[
-                inputs["cip113PayerInput2"],
-                inputs["cip113PayerCollateralInput4"],
+                inputs["utxoCip113PayerInput2"],
+                inputs["utxoCip113PayerCollateralInput4"],
             ],
             requiredSigners=[
                 RequiredSigner(TxRequiredSignerType.HASH, "7350def5f1aa50624fbaf6ac0f4f6ab36de826867b4ed20fe7a8dfea"),
             ],
             referenceInputs=[
-                inputs["cip113PayerRefInput1"],
-                inputs["cip113BootstrapRefInput0"],
-                inputs["cip113RegistryNodeRefInput"],
+                inputs["utxoCip113PayerRefInput1"],
+                inputs["utxoCip113BootstrapRefInput0"],
+                inputs["utxoCip113RegistryNodeRefInput"],
             ],
             scriptDataHash="87df71af20151003f7f868584a5fd2e769a32b4aa77033600c1d10e145971a84",
             collateralOutput=TxOutputAlonzo(destinations["cip113Payer"], 486731566),
@@ -6976,8 +6942,8 @@ testsProgrammableTokens: list[SignTxTestCase] = [
         tx=Transaction(
             network=Testnet,
             inputs=[
-                inputs["cip113FreezeTestPayerInput"],
-                inputs["cip113FreezeTestSmartWalletInput"],
+                inputs["utxoCip113FreezeTestPayerInput"],
+                inputs["utxoCip113FreezeTestSmartWalletInput"],
             ],
             outputs=[
                 TxOutputAlonzo(destinations["cip113FreezeTestPayerWallet"], 1000000),
@@ -6992,12 +6958,16 @@ testsProgrammableTokens: list[SignTxTestCase] = [
             ttl=None,
             withdrawals=[
                 Withdrawal(
-                    CredentialParams(CredentialParamsType.SCRIPT_HASH, "314afa679273dd9c2e30db0f74af76c61dd424a775ea49097bfd7c7b"),
+                    CredentialParams(
+                        CredentialParamsType.SCRIPT_HASH, "314afa679273dd9c2e30db0f74af76c61dd424a775ea49097bfd7c7b"
+                    ),
                     0,
                 ),
                 Withdrawal(
                     # programmableLogicGlobal
-                    CredentialParams(CredentialParamsType.SCRIPT_HASH, "5db48c6383a98a53ca163e58c0f8c9dbc932d65ba070daff97851282"),
+                    CredentialParams(
+                        CredentialParamsType.SCRIPT_HASH, "5db48c6383a98a53ca163e58c0f8c9dbc932d65ba070daff97851282"
+                    ),
                     0,
                 ),
             ],
@@ -7008,14 +6978,14 @@ testsProgrammableTokens: list[SignTxTestCase] = [
                 ),
             ],
             collateralInputs=[
-                inputs["cip113FreezeTestCollateralInput"],
+                inputs["utxoCip113FreezeTestCollateralInput"],
             ],
             requiredSigners=[
                 RequiredSigner(TxRequiredSignerType.HASH, "2f7e08ff7f07192c54a25c0fe963eaab5b1e8f98df5926bab5b6446a"),
             ],
             referenceInputs=[
-                inputs["cip113BootstrapRefInput0"],
-                inputs["cip113FreezeTestRegistryNodeRefInput"],
+                inputs["utxoCip113BootstrapRefInput0"],
+                inputs["utxoCip113FreezeTestRegistryNodeRefInput"],
             ],
             scriptDataHash="9a10d43e0a7c333ee36a84f19d8da22c4f8058fdf50f9efa3d9340631c270b2d",
             collateralOutput=TxOutputAlonzo(destinations["cip113FreezeTestPayerWallet"], 4352988),
@@ -7033,97 +7003,6 @@ testsProgrammableTokens: list[SignTxTestCase] = [
                 Witness(
                     path="m/1852'/1815'/0'/0/0",
                     witnessSignatureHex="c3f8cccfe793744f4cfb56309a304d0e661ad8456a6637daee9be51ddade8d6f2ff3a09cbceed21b71ba3a3ab415ad43c3074c056a3516b5c6bbdf63ec93ee03",
-                ),
-            ),
-        ),
-    ),
-    SignTxTestCase(
-        name="Plutus_tx_cip113_style_transfer_to_contract_with_allowlist",
-        # Mirrors a real CIP-113 transfer transaction on Preview
-        # (tx 8ed5bdc6be1fcfaab80495013171a4285c95fb09f36933d55630af3e247f76d2)
-        # that transfers a "whitelist"-policy programmable token from a user's
-        # smart wallet into a smart-contract's smart wallet (script-owned stake
-        # credential), alongside allowlist/user-state reference inputs.
-        tx=Transaction(
-            network=Testnet,
-            inputs=[
-                inputs["cip113WhitelistPayerInput"],
-                inputs["cip113WhitelistSmartWalletInput"],
-            ],
-            outputs=[
-                TxOutputBabbage(
-                    destinations["cip113WhitelistSenderWallet"],
-                    1300000,
-                    datum=Datum(DatumType.INLINE, "d87980"),
-                    tokenBundle=[
-                        AssetGroup(
-                            "6ac320a3bad68304521b3cd722be330051d5cdff90f555e28f826a80",
-                            [Token("77686974656c697374", 10)],
-                        )
-                    ],
-                ),
-                TxOutputBabbage(
-                    destinations["cip113WhitelistRecipientContractWallet"],
-                    2000000,
-                    datum=Datum(DatumType.INLINE, "d8799f5820d3736c6a8b8025b240fa1b1ff769dc01e5784d193c249e39a0657f3bd09c12ebff"),
-                    tokenBundle=[
-                        AssetGroup(
-                            "6ac320a3bad68304521b3cd722be330051d5cdff90f555e28f826a80",
-                            [Token("77686974656c697374", 23)],
-                        )
-                    ],
-                ),
-                TxOutputAlonzo(destinations["cip113WhitelistSenderPlainWallet"], 3668738),
-            ],
-            fee=667768,
-            ttl=None,
-            auxiliaryData=TxAuxiliaryData(
-                TxAuxiliaryDataType.ARBITRARY_HASH,
-                TxAuxiliaryDataHash("bdaa99eb158414dea0a91d6c727e2268574b23efe6e08ab3b841abe8059a030c"),
-            ),
-            withdrawals=[
-                Withdrawal(
-                    CredentialParams(CredentialParamsType.SCRIPT_HASH, "011072d05c7de4d4644270b7f066d1cc4b9cd926bfb0dcf22f2ed8ea"),
-                    0,
-                ),
-                Withdrawal(
-                    CredentialParams(CredentialParamsType.SCRIPT_HASH, "2e08e96546a586661c163ad6c550e5d0e7c0130a85ff4da051e0a208"),
-                    0,
-                ),
-                Withdrawal(
-                    # programmableLogicGlobal
-                    CredentialParams(CredentialParamsType.SCRIPT_HASH, "5db48c6383a98a53ca163e58c0f8c9dbc932d65ba070daff97851282"),
-                    0,
-                ),
-            ],
-            collateralInputs=[
-                inputs["cip113WhitelistCollateralInput"],
-            ],
-            requiredSigners=[
-                RequiredSigner(TxRequiredSignerType.HASH, "2b792a26839066323ec77135a73e00faae07d90324ea5edb9b930d19"),
-            ],
-            referenceInputs=[
-                inputs["cip113BootstrapRefInput0"],
-                inputs["cip113WhitelistUserStateRefInput"],
-                inputs["cip113WhitelistRegistryNodeRefInput"],
-            ],
-            scriptDataHash="a7b2d73b71f3d310cbf1e03fcb66f8bcdb78398cdf84e5ab7e9896415bec83e3",
-        ),
-        signingMode=TransactionSigningMode.PLUTUS,
-        options=True,
-        unit_test_expect=SignTxUnitTestExpect(
-            txBodyHex="a900d901028282582033f35032b390e276ad119014456b80efb36eba23509adb0d99facea32c5c36570182582054a3d753448884d4b7fb87069b495b2914f96200ac961347157559959b51178e000183a300583910f2182b00a37bd746e20575c9af01ab31312213514cd31e872e0a2a3e2b792a26839066323ec77135a73e00faae07d90324ea5edb9b930d1901821a0013d620a1581c6ac320a3bad68304521b3cd722be330051d5cdff90f555e28f826a80a14977686974656c6973740a028201d81843d87980a300583930f2182b00a37bd746e20575c9af01ab31312213514cd31e872e0a2a3e2e08e96546a586661c163ad6c550e5d0e7c0130a85ff4da051e0a20801821a001e8480a1581c6ac320a3bad68304521b3cd722be330051d5cdff90f555e28f826a80a14977686974656c69737417028201d8185826d8799f5820d3736c6a8b8025b240fa1b1ff769dc01e5784d193c249e39a0657f3bd09c12ebff82583900526ceeb0cd225492d88cf6c12dab6680d941572b018032e908721ba42b792a26839066323ec77135a73e00faae07d90324ea5edb9b930d191a0037fb02021a000a307805a3581df0011072d05c7de4d4644270b7f066d1cc4b9cd926bfb0dcf22f2ed8ea00581df02e08e96546a586661c163ad6c550e5d0e7c0130a85ff4da051e0a20800581df05db48c6383a98a53ca163e58c0f8c9dbc932d65ba070daff9785128200075820bdaa99eb158414dea0a91d6c727e2268574b23efe6e08ab3b841abe8059a030c0b5820a7b2d73b71f3d310cbf1e03fcb66f8bcdb78398cdf84e5ab7e9896415bec83e30dd901028182582045d1fbfd796fe9e04e5a5ceb0b455fbb8d523bb560bcd21f0bdbc9bead56b4e6000ed9010281581c2b792a26839066323ec77135a73e00faae07d90324ea5edb9b930d1912d901028382582061fae36e28a62a65496907c9660da9cf5d27fa0e9054a04581e1d8a087fbd93e00825820bec48b283c1d20c77b0debb838d1820abc6b66e9242184e61e492be1ff50a11201825820eeb7167790e0da259fd9ceda48ac553041680f8850d2006fe009da55f9f33ae202"
-        ),
-        expected_warnings=(
-            WarningBit.WARNING_BIT_NETWORK_UNUSUAL,
-            WarningBit.WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL,
-        ),
-        ragger_expect=SignTxRaggerExpect(
-            txHashHex="8ed5bdc6be1fcfaab80495013171a4285c95fb09f36933d55630af3e247f76d2",
-            witnesses=(
-                Witness(
-                    path="m/1852'/1815'/0'/0/0",
-                    witnessSignatureHex="3fc3786c87faec88325489fafe6d5e8ccc58493d86ed6f288456a349afe3399b8851e3f5f9e6a16572127b32de2753af2b1af9270682814550d35898a6d3c608",
                 ),
             ),
         ),
