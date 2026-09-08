@@ -7,6 +7,7 @@
 #include "globals.h"
 #include "app_mem_utils.h"
 #include "ui_utils.h"
+#include "ui_warnings.h"
 
 #ifndef explicit_bzero
 #define explicit_bzero(addr, size) memset((addr), 0, (size))
@@ -21,6 +22,7 @@ void fuzzing_reset_state(void) {
 
     // Clean up UI allocations left over from the previous iteration
     ui_free_pairs();
+    ui_free_warnings();
 
     // Reset the dispatcher state to avoid cross-iteration contamination
     explicit_bzero(&G_context, sizeof(G_context));

@@ -20,6 +20,14 @@ fi
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 build_dir="$script_dir/build"
 
+# Shared libFuzzer dictionary (APDU/CBOR/Cardano tokens). Passed only if present,
+# so the script still works if it is absent.
+dict_file="$script_dir/dict/cardano.dict"
+dict_arg=()
+if [[ -f "$dict_file" ]]; then
+  dict_arg=(-dict="$dict_file")
+fi
+
 if [[ "$output_dir" = /* ]]; then
   output_root="$output_dir"
 else
@@ -74,12 +82,21 @@ for fuzzer in "${fuzzers[@]}"; do
 
   mkdir -p "$corpus_dir" "$artifact_dir"
 
+  # Committed seed corpus (valid APDU sequences from the test suite), if present for
+  # this harness. Passed as an extra read-only corpus dir that libFuzzer merges in.
+  seed_arg=()
+  if [[ -d "$script_dir/seeds/$name" ]]; then
+    seed_arg=("$script_dir/seeds/$name")
+  fi
+
   printf "[%s] Running ... " "$name"
   set +e
   ASAN_OPTIONS="$asan_options" timeout "${timeout_seconds}s" "$fuzzer" \
     -artifact_prefix="${artifact_dir}/" \
     -max_total_time="$timeout_seconds" \
+    "${dict_arg[@]}" \
     "$corpus_dir" \
+    "${seed_arg[@]}" \
     >"$log_file" 2>&1
   rc=$?
   set -e
