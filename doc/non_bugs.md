@@ -14,11 +14,14 @@ Format: -> means explanation why not a bug.
 * IPv6 Relay Address Byte Order: The app serializes each relay IPv6 address into the tx hash as 4 big-endian uint32 words. This matches how Cardano transmits IPv6 relay addresses — as 4 little-endian uint32 words — which differs from standard network byte order (RFC 4291). The UI calls `inet_ntop6` which reads the bytes bytewise (standard order) and displays the address correctly. Both the hash and the display are self-consistent and match the Cardano ledger expectation.
 -> intentional. Cardano's non-standard per-word little-endian IPv6 encoding must be followed.
 
-* Missing Canonical Ordering Checks (CDDL Violations): required_signers (Key 14) are not checked for canonical sorting, pool_owners within stake pool registration certificates are not checked for canonical sorting.
--> for historical reason, we do not check unique elements in sets.
+* Missing Canonical Ordering Checks (CDDL Violations): elements of CBOR arrays are not checked for canonical sorting, including required_signers (Key 14), pool_owners within stake pool registration certificates, certificates (Key 4) and proposal_procedures (Key 20).
+-> intentional. Canonical ordering is enforced on CBOR map keys, where an unsorted or duplicated key lets the device and the node read different values. An array carries no such ambiguity: every element is displayed and hashed in the order received, so the signature covers the order the user saw. Mainnet transactions carrying unsorted array elements exist, and rejecting them would reject valid transactions.
 
-* Unsupported Field Omission (Protocol Gap): Key 20 (proposal_procedures) is defined as "NOT SUPPORTED" in the CDDL but is silently ignored by the app's parsing logic.
--> no plans to support proposal_procedures for now, it is ok. The app behaves as if it did not know anything about proposal procedures and that is the intended behavior.
+* Rejected protocol_param_update key: a parameter_change governance action carrying cost_models (key 18) fails parsing, although the key is valid per the CDDL.
+-> intentional. Cost models are not reviewable on a device screen, so the app refuses to sign rather than hash content the user cannot check. The other 29 keys are parsed and displayed.
+
+* The reward account of a treasury_withdrawals action, and the proposal's own deposit return account, are accepted as a key path in MULTISIG signing mode, unlike a withdrawal's stake credential.
+-> not a bug. This reward account is a payout destination that signs nothing, whereas a withdrawal's stake credential is the spending authority.
 
 * `swap_handle_check_address` hardcodes `MAINNET_NETWORK_ID`.
 -> intentional and inherited from the old app (`../app-cardano/src/swap/handle_check_address.c`); swap flow is mainnet-only.

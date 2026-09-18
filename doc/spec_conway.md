@@ -11,8 +11,7 @@ Nano S:
 * D (delegation to dreps)
 
 Ledger full:
-* A, B, C, D, F, G, H (everything except combined certificates)
-* possibly I (signing gov. action proposals), only after the more important items are done
+* A, B, C, D, F, G, H, I (everything except combined certificates)
 
 Requirements (feature on the left requires features on the right):
 * B -> A
@@ -251,6 +250,12 @@ These items are straightforward to implement. They can be part of any transactio
 UI text: "Treasury amount" for item 21, "Donation" for item 22
 
 # **I. Governance actions**
+
+**Status: implemented.** See `doc/PROPOSAL_PROCEDURES_DESIGN.md` for the data model, the
+file layout and the test plan. The reservations below no longer block the feature, but they
+did shape its scope: `cost_models` (protocol_param_update key 18) is rejected for exactly the
+reason given here, because a device screen cannot show it in a reviewable form. The other 29
+keys are parsed and displayed.
 
     , ? 20 : [* proposal_procedure]   ; New; Proposal procedures
 
