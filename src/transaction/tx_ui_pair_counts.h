@@ -8,9 +8,9 @@
 
 // UI pair count constants for transaction elements.
 // These define how many UI pairs each transaction element contributes when displayed.
-// CRITICAL: These must match exactly with the actual UI_ADD_* calls in tx_parse.c (pass 2
-// rendering). Ordered by CBOR transaction body keys (0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13, 14, 17, 18,
-// 21, 22, ...)
+// CRITICAL: These must match exactly with the actual UI_ADD_* calls made on the render pass.
+// Ordered by CBOR transaction body keys (0, 1, 2, 3, 4, 5, 7, 8, 9, 11, 13, 14, 16, 17, 18,
+// 19, 20, 21, 22)
 #define LONG_TX_REVIEW_THRESHOLD            25  // Long transaction review threshold in UI pairs
 #define CERTIFICATE_NEW_PAGE_COUNT_TRESHOLD 3   // Force new page per certificate when count >= this
 #define UI_PAIRS_INPUT                      1   // key 0: "Input"
@@ -35,21 +35,22 @@
 #define UI_PAIRS_CERTIFICATE_POOL_RETIREMENT \
     3  // key 4: "Certificate", "Pool ID", "Retirement epoch"
 #define UI_PAIRS_CERTIFICATE_POOL_REGISTRATION_BASE \
-    1                                           // key 4: "Certificate" (pool registration base)
-#define UI_PAIRS_POOL_ID                     1  // key 4: "Pool ID"
-#define UI_PAIRS_POOL_VRF_KEY                1  // key 4: "VRF key hash"
-#define UI_PAIRS_POOL_FIXED                  3  // key 4: "Pledge", "Cost", "Profit margin"
-#define UI_PAIRS_POOL_REWARD_ACCOUNT         1  // key 4: "Pool reward address"
-#define UI_PAIRS_POOL_OWNER                  1  // key 4: "Owner reward address"
-#define UI_PAIRS_POOL_NO_OWNERS              1  // key 4: "Pool owners: None"
+    1                                   // key 4: "Certificate" (pool registration base)
+#define UI_PAIRS_POOL_ID             1  // key 4: "Pool ID"
+#define UI_PAIRS_POOL_VRF_KEY        1  // key 4: "VRF key hash"
+#define UI_PAIRS_POOL_FIXED          3  // key 4: "Pledge", "Cost", "Profit margin"
+#define UI_PAIRS_POOL_REWARD_ACCOUNT 1  // key 4: "Pool reward address"
+#define UI_PAIRS_POOL_OWNER          1  // key 4: "Owner reward address"
+#define UI_PAIRS_NONE_INDICATOR \
+    1  // key 4/20: "<Field>: (none)" for any empty collection (pool owners/relays/metadata,
+       // treasury_withdrawals_action's withdrawal map, update_committee's removal set /
+       // addition map)
 #define UI_PAIRS_POOL_RELAY_HEADER           1  // key 4: "Relay #N"
 #define UI_PAIRS_POOL_RELAY_IPV4             1  // key 4: "IPv4"
 #define UI_PAIRS_POOL_RELAY_IPV6             1  // key 4: "IPv6"
 #define UI_PAIRS_POOL_RELAY_PORT             1  // key 4: "Port"
 #define UI_PAIRS_POOL_RELAY_DNS              1  // key 4: "DNS name" or "SRV DNS"
-#define UI_PAIRS_POOL_NO_RELAYS              1  // key 4: "Pool relays: None"
 #define UI_PAIRS_POOL_METADATA               2  // key 4: "Pool metadata url", "Pool metadata hash"
-#define UI_PAIRS_POOL_NO_METADATA            1  // key 4: "Metadata: none (anonymous pool)"
 #define UI_PAIRS_CERTIFICATE_VOTE_DELEGATION 3  // key 4: "Certificate", voter credential, DRep
 #define UI_PAIRS_CERTIFICATE_STAKE_POOL_AND_DREP_DELEGATION \
     4  // key 4: "Certificate", credential, "Pool", DRep
@@ -94,8 +95,30 @@
 #define UI_PAIRS_REFERENCE_INPUT          1  // key 18: "Ref input"
 #define UI_PAIRS_VOTER \
     2  // key 19: "Voter" index header + voter credential (Committee hot key, DRep key, SPO key)
-#define UI_PAIRS_VOTE     3  // key 19: "Gov action tx hash", "Gov action index", "Vote"
-#define UI_PAIRS_ANCHOR   2  // key 19: "Anchor URL", "Anchor hash" (if anchor included)
-#define UI_PAIRS_TREASURY 1  // key 21: "Treasury"
-#define UI_PAIRS_DONATION 1  // key 22: "Donation"
-#define UI_PAIRS_TX_HASH  1  // Transaction hash display
+#define UI_PAIRS_VOTE   3  // key 19: "Gov action tx hash", "Gov action index", "Vote"
+#define UI_PAIRS_ANCHOR 2  // key 19: "Anchor URL", "Anchor hash" (if anchor included)
+#define UI_PAIRS_PROPOSAL_ENVELOPE \
+    4  // key 20: "Proposal" index header, "Deposit", "Reward address", "Gov action" type name
+#define UI_PAIRS_PROPOSAL_PREV_GOV_ACTION_ID \
+    2  // key 20: "Prior gov action tx hash", "Prior gov action index"
+#define UI_PAIRS_PROPOSAL_PROTOCOL_VERSION \
+    1  // key 20: "Protocol version" (hard_fork_initiation_action)
+#define UI_PAIRS_PROPOSAL_GUARDRAILS_SCRIPT_HASH \
+    1  // key 20: "Guardrails script hash" (if included; new_constitution,
+       // treasury_withdrawals_action)
+#define UI_PAIRS_PROPOSAL_TREASURY_WITHDRAWAL \
+    2  // key 20: withdrawal reward address + amount (treasury_withdrawals_action)
+#define UI_PAIRS_PROPOSAL_COMMITTEE_MEMBER_REMOVAL \
+    1  // key 20: removed committee member credential (update_committee)
+#define UI_PAIRS_PROPOSAL_COMMITTEE_MEMBER_ADDITION \
+    2  // key 20: added committee member credential + expiration epoch (update_committee)
+#define UI_PAIRS_PROPOSAL_COMMITTEE_THRESHOLD 1  // key 20: committee threshold (update_committee)
+#define UI_PAIRS_PARAM_CHANGE_SIMPLE_FIELD \
+    1  // key 20: one coin/uint/ratio field, or ex units with memory+steps on one line
+#define UI_PAIRS_PARAM_CHANGE_EX_UNIT_PRICES \
+    2  // key 20: "Mem price", "Step price" (execution costs)
+#define UI_PAIRS_PARAM_CHANGE_POOL_VOTING_THRESHOLDS 5   // key 20: pool voting thresholds
+#define UI_PAIRS_PARAM_CHANGE_DREP_VOTING_THRESHOLDS 10  // key 20: DRep voting thresholds
+#define UI_PAIRS_TREASURY                            1   // key 21: "Treasury"
+#define UI_PAIRS_DONATION                            1   // key 22: "Donation"
+#define UI_PAIRS_TX_HASH                             1   // Transaction hash display
