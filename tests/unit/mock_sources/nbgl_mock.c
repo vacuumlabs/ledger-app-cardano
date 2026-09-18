@@ -14,6 +14,7 @@
 #include "nbgl_mock.h"
 #include "ledger_assert.h"
 #include "menu.h"
+#include "globals.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +22,7 @@
 #define NBGL_MOCK_MAX_FINAL_DECISIONS 16
 #define NBGL_MOCK_TEXT_BUFFER_SIZE    256
 
+static warning_bits_t g_captured_warning_bits = 0;
 static bool g_final_decisions_storage[NBGL_MOCK_MAX_FINAL_DECISIONS];
 static size_t g_final_decision_count = 0;
 static size_t g_final_decision_index = 0;
@@ -56,6 +58,7 @@ void nbgl_mock_reset(void) {
     memset(g_last_choice_message, 0, sizeof(g_last_choice_message));
     memset(g_last_status_message, 0, sizeof(g_last_status_message));
     g_last_status_success = false;
+    g_captured_warning_bits = 0;
 }
 
 void nbgl_mock_set_final_decisions(const bool *decisions, size_t decision_count) {
@@ -184,6 +187,7 @@ void nbgl_useCaseAdvancedReview(nbgl_operationType_t operationType,
     (void) finishTitle;
     (void) tipBox;
     (void) warning;
+    g_captured_warning_bits = G_context.tx_info.body.warning_bits;
     if (choiceCallback != NULL) {
         choiceCallback(nbgl_mock_final_decision_for_operation(operationType));
     }
@@ -252,6 +256,7 @@ void nbgl_useCaseAdvancedReviewStreamingStart(nbgl_operationType_t operationType
     (void) reviewTitle;
     (void) reviewSubTitle;
     (void) warning;
+    g_captured_warning_bits = G_context.tx_info.body.warning_bits;
     if (g_streaming_start_auto_complete && choiceCallback != NULL) {
         choiceCallback(g_streaming_start_confirm);
     }
@@ -297,4 +302,8 @@ const char *nbgl_mock_last_status_message(void) {
 
 bool nbgl_mock_last_status_success(void) {
     return g_last_status_success;
+}
+
+warning_bits_t nbgl_mock_captured_warning_bits(void) {
+    return g_captured_warning_bits;
 }

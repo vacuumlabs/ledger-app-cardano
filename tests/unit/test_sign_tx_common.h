@@ -151,9 +151,10 @@ static inline void run_tx_and_verify(const uint8_t *init_raw,
 
     run_sign_tx_body_chunked(raw_tx, raw_tx_len);
 
-    // Assert warning bits. Direct struct access because at this point the state may have
-    // already transitioned to TX_STATE_APPROVED (via finalize_sign_tx UI callback mock).
-    const warning_bits_t actual_warning_bits = G_context.tx_info.body.warning_bits;
+    // Warning bits as captured when the review was built. Reading G_context here would see
+    // zeros for any fixture whose flow completes during the body run, because approval
+    // resets the app context.
+    const warning_bits_t actual_warning_bits = nbgl_mock_captured_warning_bits();
     if (actual_warning_bits != expected_warning_bits) {
         print_message(
             "WARNING BITS MISMATCH for fixture \"%s\":\n"
@@ -313,6 +314,7 @@ static inline init_apdu_params_t build_init_params_from_fixture(const tx_fixture
         .includeTotalCollateral = fixture->include_total_collateral,
         .numReferenceInputs = fixture->num_reference_inputs,
         .numVoters = fixture->num_voters,
+        .numProposalProcedures = fixture->num_proposal_procedures,
         .includeTreasury = fixture->include_treasury,
         .includeDonation = fixture->include_donation,
         .numWitnesses = fixture->num_witnesses,
