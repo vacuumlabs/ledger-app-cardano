@@ -412,13 +412,16 @@ void txHashBuilder_init(tx_hash_builder_t *builder, const tx_params_t *txParams)
         builder->remainingVoters = txParams->num_voters;
         if (txParams->num_voters > 0) numItems++;
 
+        builder->remainingProposalProcedures = txParams->num_proposal_procedures;
+        if (txParams->num_proposal_procedures > 0) numItems++;
+
         builder->includeTreasury = txParams->includeTreasury;
         if (txParams->includeTreasury) numItems++;
 
         builder->includeDonation = txParams->includeDonation;
         if (txParams->includeDonation) numItems++;
 
-        ASSERT((3 <= numItems) && (numItems <= 19));
+        ASSERT((3 <= numItems) && (numItems <= 20));
 
         _TRACE("Serializing tx body with %u items", numItems);
         BUILDER_APPEND_CBOR(CBOR_TYPE_MAP, numItems);
@@ -1751,18 +1754,11 @@ static void txHashBuilder_assertCanLeaveCertificates(tx_hash_builder_t *builder)
            builder->state,
            builder->remainingCertificates);
 
-    switch (builder->state) {
-        case TX_HASH_BUILDER_IN_CERTIFICATES:
-            // make sure there are not remaining certificates to process
-            ASSERT(builder->remainingCertificates == 0);
-            break;
-
-        default:
-            // make sure no certificates are expected
-            ASSERT(builder->remainingCertificates == 0);
-            // assert we can leave the previous state
-            txHashBuilder_assertCanLeaveTtl(builder);
-            break;
+    // No certificates may remain: the same invariant whether this state was entered or
+    // skipped entirely. Only walking back through the previous state is conditional.
+    ASSERT(builder->remainingCertificates == 0);
+    if (builder->state != TX_HASH_BUILDER_IN_CERTIFICATES) {
+        txHashBuilder_assertCanLeaveTtl(builder);
     }
 }
 
@@ -1810,18 +1806,11 @@ void txHashBuilder_addWithdrawal(tx_hash_builder_t *builder,
 static void txHashBuilder_assertCanLeaveWithdrawals(tx_hash_builder_t *builder) {
     _TRACE("state = %d, remainingWithdrawals = %u", builder->state, builder->remainingWithdrawals);
 
-    switch (builder->state) {
-        case TX_HASH_BUILDER_IN_WITHDRAWALS:
-            // make sure there are no more withdrawals to process
-            ASSERT(builder->remainingWithdrawals == 0);
-            break;
-
-        default:
-            // make sure no withdrawals are expected
-            ASSERT(builder->remainingWithdrawals == 0);
-            // assert we can leave the previous state
-            txHashBuilder_assertCanLeaveCertificates(builder);
-            break;
+    // No withdrawals may remain: the same invariant whether this state was entered or
+    // skipped entirely. Only walking back through the previous state is conditional.
+    ASSERT(builder->remainingWithdrawals == 0);
+    if (builder->state != TX_HASH_BUILDER_IN_WITHDRAWALS) {
+        txHashBuilder_assertCanLeaveCertificates(builder);
     }
 }
 
@@ -2038,18 +2027,11 @@ void txHashBuilder_addCollateralInput(tx_hash_builder_t *builder, const tx_input
 static void txHashBuilder_assertCanLeaveCollateralInputs(tx_hash_builder_t *builder) {
     _TRACE("state = %u", builder->state);
 
-    switch (builder->state) {
-        case TX_HASH_BUILDER_IN_COLLATERAL_INPUTS:
-            // make sure there are no more collateral inputs to process
-            ASSERT(builder->remainingCollateralInputs == 0);
-            break;
-
-        default:
-            // make sure no collateral inputs are expected
-            ASSERT(builder->remainingCollateralInputs == 0);
-            // assert we can leave the previous state
-            txHashBuilder_assertCanLeaveScriptDataHash(builder);
-            break;
+    // No collateral inputs may remain: the same invariant whether this state was entered or
+    // skipped entirely. Only walking back through the previous state is conditional.
+    ASSERT(builder->remainingCollateralInputs == 0);
+    if (builder->state != TX_HASH_BUILDER_IN_COLLATERAL_INPUTS) {
+        txHashBuilder_assertCanLeaveScriptDataHash(builder);
     }
 }
 
@@ -2095,18 +2077,11 @@ void txHashBuilder_addRequiredSigner(tx_hash_builder_t *builder,
 static void txHashBuilder_assertCanLeaveRequiredSigners(tx_hash_builder_t *builder) {
     _TRACE("state = %u", builder->state);
 
-    switch (builder->state) {
-        case TX_HASH_BUILDER_IN_REQUIRED_SIGNERS:
-            // make sure there are no more withdrawals to process
-            ASSERT(builder->remainingRequiredSigners == 0);
-            break;
-
-        default:
-            // make sure no required signers are expected
-            ASSERT(builder->remainingRequiredSigners == 0);
-            // assert we can leave the previous state
-            txHashBuilder_assertCanLeaveCollateralInputs(builder);
-            break;
+    // No required signers may remain: the same invariant whether this state was entered or
+    // skipped entirely. Only walking back through the previous state is conditional.
+    ASSERT(builder->remainingRequiredSigners == 0);
+    if (builder->state != TX_HASH_BUILDER_IN_REQUIRED_SIGNERS) {
+        txHashBuilder_assertCanLeaveCollateralInputs(builder);
     }
 }
 
@@ -2262,18 +2237,11 @@ void txHashBuilder_addReferenceInput(tx_hash_builder_t *builder, const tx_input_
 static void txHashBuilder_assertCanLeaveReferenceInputs(tx_hash_builder_t *builder) {
     _TRACE("state = %d", builder->state);
 
-    switch (builder->state) {
-        case TX_HASH_BUILDER_IN_REFERENCE_INPUTS:
-            // make sure there are no more reference inputs to process
-            ASSERT(builder->remainingReferenceInputs == 0);
-            break;
-
-        default:
-            // make sure no reference inputs are expected
-            ASSERT(builder->remainingReferenceInputs == 0);
-            // assert we can leave the previous state
-            txHashBuilder_assertCanLeaveTotalCollateral(builder);
-            break;
+    // No reference inputs may remain: the same invariant whether this state was entered or
+    // skipped entirely. Only walking back through the previous state is conditional.
+    ASSERT(builder->remainingReferenceInputs == 0);
+    if (builder->state != TX_HASH_BUILDER_IN_REFERENCE_INPUTS) {
+        txHashBuilder_assertCanLeaveTotalCollateral(builder);
     }
 }
 
@@ -2363,21 +2331,437 @@ void txHashBuilder_addVote(tx_hash_builder_t *builder,
 
 static void txHashBuilder_assertCanLeaveVotingProcedures(tx_hash_builder_t *builder) {
     _TRACE("state = %d", builder->state);
+    ASSERT(builder->remainingVoters == 0);
+    ASSERT(builder->remainingVotesPerVoter == 0);
+    if (builder->state != TX_HASH_BUILDER_IN_VOTING_PROCEDURES) {
+        txHashBuilder_assertCanLeaveReferenceInputs(builder);
+    }
+}
 
-    switch (builder->state) {
-        case TX_HASH_BUILDER_IN_VOTING_PROCEDURES:
-            // make sure there are no more voting procedures to process
-            ASSERT(builder->remainingVoters == 0);
-            ASSERT(builder->remainingVotesPerVoter == 0);
+// ============================== PROPOSAL PROCEDURES ==============================
+
+static void _appendOptGovActionId(tx_hash_builder_t *builder,
+                                  const opt_gov_action_id_t *optGovActionId) {
+    if (optGovActionId->isIncluded) {
+        // Array(2)[Bytes[hash], Unsigned[index]]
+        BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
+        {
+            size_t size = TX_HASH_LENGTH;
+            BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, size);
+            BUILDER_APPEND_DATA(optGovActionId->govActionId.txHash, size);
+        }
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, optGovActionId->govActionId.govActionIndex);
+    } else {
+        // Null
+        BUILDER_APPEND_CBOR(CBOR_TYPE_NULL, 0);
+    }
+}
+
+// Null / Bytes[guardrailsScriptHash], shared by new_constitution (below) and
+// treasury_withdrawals_action's finish() call: the two gov_action variants with an optional
+// guardrails script hash.
+static void _appendOptGuardrailsScriptHash(tx_hash_builder_t *builder,
+                                           bool hasGuardrailsScriptHash,
+                                           const uint8_t *guardrailsScriptHash) {
+    if (hasGuardrailsScriptHash) {
+        ASSERT(guardrailsScriptHash != NULL);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, SCRIPT_HASH_LENGTH);
+        BUILDER_APPEND_DATA(guardrailsScriptHash, SCRIPT_HASH_LENGTH);
+    } else {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_NULL, 0);
+    }
+}
+
+static void _appendGovAction(tx_hash_builder_t *builder, const gov_action_t *govAction) {
+    switch (govAction->type) {
+        case GOV_ACTION_INFO:
+            // Array(1)[Unsigned[6]]
+            BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 1);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, GOV_ACTION_INFO);
             break;
 
+        case GOV_ACTION_NO_CONFIDENCE:
+            // Array(2)[Unsigned[3], Null / ...gov_action_id]
+            BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, GOV_ACTION_NO_CONFIDENCE);
+            _appendOptGovActionId(builder, &govAction->noConfidence);
+            break;
+
+        case GOV_ACTION_HARD_FORK_INITIATION:
+            // Array(3)[
+            //   Unsigned[1]
+            //   Null / ...gov_action_id
+            //   Array(2)[Unsigned[major], Unsigned[minor]]
+            // ]
+            BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 3);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, GOV_ACTION_HARD_FORK_INITIATION);
+            _appendOptGovActionId(builder, &govAction->hardForkInitiation.prevActionId);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
+                                govAction->hardForkInitiation.protocolVersion.major);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED,
+                                govAction->hardForkInitiation.protocolVersion.minor);
+            break;
+
+        case GOV_ACTION_NEW_CONSTITUTION:
+            // Array(3)[
+            //   Unsigned[5]
+            //   Null / ...gov_action_id
+            //   Array(2)[...anchor, Null / Bytes[guardrails_script_hash]]
+            // ]
+            BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 3);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, GOV_ACTION_NEW_CONSTITUTION);
+            _appendOptGovActionId(builder, &govAction->newConstitution.prevActionId);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
+            _appendAnchor(builder, &govAction->newConstitution.constitutionAnchor);
+            _appendOptGuardrailsScriptHash(builder,
+                                           govAction->newConstitution.hasGuardrailsScriptHash,
+                                           govAction->newConstitution.guardrailsScriptHash);
+            break;
+
+        // LCOV_EXCL_START
+        case GOV_ACTION_TREASURY_WITHDRAWALS:
+        case GOV_ACTION_UPDATE_COMMITTEE:
+            // Handled by their own multi-call API (txHashBuilder_treasuryWithdrawals_*,
+            // txHashBuilder_updateCommittee_*) instead of this function.
+            ASSERT(false);
+            break;
         default:
-            // make sure no voting procedures are expected
-            ASSERT(builder->remainingVoters == 0);
-            ASSERT(builder->remainingVotesPerVoter == 0);
-            // assert we can leave the previous state
-            txHashBuilder_assertCanLeaveReferenceInputs(builder);
+            ASSERT(false);
             break;
+            // LCOV_EXCL_STOP
+    }
+}
+
+void txHashBuilder_enterProposalProcedures(tx_hash_builder_t *builder) {
+    txHashBuilder_assertCanLeaveVotingProcedures(builder);
+    ASSERT(builder->remainingProposalProcedures > 0);
+
+    {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_PROPOSAL_PROCEDURES);
+        BUILDER_TAG_CBOR_SET();
+        BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, builder->remainingProposalProcedures);
+    }
+    builder->state = TX_HASH_BUILDER_IN_PROPOSAL_PROCEDURES;
+}
+
+// Common proposal_procedure envelope prologue (validates/decrements remainingProposalProcedures,
+// then opens Array(4) and emits deposit + reward account bytes), identical across all three
+// ways a proposal_procedure's gov_action is emitted (simple variants, update_committee,
+// treasury_withdrawals_action). Each caller appends its own gov_action array afterward.
+static void _appendProposalEnvelope(tx_hash_builder_t *builder,
+                                    uint64_t deposit,
+                                    const uint8_t *rewardAccountBuffer,
+                                    size_t rewardAccountSize) {
+    _TRACE("state = %d, remainingProposalProcedures = %u",
+           builder->state,
+           builder->remainingProposalProcedures);
+
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_PROCEDURES);
+    ASSERT(builder->remainingProposalProcedures > 0);
+    builder->remainingProposalProcedures--;
+
+    ASSERT(rewardAccountSize == REWARD_ACCOUNT_LENGTH);
+
+    BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 4);
+    {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, deposit);
+    }
+    {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, rewardAccountSize);
+        BUILDER_APPEND_DATA(rewardAccountBuffer, rewardAccountSize);
+    }
+}
+
+void txHashBuilder_addProposalProcedure(tx_hash_builder_t *builder,
+                                        uint64_t deposit,
+                                        const uint8_t *rewardAccountBuffer,
+                                        size_t rewardAccountSize,
+                                        const gov_action_t *govAction,
+                                        const anchor_t *anchor) {
+    ASSERT(govAction != NULL);
+    ASSERT(anchor != NULL);
+
+    // Array(4)[
+    //   Unsigned[deposit]
+    //   Bytes[rewardAccount]
+    //   gov_action (variant-tagged array; see _appendGovAction)
+    //   Null / ...anchor
+    // ]
+    _appendProposalEnvelope(builder, deposit, rewardAccountBuffer, rewardAccountSize);
+    {
+        _appendGovAction(builder, govAction);
+    }
+    {
+        _appendAnchor(builder, anchor);
+    }
+}
+
+void txHashBuilder_updateCommittee_enter(tx_hash_builder_t *builder,
+                                         uint64_t deposit,
+                                         const uint8_t *rewardAccountBuffer,
+                                         size_t rewardAccountSize,
+                                         const opt_gov_action_id_t *prevActionId,
+                                         uint16_t numRemovals) {
+    ASSERT(prevActionId != NULL);
+
+    // Array(4)[ ; proposal_procedure
+    //   Unsigned[deposit]
+    //   Bytes[rewardAccount]
+    //   Array(5)[ ; gov_action (update_committee)
+    //     Unsigned[4]
+    //     Null / ...gov_action_id ; prevActionId
+    //     [Tag(258)] Array(numRemovals)[...] ; removal set, streamed by addRemoval()
+    //     ... ; addition map and anchor, see enterAdditions() and finish()
+    //   ]
+    // ]
+    _appendProposalEnvelope(builder, deposit, rewardAccountBuffer, rewardAccountSize);
+    {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 5);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, GOV_ACTION_UPDATE_COMMITTEE);
+        _appendOptGovActionId(builder, prevActionId);
+        BUILDER_TAG_CBOR_SET();
+        BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, numRemovals);
+    }
+
+    builder->committeeUpdateData.remainingCommitteeRemovals = numRemovals;
+    builder->state = TX_HASH_BUILDER_IN_PROPOSAL_UPDATE_COMMITTEE_REMOVALS;
+}
+
+void txHashBuilder_updateCommittee_addRemoval(tx_hash_builder_t *builder,
+                                              const credential_t *credential) {
+    _TRACE("state = %d, remainingCommitteeRemovals = %u",
+           builder->state,
+           builder->committeeUpdateData.remainingCommitteeRemovals);
+
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_UPDATE_COMMITTEE_REMOVALS);
+    ASSERT(builder->committeeUpdateData.remainingCommitteeRemovals > 0);
+    builder->committeeUpdateData.remainingCommitteeRemovals--;
+
+    _appendCredential(builder, credential);
+}
+
+void txHashBuilder_updateCommittee_enterAdditions(tx_hash_builder_t *builder,
+                                                  uint16_t numAdditions) {
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_UPDATE_COMMITTEE_REMOVALS);
+    ASSERT(builder->committeeUpdateData.remainingCommitteeRemovals == 0);
+
+    // Map(numAdditions)[ credential (Array(2)) => Unsigned[epoch], ... ], streamed by addAddition()
+    BUILDER_APPEND_CBOR(CBOR_TYPE_MAP, numAdditions);
+
+    builder->committeeUpdateData.remainingCommitteeAdditions = numAdditions;
+    builder->state = TX_HASH_BUILDER_IN_PROPOSAL_UPDATE_COMMITTEE_ADDITIONS;
+}
+
+void txHashBuilder_updateCommittee_addAddition(tx_hash_builder_t *builder,
+                                               const credential_t *credential,
+                                               uint64_t expirationEpoch) {
+    _TRACE("state = %d, remainingCommitteeAdditions = %u",
+           builder->state,
+           builder->committeeUpdateData.remainingCommitteeAdditions);
+
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_UPDATE_COMMITTEE_ADDITIONS);
+    ASSERT(builder->committeeUpdateData.remainingCommitteeAdditions > 0);
+    builder->committeeUpdateData.remainingCommitteeAdditions--;
+
+    _appendCredential(builder, credential);
+    BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, expirationEpoch);
+}
+
+void txHashBuilder_updateCommittee_finish(tx_hash_builder_t *builder,
+                                          uint64_t thresholdNumerator,
+                                          uint64_t thresholdDenominator,
+                                          const anchor_t *anchor) {
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_UPDATE_COMMITTEE_ADDITIONS);
+    ASSERT(builder->committeeUpdateData.remainingCommitteeAdditions == 0);
+    ASSERT(anchor != NULL);
+
+    // Tag(30) Array(2)[Unsigned[numerator], Unsigned[denominator]] ; unit_interval threshold,
+    // closes gov_action's Array(5); anchor closes proposal_procedure's Array(4).
+    {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_TAG, CBOR_TAG_UNIT_INTERVAL);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, thresholdNumerator);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, thresholdDenominator);
+    }
+    {
+        _appendAnchor(builder, anchor);
+    }
+
+    builder->state = TX_HASH_BUILDER_IN_PROPOSAL_PROCEDURES;
+}
+
+void txHashBuilder_treasuryWithdrawals_enter(tx_hash_builder_t *builder,
+                                             uint64_t deposit,
+                                             const uint8_t *rewardAccountBuffer,
+                                             size_t rewardAccountSize,
+                                             uint16_t numWithdrawals) {
+    // Array(4)[ ; proposal_procedure
+    //   Unsigned[deposit]
+    //   Bytes[rewardAccount]
+    //   Array(3)[ ; gov_action (treasury_withdrawals_action)
+    //     Unsigned[2]
+    //     Map(numWithdrawals)[...] ; withdrawals map, streamed by addWithdrawal()
+    //     ... ; guardrails and anchor, see finish()
+    //   ]
+    // ]
+    _appendProposalEnvelope(builder, deposit, rewardAccountBuffer, rewardAccountSize);
+    {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 3);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, GOV_ACTION_TREASURY_WITHDRAWALS);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_MAP, numWithdrawals);
+    }
+
+    builder->treasuryWithdrawalsData.remainingTreasuryWithdrawals = numWithdrawals;
+    builder->state = TX_HASH_BUILDER_IN_PROPOSAL_TREASURY_WITHDRAWALS_ENTRIES;
+}
+
+void txHashBuilder_treasuryWithdrawals_addWithdrawal(tx_hash_builder_t *builder,
+                                                     const uint8_t *withdrawalRewardAccountBuffer,
+                                                     size_t withdrawalRewardAccountSize,
+                                                     uint64_t coin) {
+    _TRACE("state = %d, remainingTreasuryWithdrawals = %u",
+           builder->state,
+           builder->treasuryWithdrawalsData.remainingTreasuryWithdrawals);
+
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_TREASURY_WITHDRAWALS_ENTRIES);
+    ASSERT(builder->treasuryWithdrawalsData.remainingTreasuryWithdrawals > 0);
+    builder->treasuryWithdrawalsData.remainingTreasuryWithdrawals--;
+
+    ASSERT(withdrawalRewardAccountSize == REWARD_ACCOUNT_LENGTH);
+
+    BUILDER_APPEND_CBOR(CBOR_TYPE_BYTES, withdrawalRewardAccountSize);
+    BUILDER_APPEND_DATA(withdrawalRewardAccountBuffer, withdrawalRewardAccountSize);
+    BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, coin);
+}
+
+// Null / Bytes[guardrailsScriptHash] closing the gov_action array, then the anchor closing
+// proposal_procedure's Array(4): the identical tail of treasury_withdrawals_action and
+// parameter_change_action. Each caller asserts its own state/counter invariants first.
+static void _finishGuardrailsAndAnchor(tx_hash_builder_t *builder,
+                                       bool hasGuardrailsScriptHash,
+                                       const uint8_t *guardrailsScriptHash,
+                                       const anchor_t *anchor) {
+    ASSERT(anchor != NULL);
+
+    _appendOptGuardrailsScriptHash(builder, hasGuardrailsScriptHash, guardrailsScriptHash);
+    {
+        _appendAnchor(builder, anchor);
+    }
+
+    builder->state = TX_HASH_BUILDER_IN_PROPOSAL_PROCEDURES;
+}
+
+void txHashBuilder_treasuryWithdrawals_finish(tx_hash_builder_t *builder,
+                                              bool hasGuardrailsScriptHash,
+                                              const uint8_t *guardrailsScriptHash,
+                                              const anchor_t *anchor) {
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_TREASURY_WITHDRAWALS_ENTRIES);
+    ASSERT(builder->treasuryWithdrawalsData.remainingTreasuryWithdrawals == 0);
+
+    _finishGuardrailsAndAnchor(builder, hasGuardrailsScriptHash, guardrailsScriptHash, anchor);
+}
+
+// Tag(30) Array(2)[Unsigned[numerator], Unsigned[denominator]], the shared ratio shape for
+// unit_interval / nonnegative_interval protocol_param_update values.
+static void _appendParamRatio(tx_hash_builder_t *builder, const param_ratio_t *ratio) {
+    BUILDER_APPEND_CBOR(CBOR_TYPE_TAG, CBOR_TAG_UNIT_INTERVAL);
+    BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
+    BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, ratio->numerator);
+    BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, ratio->denominator);
+}
+
+void txHashBuilder_parameterChange_enter(tx_hash_builder_t *builder,
+                                         uint64_t deposit,
+                                         const uint8_t *rewardAccountBuffer,
+                                         size_t rewardAccountSize,
+                                         const opt_gov_action_id_t *prevActionId,
+                                         uint16_t numPresentFields) {
+    ASSERT(prevActionId != NULL);
+
+    // Array(4)[ ; proposal_procedure
+    //   Unsigned[deposit]
+    //   Bytes[rewardAccount]
+    //   Array(4)[ ; gov_action (parameter_change_action)
+    //     Unsigned[0]
+    //     Null / ...gov_action_id ; prevActionId
+    //     Map(numPresentFields)[...] ; protocol_param_update, streamed by addField()
+    //     ... ; guardrails and anchor, see finish()
+    //   ]
+    // ]
+    _appendProposalEnvelope(builder, deposit, rewardAccountBuffer, rewardAccountSize);
+    {
+        BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 4);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, GOV_ACTION_PARAMETER_CHANGE);
+        _appendOptGovActionId(builder, prevActionId);
+        BUILDER_APPEND_CBOR(CBOR_TYPE_MAP, numPresentFields);
+    }
+
+    builder->parameterChangeData.remainingParameterChangeFields = numPresentFields;
+    builder->state = TX_HASH_BUILDER_IN_PROPOSAL_PARAMETER_CHANGE_FIELDS;
+}
+
+void txHashBuilder_parameterChange_addField(tx_hash_builder_t *builder,
+                                            uint8_t cddlKey,
+                                            const parsed_param_field_t *field) {
+    _TRACE("state = %d, remainingParameterChangeFields = %u",
+           builder->state,
+           builder->parameterChangeData.remainingParameterChangeFields);
+
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_PARAMETER_CHANGE_FIELDS);
+    ASSERT(builder->parameterChangeData.remainingParameterChangeFields > 0);
+    builder->parameterChangeData.remainingParameterChangeFields--;
+
+    BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, cddlKey);
+    switch (field->kind) {
+        case PARAM_FIELD_COIN:
+        case PARAM_FIELD_UINT:
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, field->scalar);
+            break;
+        case PARAM_FIELD_EX_UNITS:
+            BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, 2);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, field->exUnits.memory);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, field->exUnits.steps);
+            break;
+        case PARAM_FIELD_RATIO:
+            _appendParamRatio(builder, &field->ratio);
+            break;
+        // EX_UNIT_PRICES/*_VOTING_THRESHOLDS are all just Array(N)[ratio x N] (N = 2/5/10) on
+        // the wire; RATIO alone has no wrapping array, so it stays separate above.
+        case PARAM_FIELD_EX_UNIT_PRICES:
+        case PARAM_FIELD_POOL_VOTING_THRESHOLDS:
+        case PARAM_FIELD_DREP_VOTING_THRESHOLDS: {
+            uint8_t count = param_field_ratio_count(field->kind);
+            BUILDER_APPEND_CBOR(CBOR_TYPE_ARRAY, count);
+            for (uint8_t i = 0; i < count; i++) {
+                _appendParamRatio(builder, &field->ratios[i]);
+            }
+            break;
+        }
+        // LCOV_EXCL_START
+        default:
+            LEDGER_ASSERT(false, "Unknown param field kind");
+            break;
+            // LCOV_EXCL_STOP
+    }
+}
+
+void txHashBuilder_parameterChange_finish(tx_hash_builder_t *builder,
+                                          bool hasGuardrailsScriptHash,
+                                          const uint8_t *guardrailsScriptHash,
+                                          const anchor_t *anchor) {
+    ASSERT(builder->state == TX_HASH_BUILDER_IN_PROPOSAL_PARAMETER_CHANGE_FIELDS);
+    ASSERT(builder->parameterChangeData.remainingParameterChangeFields == 0);
+
+    _finishGuardrailsAndAnchor(builder, hasGuardrailsScriptHash, guardrailsScriptHash, anchor);
+}
+
+static void txHashBuilder_assertCanLeaveProposalProcedures(tx_hash_builder_t *builder) {
+    // No proposal procedures may remain: the same invariant whether this state was entered or
+    // skipped entirely. Only walking back through the previous state is conditional.
+    ASSERT(builder->remainingProposalProcedures == 0);
+    if (builder->state != TX_HASH_BUILDER_IN_PROPOSAL_PROCEDURES) {
+        txHashBuilder_assertCanLeaveVotingProcedures(builder);
     }
 }
 
@@ -2386,7 +2770,7 @@ static void txHashBuilder_assertCanLeaveVotingProcedures(tx_hash_builder_t *buil
 void txHashBuilder_addTreasury(tx_hash_builder_t *builder, uint64_t treasury) {
     _TRACE("state = %d", builder->state);
 
-    txHashBuilder_assertCanLeaveVotingProcedures(builder);
+    txHashBuilder_assertCanLeaveProposalProcedures(builder);
 
     // add treasury item into the main tx body map
     BUILDER_APPEND_CBOR(CBOR_TYPE_UNSIGNED, TX_BODY_KEY_TREASURY);
@@ -2407,7 +2791,7 @@ static void txHashBuilder_assertCanLeaveTreasury(tx_hash_builder_t *builder) {
             // make sure treasury was not expected
             ASSERT(!builder->includeTreasury);
             // assert we can leave the previous state
-            txHashBuilder_assertCanLeaveVotingProcedures(builder);
+            txHashBuilder_assertCanLeaveProposalProcedures(builder);
             break;
     }
 }

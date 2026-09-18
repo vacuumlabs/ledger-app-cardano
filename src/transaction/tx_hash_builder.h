@@ -11,6 +11,7 @@
 #include "tx.h"
 #include "tx_output_types.h"
 #include "tx_credential_types.h"
+#include "tx_proposal_procedure_types.h"
 
 enum {
     TX_BODY_KEY_INPUTS = 0,
@@ -31,7 +32,7 @@ enum {
     TX_BODY_KEY_TOTAL_COLLATERAL = 17,
     TX_BODY_KEY_REFERENCE_INPUTS = 18,
     TX_BODY_KEY_VOTING_PROCEDURES = 19,
-    // TX_BODY_KEY_PROPOSAL_PROCEDURES = 20, // not used
+    TX_BODY_KEY_PROPOSAL_PROCEDURES = 20,
     TX_BODY_KEY_TREASURY = 21,
     TX_BODY_KEY_DONATION = 22,
 };
@@ -80,9 +81,14 @@ typedef enum {
     TX_HASH_BUILDER_IN_TOTAL_COLLATERAL = 1600,
     TX_HASH_BUILDER_IN_REFERENCE_INPUTS = 1700,
     TX_HASH_BUILDER_IN_VOTING_PROCEDURES = 1800,
-    TX_HASH_BUILDER_IN_TREASURY = 1900,
-    TX_HASH_BUILDER_IN_DONATION = 2000,
-    TX_HASH_BUILDER_FINISHED = 2100,
+    TX_HASH_BUILDER_IN_PROPOSAL_PROCEDURES = 1900,
+    TX_HASH_BUILDER_IN_PROPOSAL_UPDATE_COMMITTEE_REMOVALS = 1901,
+    TX_HASH_BUILDER_IN_PROPOSAL_UPDATE_COMMITTEE_ADDITIONS = 1902,
+    TX_HASH_BUILDER_IN_PROPOSAL_TREASURY_WITHDRAWALS_ENTRIES = 1903,
+    TX_HASH_BUILDER_IN_PROPOSAL_PARAMETER_CHANGE_FIELDS = 1904,
+    TX_HASH_BUILDER_IN_TREASURY = 2000,
+    TX_HASH_BUILDER_IN_DONATION = 2100,
+    TX_HASH_BUILDER_FINISHED = 2200,
 } tx_hash_builder_state_t;
 
 typedef enum {
@@ -107,6 +113,7 @@ typedef struct {
     uint16_t remainingReferenceInputs;
     uint16_t remainingVoters;
     uint16_t remainingVotesPerVoter;
+    uint16_t remainingProposalProcedures;
     bool includeTtl;
     bool includeAuxData;
     bool includeValidityIntervalStart;
@@ -123,6 +130,19 @@ typedef struct {
             uint16_t remainingOwners;
             uint16_t remainingRelays;
         } poolCertificateData;
+
+        struct {
+            uint16_t remainingCommitteeRemovals;
+            uint16_t remainingCommitteeAdditions;
+        } committeeUpdateData;
+
+        struct {
+            uint16_t remainingTreasuryWithdrawals;
+        } treasuryWithdrawalsData;
+
+        struct {
+            uint16_t remainingParameterChangeFields;
+        } parameterChangeData;
 
         struct {
             tx_hash_builder_output_state_t outputState;
@@ -396,6 +416,69 @@ void txHashBuilder_addVoter(tx_hash_builder_t *builder, const voter_t *voter, ui
 void txHashBuilder_addVote(tx_hash_builder_t *builder,
                            gov_action_id_t *govActionId,
                            voting_procedure_t *votingProcedure);
+
+void txHashBuilder_enterProposalProcedures(tx_hash_builder_t *builder);
+
+void txHashBuilder_addProposalProcedure(tx_hash_builder_t *builder,
+                                        uint64_t deposit,
+                                        const uint8_t *rewardAccountBuffer,
+                                        size_t rewardAccountSize,
+                                        const gov_action_t *govAction,
+                                        const anchor_t *anchor);
+
+void txHashBuilder_updateCommittee_enter(tx_hash_builder_t *builder,
+                                         uint64_t deposit,
+                                         const uint8_t *rewardAccountBuffer,
+                                         size_t rewardAccountSize,
+                                         const opt_gov_action_id_t *prevActionId,
+                                         uint16_t numRemovals);
+
+void txHashBuilder_updateCommittee_addRemoval(tx_hash_builder_t *builder,
+                                              const credential_t *credential);
+
+void txHashBuilder_updateCommittee_enterAdditions(tx_hash_builder_t *builder,
+                                                  uint16_t numAdditions);
+
+void txHashBuilder_updateCommittee_addAddition(tx_hash_builder_t *builder,
+                                               const credential_t *credential,
+                                               uint64_t expirationEpoch);
+
+void txHashBuilder_updateCommittee_finish(tx_hash_builder_t *builder,
+                                          uint64_t thresholdNumerator,
+                                          uint64_t thresholdDenominator,
+                                          const anchor_t *anchor);
+
+void txHashBuilder_treasuryWithdrawals_enter(tx_hash_builder_t *builder,
+                                             uint64_t deposit,
+                                             const uint8_t *rewardAccountBuffer,
+                                             size_t rewardAccountSize,
+                                             uint16_t numWithdrawals);
+
+void txHashBuilder_treasuryWithdrawals_addWithdrawal(tx_hash_builder_t *builder,
+                                                     const uint8_t *withdrawalRewardAccountBuffer,
+                                                     size_t withdrawalRewardAccountSize,
+                                                     uint64_t coin);
+
+void txHashBuilder_treasuryWithdrawals_finish(tx_hash_builder_t *builder,
+                                              bool hasGuardrailsScriptHash,
+                                              const uint8_t *guardrailsScriptHash,
+                                              const anchor_t *anchor);
+
+void txHashBuilder_parameterChange_enter(tx_hash_builder_t *builder,
+                                         uint64_t deposit,
+                                         const uint8_t *rewardAccountBuffer,
+                                         size_t rewardAccountSize,
+                                         const opt_gov_action_id_t *prevActionId,
+                                         uint16_t numPresentFields);
+
+void txHashBuilder_parameterChange_addField(tx_hash_builder_t *builder,
+                                            uint8_t cddlKey,
+                                            const parsed_param_field_t *field);
+
+void txHashBuilder_parameterChange_finish(tx_hash_builder_t *builder,
+                                          bool hasGuardrailsScriptHash,
+                                          const uint8_t *guardrailsScriptHash,
+                                          const anchor_t *anchor);
 
 void txHashBuilder_addTreasury(tx_hash_builder_t *builder, uint64_t treasury);
 
