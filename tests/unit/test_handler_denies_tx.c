@@ -288,12 +288,20 @@ static void test_tx_init_missing_voters_count(void **state) {
     run_sign_tx_init_case(&params, 37, SWO_WRONG_DATA_LENGTH);
 }
 
+static void test_tx_init_missing_proposal_procedures_count(void **state) {
+    (void) state;
+    const tx_fixture_t *fixture =
+        &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_VALID_MULTIPLE_MIXED_OWNERS_ALL_RELAYS_POOL_REGISTRATION;
+    init_apdu_params_t params = build_init_params_from_fixture(fixture, NULL, 0);
+    run_sign_tx_init_case(&params, 39, SWO_WRONG_DATA_LENGTH);
+}
+
 static void test_tx_init_missing_treasury_flag(void **state) {
     (void) state;
     const tx_fixture_t *fixture =
         &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_VALID_MULTIPLE_MIXED_OWNERS_ALL_RELAYS_POOL_REGISTRATION;
     init_apdu_params_t params = build_init_params_from_fixture(fixture, NULL, 0);
-    run_sign_tx_init_case(&params, 39, SWO_TX_PARSING_FAIL_INCLUSION_FLAG);
+    run_sign_tx_init_case(&params, 41, SWO_TX_PARSING_FAIL_INCLUSION_FLAG);
 }
 
 static void test_tx_init_missing_donation_flag(void **state) {
@@ -301,7 +309,7 @@ static void test_tx_init_missing_donation_flag(void **state) {
     const tx_fixture_t *fixture =
         &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_VALID_MULTIPLE_MIXED_OWNERS_ALL_RELAYS_POOL_REGISTRATION;
     init_apdu_params_t params = build_init_params_from_fixture(fixture, NULL, 0);
-    run_sign_tx_init_case(&params, 40, SWO_TX_PARSING_FAIL_INCLUSION_FLAG);
+    run_sign_tx_init_case(&params, 42, SWO_TX_PARSING_FAIL_INCLUSION_FLAG);
 }
 
 static void test_tx_init_missing_witnesses_count(void **state) {
@@ -309,7 +317,7 @@ static void test_tx_init_missing_witnesses_count(void **state) {
     const tx_fixture_t *fixture =
         &FIXTURE_POOL_REGISTRATION_SIGN_TX_WITNESS_VALID_MULTIPLE_MIXED_OWNERS_ALL_RELAYS_POOL_REGISTRATION;
     init_apdu_params_t params = build_init_params_from_fixture(fixture, NULL, 0);
-    run_sign_tx_init_case(&params, 41, SWO_WRONG_DATA_LENGTH);
+    run_sign_tx_init_case(&params, 43, SWO_WRONG_DATA_LENGTH);
 }
 
 static void test_tx_init_missing_raw_tx_total_length(void **state) {
@@ -888,6 +896,7 @@ int main(void) {
         cmocka_unit_test(test_tx_init_missing_total_collateral_flag),
         cmocka_unit_test(test_tx_init_missing_reference_inputs_count),
         cmocka_unit_test(test_tx_init_missing_voters_count),
+        cmocka_unit_test(test_tx_init_missing_proposal_procedures_count),
         cmocka_unit_test(test_tx_init_missing_treasury_flag),
         cmocka_unit_test(test_tx_init_missing_donation_flag),
         cmocka_unit_test(test_tx_init_missing_witnesses_count),

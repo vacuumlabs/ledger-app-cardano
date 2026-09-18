@@ -41,7 +41,10 @@
 #define MAX_INLINE_DATUM_STRING_LENGTH       40
 #define MAX_RELAY_INDEX_STRING_LENGTH        20  // For relay index "#4294967295"
 #define MAX_PROFIT_MARGIN_STRING_LENGTH      50  // For pool margin percentage "100.99 %"
+#define MAX_EX_UNITS_STRING_LENGTH           (2 * MAX_UINT64_STRING_LENGTH + 3)  // "<memory> / <steps>"
 #define MAX_VOTE_OPTION_LENGTH               16  // For vote option strings ("Abstain", "Yes", "No")
 #define MAX_DREP_OPTION_LENGTH               32  // For DRep option strings ("No Confidence")
 #define MAX_CERTIFICATE_TYPE_LENGTH          64  // For certificate type strings
+#define MAX_GOV_ACTION_TYPE_LENGTH           64  // For gov action type strings
+#define MAX_PROTOCOL_VERSION_STRING_LENGTH   24  // For "major.minor" (uint32_t.uint32_t)
 #define MAX_DELEGATION_INDEX_STRING_LENGTH   6   // "#65535"

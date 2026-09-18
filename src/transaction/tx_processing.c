@@ -17,6 +17,7 @@
 #include "tx_processing.h"
 #include "tx_processing_outputs.h"
 #include "tx_processing_certificates.h"
+#include "tx_processing_proposal_procedures.h"
 #include "tx.h"
 #include "utils.h"
 #include "assert.h"
@@ -1077,6 +1078,9 @@ static bool tx_process_all_fields(buffer_t *buf, tx_processing_state_t *state) {
     if (!tx_process_voting_procedures(buf, state)) {
         return false;
     }
+    if (!tx_process_proposal_procedures(buf, state)) {
+        return false;
+    }
     if (!tx_process_treasury(buf, state)) {
         return false;
     }
@@ -1177,8 +1181,10 @@ bool tx_render_ui_chunk(uint16_t from) {
     };
     // Use a copy of warnings for the render pass so it cannot
     // accidentally change global warning state, and we can assert consistency.
-    warning_bits_t render_run_warnings = tx_body_ctx()->warning_bits;
-    tx_processing_setup_state(&render_mode, &render_run_warnings);
+    // The copy lives in the request-scoped context (not on the stack) so its
+    // address does not escape into the global processing_state.
+    tx_body_ctx()->render_run_warnings = tx_body_ctx()->warning_bits;
+    tx_processing_setup_state(&render_mode, &tx_body_ctx()->render_run_warnings);
 
     // Set the render session: pairs before `from` are skipped, OOM stops the chunk.
     ui_render_session_t session = {0};
@@ -1192,7 +1198,8 @@ bool tx_render_ui_chunk(uint16_t from) {
     LEDGER_ASSERT(!buffer_can_read(&buf, 1), "Render pass did not consume full tx buffer");
 
     security_policy_t tx_hash_policy =
-        policyForSignTxDisplayTxHash(state->tx_params->txSigningMode, &render_run_warnings);
+        policyForSignTxDisplayTxHash(state->tx_params->txSigningMode,
+                                     &tx_body_ctx()->render_run_warnings);
     switch (tx_hash_policy) {
         // LCOV_EXCL_START
         case POLICY_DENY:
@@ -1214,9 +1221,9 @@ bool tx_render_ui_chunk(uint16_t from) {
 
     // A single streamed chunk may visit only a subset of policy SHOW paths.
     // It must never introduce warning bits that were not discovered during validation.
-    LEDGER_ASSERT(
-        (render_run_warnings | tx_body_ctx()->warning_bits) == tx_body_ctx()->warning_bits,
-        "Render run introduced unexpected warning bits");
+    LEDGER_ASSERT((tx_body_ctx()->render_run_warnings | tx_body_ctx()->warning_bits) ==
+                      tx_body_ctx()->warning_bits,
+                  "Render run introduced unexpected warning bits");
 
     ui_render_session_end();
     return true;

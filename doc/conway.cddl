@@ -127,7 +127,7 @@ transaction_body =
   , ? 17 : coin                             ; total collateral
   , ? 18 : nonempty_set<transaction_input> ; reference inputs
   , ? 19 : voting_procedures
-  , ? 20 : proposal_procedures             ; NOT SUPPORTED by Ledger Cardano app
+  , ? 20 : proposal_procedures
   , ? 21 : coin                             ; current treasury value
   , ? 22 : positive_coin                    ; donation
   }

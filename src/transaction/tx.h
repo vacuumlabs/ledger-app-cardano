@@ -81,6 +81,7 @@ typedef struct {
     bool includeTotalCollateral;
     uint16_t num_reference_inputs;
     uint16_t num_voters;
+    uint16_t num_proposal_procedures;
     bool includeTreasury;
     bool includeDonation;
 } tx_params_t;

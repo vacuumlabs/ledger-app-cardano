@@ -31,8 +31,8 @@ APPNAME = "Cardano ADA"
 
 # Application version
 APPVERSION_M = 8
-APPVERSION_N = 0
-APPVERSION_P = 6
+APPVERSION_N = 1
+APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files

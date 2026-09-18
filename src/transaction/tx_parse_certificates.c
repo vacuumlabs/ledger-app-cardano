@@ -417,6 +417,7 @@ static bool _parse_pool_id(buffer_t *buf, pool_id_t *pool_id) {
     return true;
 }
 
+/// Parse a DNS name that is mandatory for the relay.
 static bool _parse_required_relay_dns_name(buffer_t *buf,
                                            pool_relay_t *relay,
                                            const char *missing_dns_message MARK_UNUSED,
@@ -468,6 +469,11 @@ static bool _parse_required_relay_dns_name(buffer_t *buf,
     return true;
 }
 
+/// Parse a single pool relay entry from the pool registration certificate.
+/// The parser accepts three formats:
+///   - single_host_addr (0): a port and at least one IP (IPv4 and/or IPv6)
+///   - single_host_name (1): a port and a non-empty DNS name (A/AAAA host record)
+///   - multi_host_name  (2): a non-empty DNS name only (SRV record); no port or IP
 bool parse_pool_relay(buffer_t *buf, pool_relay_t *relay) {
     ASSERT(buf != NULL);
     ASSERT(relay != NULL);
@@ -481,6 +487,8 @@ bool parse_pool_relay(buffer_t *buf, pool_relay_t *relay) {
 
     switch (relay_type) {
         case RELAY_SINGLE_HOST_IP: {
+            // Address relay: optional port + optional IPv4/IPv6 on the wire. This app
+            // additionally requires a port and at least one IP (enforced below).
             relay->format = RELAY_SINGLE_HOST_IP;
             relay->dnsName = NULL;
             relay->dnsNameSize = 0;
@@ -499,6 +507,7 @@ bool parse_pool_relay(buffer_t *buf, pool_relay_t *relay) {
                 }
                 TRACE_MODULE("port=%u", relay->port.number);
             }
+            // A single-host-address relay is not useful without a port.
             if (relay->port.isNull) {
                 TRACE_MODULE("Relay single host IP must have a port");
                 return false;
@@ -533,6 +542,7 @@ bool parse_pool_relay(buffer_t *buf, pool_relay_t *relay) {
                 ASSERT(relay->ipv6.ip != NULL);
                 TRACE_MODULE("ipv6 present");
             }
+            // ...and it must carry at least one IP address (v4 and/or v6).
             if (relay->ipv4.isNull && relay->ipv6.isNull) {
                 TRACE_MODULE("Relay single host IP must have at least one IP");
                 return false;
@@ -540,6 +550,7 @@ bool parse_pool_relay(buffer_t *buf, pool_relay_t *relay) {
             break;
         }
         case RELAY_SINGLE_HOST_NAME: {
+            // Named relay: optional port + a required DNS name; no IP addresses.
             relay->format = RELAY_SINGLE_HOST_NAME;
             relay->ipv4.isNull = true;
             relay->ipv4.ip = NULL;
@@ -575,6 +586,7 @@ bool parse_pool_relay(buffer_t *buf, pool_relay_t *relay) {
             break;
         }
         case RELAY_MULTIPLE_HOST_NAME: {
+            // SRV relay: a required DNS name only; no port or IP addresses.
             relay->format = RELAY_MULTIPLE_HOST_NAME;
             relay->port.isNull = true;
             relay->port.number = 0;
@@ -715,34 +727,9 @@ bool parse_certificate_stake_pool_registration(buffer_t *buf, certificate_data_t
     }
     TRACE_MODULE("marginDenominator=%llu", (unsigned long long) poolReg->marginDenominator);
 
-    uint8_t reward_account_type;
-    if (!buffer_read_u8(pool_reg_buf, &reward_account_type)) {
-        TRACE("Failed to read reward account type");
+    if (!buffer_read_pool_reward_account(pool_reg_buf, &poolReg->rewardAccount)) {
+        TRACE("Failed to read reward account");
         return false;
-    }
-    TRACE_MODULE("reward_account_type=0x%02x", reward_account_type);
-
-    switch (reward_account_type) {
-        case EXT_CREDENTIAL_KEY_HASH:
-            poolReg->rewardAccount.keyReferenceType = KEY_REFERENCE_HASH;
-            if (!buffer_read_bytes_ptr(pool_reg_buf,
-                                       &poolReg->rewardAccount.hashBuffer,
-                                       REWARD_ACCOUNT_LENGTH)) {
-                TRACE("Failed to read reward account hash");
-                return false;
-            }
-            ASSERT(poolReg->rewardAccount.hashBuffer != NULL);
-            break;
-        case EXT_CREDENTIAL_KEY_PATH:
-            poolReg->rewardAccount.keyReferenceType = KEY_REFERENCE_PATH;
-            if (!buffer_read_bip44_path(pool_reg_buf, &poolReg->rewardAccount.path)) {
-                TRACE("Failed to read reward account path");
-                return false;
-            }
-            break;
-        default:
-            TRACE("Unknown reward account type: 0x%02x", (unsigned) reward_account_type);
-            return false;
     }
 
     if (!buffer_read_u16(pool_reg_buf, &poolReg->numPoolOwners, BE)) {

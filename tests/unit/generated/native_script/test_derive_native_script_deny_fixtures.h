@@ -62,8 +62,8 @@ static const uint8_t FINISH_APDU_PAYLOAD_TC0_NATIVE_SCRIPT_PUBKEY_INVALID_KEY_PA
 // ======================================================================
 
 // N_OF_K (internal node): 1 of 0 children required
-static const native_script_t
-    *CHILDREN_TC1_NATIVE_SCRIPT_N_OF_K_INVALID_REQUIRED_COUNT_HIGHER_THAN_NUMBER_OF_SCRIPTS_C0[] = {
+static const native_script_t*
+    CHILDREN_TC1_NATIVE_SCRIPT_N_OF_K_INVALID_REQUIRED_COUNT_HIGHER_THAN_NUMBER_OF_SCRIPTS_C0[] = {
         NULL};
 
 static const native_script_t
@@ -125,8 +125,8 @@ static const uint8_t
 // ======================================================================
 
 // N_OF_K (internal node): 3 of 0 children required
-static const native_script_t
-    *CHILDREN_TC3_NATIVE_SCRIPT_N_OF_K_REQUIRED_COUNT_EQUALS_ZERO_WITH_SUBSCRIPTS_C0[] = {NULL};
+static const native_script_t*
+    CHILDREN_TC3_NATIVE_SCRIPT_N_OF_K_REQUIRED_COUNT_EQUALS_ZERO_WITH_SUBSCRIPTS_C0[] = {NULL};
 
 static const native_script_t
     SCRIPT_TC3_NATIVE_SCRIPT_N_OF_K_REQUIRED_COUNT_EQUALS_ZERO_WITH_SUBSCRIPTS_C0 = {
@@ -158,7 +158,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_PUBKEY invalid key path",
         .root_script =
-            (const native_script_t *) &SCRIPT_TC0_NATIVE_SCRIPT_PUBKEY_INVALID_KEY_PATH_C0,
+            (const native_script_t*) &SCRIPT_TC0_NATIVE_SCRIPT_PUBKEY_INVALID_KEY_PATH_C0,
         .expected_response = SWO_NATIVE_SCRIPT_PARSING_FAIL_PUBKEY_CREDENTIAL,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC0_NATIVE_SCRIPT_PUBKEY_INVALID_KEY_PATH,
         .finish_apdu_payload_length =
@@ -169,8 +169,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_N_OF_K invalid required count higher than number of scripts",
         .root_script =
-            (const native_script_t
-                 *) &SCRIPT_TC1_NATIVE_SCRIPT_N_OF_K_INVALID_REQUIRED_COUNT_HIGHER_THAN_NUMBER_OF_SCRIPTS_C0,
+            (const native_script_t*) &SCRIPT_TC1_NATIVE_SCRIPT_N_OF_K_INVALID_REQUIRED_COUNT_HIGHER_THAN_NUMBER_OF_SCRIPTS_C0,
         .expected_response = SWO_NATIVE_SCRIPT_PARSING_FAIL_SCRIPT_COUNT,
         .finish_apdu_payload =
             FINISH_APDU_PAYLOAD_TC1_NATIVE_SCRIPT_N_OF_K_INVALID_REQUIRED_COUNT_HIGHER_THAN_NUMBER_OF_SCRIPTS,
@@ -182,8 +181,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_PUBKEY_device_owned_path_invalid_non_hardened_account",
         .root_script =
-            (const native_script_t
-                 *) &SCRIPT_TC2_NATIVE_SCRIPT_PUBKEY_DEVICE_OWNED_PATH_INVALID_NON_HARDENED_ACCOUNT_C0,
+            (const native_script_t*) &SCRIPT_TC2_NATIVE_SCRIPT_PUBKEY_DEVICE_OWNED_PATH_INVALID_NON_HARDENED_ACCOUNT_C0,
         .expected_response = SWO_SECURITY_CONDITION_NOT_SATISFIED,
         .finish_apdu_payload =
             FINISH_APDU_PAYLOAD_TC2_NATIVE_SCRIPT_PUBKEY_DEVICE_OWNED_PATH_INVALID_NON_HARDENED_ACCOUNT,
@@ -195,8 +193,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_N_OF_K_required_count_equals_zero_with_subscripts",
         .root_script =
-            (const native_script_t
-                 *) &SCRIPT_TC3_NATIVE_SCRIPT_N_OF_K_REQUIRED_COUNT_EQUALS_ZERO_WITH_SUBSCRIPTS_C0,
+            (const native_script_t*) &SCRIPT_TC3_NATIVE_SCRIPT_N_OF_K_REQUIRED_COUNT_EQUALS_ZERO_WITH_SUBSCRIPTS_C0,
         .expected_response = SWO_NATIVE_SCRIPT_PARSING_FAIL_SCRIPT_COUNT,
         .finish_apdu_payload =
             FINISH_APDU_PAYLOAD_TC3_NATIVE_SCRIPT_N_OF_K_REQUIRED_COUNT_EQUALS_ZERO_WITH_SUBSCRIPTS,
