@@ -727,34 +727,9 @@ bool parse_certificate_stake_pool_registration(buffer_t *buf, certificate_data_t
     }
     TRACE_MODULE("marginDenominator=%llu", (unsigned long long) poolReg->marginDenominator);
 
-    uint8_t reward_account_type;
-    if (!buffer_read_u8(pool_reg_buf, &reward_account_type)) {
-        TRACE("Failed to read reward account type");
+    if (!buffer_read_pool_reward_account(pool_reg_buf, &poolReg->rewardAccount)) {
+        TRACE("Failed to read reward account");
         return false;
-    }
-    TRACE_MODULE("reward_account_type=0x%02x", reward_account_type);
-
-    switch (reward_account_type) {
-        case EXT_CREDENTIAL_KEY_HASH:
-            poolReg->rewardAccount.keyReferenceType = KEY_REFERENCE_HASH;
-            if (!buffer_read_bytes_ptr(pool_reg_buf,
-                                       &poolReg->rewardAccount.hashBuffer,
-                                       REWARD_ACCOUNT_LENGTH)) {
-                TRACE("Failed to read reward account hash");
-                return false;
-            }
-            ASSERT(poolReg->rewardAccount.hashBuffer != NULL);
-            break;
-        case EXT_CREDENTIAL_KEY_PATH:
-            poolReg->rewardAccount.keyReferenceType = KEY_REFERENCE_PATH;
-            if (!buffer_read_bip44_path(pool_reg_buf, &poolReg->rewardAccount.path)) {
-                TRACE("Failed to read reward account path");
-                return false;
-            }
-            break;
-        default:
-            TRACE("Unknown reward account type: 0x%02x", (unsigned) reward_account_type);
-            return false;
     }
 
     if (!buffer_read_u16(pool_reg_buf, &poolReg->numPoolOwners, BE)) {

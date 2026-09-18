@@ -2,6 +2,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 
 #include "buffer.h"
+#include "bip44.h"
 #include "cardano_constants.h"
 #include "cardano_parsers.h"
 #include "tx_certificate_types.h"
@@ -295,5 +296,39 @@ bool buffer_read_credential(buffer_t *buf, ext_credential_t *credential) {
         TRACE("Failed to parse credential data");
         return false;
     }
+    return true;
+}
+
+bool buffer_read_pool_reward_account(buffer_t *buf, pool_reward_account_t *reward_account) {
+    ASSERT(buf != NULL);
+    ASSERT(reward_account != NULL);
+
+    uint8_t reward_account_type = 0;
+    if (!buffer_read_u8(buf, &reward_account_type)) {
+        TRACE("Failed to read reward account type");
+        return false;
+    }
+
+    switch (reward_account_type) {
+        case EXT_CREDENTIAL_KEY_HASH:
+            reward_account->keyReferenceType = KEY_REFERENCE_HASH;
+            if (!buffer_read_bytes_ptr(buf, &reward_account->hashBuffer, REWARD_ACCOUNT_LENGTH)) {
+                TRACE("Failed to read reward account hash");
+                return false;
+            }
+            ASSERT(reward_account->hashBuffer != NULL);
+            break;
+        case EXT_CREDENTIAL_KEY_PATH:
+            reward_account->keyReferenceType = KEY_REFERENCE_PATH;
+            if (!buffer_read_bip44_path(buf, &reward_account->path)) {
+                TRACE("Failed to read reward account path");
+                return false;
+            }
+            break;
+        default:
+            TRACE("Unknown reward account type: 0x%02x", (unsigned) reward_account_type);
+            return false;
+    }
+
     return true;
 }

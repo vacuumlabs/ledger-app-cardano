@@ -58,6 +58,30 @@ static const char *getCertificateTypeName(certificate_type_t type) {
     }
 }
 
+static const char *getGovActionTypeName(gov_action_type_t type) {
+    switch (type) {
+        case GOV_ACTION_PARAMETER_CHANGE:
+            return "Protocol Parameter Changes";
+        case GOV_ACTION_HARD_FORK_INITIATION:
+            return "Hard-Fork Initiation";
+        case GOV_ACTION_TREASURY_WITHDRAWALS:
+            return "Treasury Withdrawals";
+        case GOV_ACTION_NO_CONFIDENCE:
+            return "Motion of No-Confidence";
+        case GOV_ACTION_UPDATE_COMMITTEE:
+            return "Committee Update";
+        case GOV_ACTION_NEW_CONSTITUTION:
+            return "New Constitution";
+        case GOV_ACTION_INFO:
+            return "Info";
+        // LCOV_EXCL_START
+        default:
+            LEDGER_ASSERT(false, "Unknown gov action type");
+            return "Unknown";
+            // LCOV_EXCL_STOP
+    }
+}
+
 /**
  * Format bytes to lowercase hex string (UI version with bool return)
  */
@@ -233,6 +257,20 @@ bool format_validity_boundary(uint64_t slotNumber,
 }
 
 /**
+ * Format an ex_units pair (memory, steps) as "<memory> / <steps>"
+ */
+bool format_ex_units(uint64_t memory, uint64_t steps, char *out, size_t outSize) {
+    int written = snprintf(out,
+                           outSize,
+                           "%llu / %llu",
+                           (unsigned long long) memory,
+                           (unsigned long long) steps);
+    LEDGER_ASSERT(written > 0, "snprintf ex_units formatting failed");
+    LEDGER_ASSERT((size_t) written + 1 < outSize, "ex_units string does not fit in output buffer");
+    return true;
+}
+
+/**
  * Format pool profit margin as percentage
  */
 bool format_pool_margin(uint64_t numerator, uint64_t denominator, char *out, size_t outSize) {
@@ -400,6 +438,29 @@ bool format_certificate_type(certificate_type_t type, char *out, size_t outSize)
     LEDGER_ASSERT(written > 0, "snprintf certificate type formatting failed");
     LEDGER_ASSERT((size_t) written + 1 < outSize,
                   "Certificate type string does not fit in output buffer");
+    return true;
+}
+
+/**
+ * Format gov action type enum to string
+ */
+bool format_gov_action_type(gov_action_type_t type, char *out, size_t outSize) {
+    const char *gov_action_type_name = getGovActionTypeName(type);
+    int written = snprintf(out, outSize, "%s", gov_action_type_name);
+    LEDGER_ASSERT(written > 0, "snprintf gov action type formatting failed");
+    LEDGER_ASSERT((size_t) written + 1 < outSize,
+                  "Gov action type string does not fit in output buffer");
+    return true;
+}
+
+/**
+ * Format protocol version as "major.minor"
+ */
+bool format_protocol_version(protocol_version_t version, char *out, size_t outSize) {
+    int written = snprintf(out, outSize, "%u.%u", version.major, version.minor);
+    LEDGER_ASSERT(written > 0, "snprintf protocol version formatting failed");
+    LEDGER_ASSERT((size_t) written + 1 < outSize,
+                  "Protocol version string does not fit in output buffer");
     return true;
 }
 

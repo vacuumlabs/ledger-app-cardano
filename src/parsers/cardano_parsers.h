@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include "buffer.h"
 #include "cardano_buffer.h"
+#include "tx_address_types.h"
 #include "tx_credential_types.h"
 #include "tx_certificate_types.h"
 
@@ -103,3 +104,16 @@ bool buffer_read_drep(buffer_t *buf, ext_drep_t *drep);
  * @return true on success, false on failure
  */
 bool buffer_read_credential(buffer_t *buf, ext_credential_t *credential);
+
+/**
+ * Read a pool reward account (key hash or key path).
+ *
+ * Wire format:
+ *   - 1 byte: reference type (0=KEY_HASH, 2=KEY_PATH)
+ *   - Variable: REWARD_ACCOUNT_LENGTH-byte hash, or a BIP44 path
+ *
+ * @param[in] buf Buffer to read from
+ * @param[out] reward_account Parsed reward account structure
+ * @return true on success, false on failure
+ */
+bool buffer_read_pool_reward_account(buffer_t *buf, pool_reward_account_t *reward_account);

@@ -10,6 +10,7 @@
 #include "tx_output_types.h"
 #include "tx_certificate_types.h"
 #include "tx_credential_types.h"
+#include "tx_proposal_procedure_types.h"
 
 /**
  * UI formatter output buffer contract
@@ -110,6 +111,17 @@ bool format_validity_boundary(uint64_t slotNumber,
 bool format_pool_margin(uint64_t numerator, uint64_t denominator, char *out, size_t outSize);
 
 /**
+ * Format an ex_units pair (memory, steps) as "<memory> / <steps>"
+ *
+ * @param memory   Memory execution units
+ * @param steps    Step execution units
+ * @param out      Output buffer for formatted string
+ * @param outSize  Size of output buffer
+ * @return true on success, false on failure
+ */
+bool format_ex_units(uint64_t memory, uint64_t steps, char *out, size_t outSize);
+
+/**
  * Format a 16-bit unsigned integer
  *
  * @param value   Value to format
@@ -192,6 +204,29 @@ bool format_constant_drep(ext_drep_type_t drep_type, char *out, size_t outSize);
  * @return true on success, false on failure
  */
 bool format_certificate_type(certificate_type_t type, char *out, size_t outSize);
+
+/**
+ * Format gov action type enum to string
+ *
+ * Converts gov action type enum values to human-readable strings.
+ * Matches UI_ADD_FORMAT1 signature for use with unified macros.
+ *
+ * @param type    Gov action type enum value
+ * @param out     Output buffer for formatted string
+ * @param outSize Size of output buffer
+ * @return true on success, false on failure
+ */
+bool format_gov_action_type(gov_action_type_t type, char *out, size_t outSize);
+
+/**
+ * Format protocol version as "major.minor"
+ *
+ * @param version Protocol version (major/minor pair)
+ * @param out     Output buffer for formatted string
+ * @param outSize Size of output buffer
+ * @return true on success, false on failure
+ */
+bool format_protocol_version(protocol_version_t version, char *out, size_t outSize);
 
 /**
  * Format URL from raw buffer
