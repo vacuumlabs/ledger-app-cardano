@@ -15,6 +15,7 @@
 #include "securityPolicyType.h"
 #include "tx_hash_builder.h"
 #include "tx.h"
+#include "tx_proposal_procedure_types.h"
 
 #include "securityWarnings.h"
 
@@ -198,6 +199,27 @@ security_policy_t policyForSignTxReferenceInput(const sign_tx_signingmode_t txSi
 security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigningMode,
                                                  ext_voter_t *voter,
                                                  warning_bits_t *w);
+
+security_policy_t policyForSignTxProposalProcedure(sign_tx_signingmode_t txSigningMode,
+                                                   uint8_t networkId,
+                                                   const proposal_procedure_t *proposal,
+                                                   warning_bits_t *w);
+
+// Shared by update_committee's removal-set and addition-map credential entries. No witness is
+// ever required from a committee member being added/removed by a proposal (that's independent
+// of who signs this tx), so this only defends against deriving a hash from an implausible path
+// -- it always shows, never mode-gated.
+security_policy_t policyForSignTxProposalProcedureCommitteeCredential(
+    const ext_credential_t *credential,
+    warning_bits_t *w);
+
+// Validates a reward account appearing in a proposal_procedure: the deposit return
+// account of any governance action, or a treasury_withdrawals_action recipient.
+security_policy_t policyForSignTxProposalProcedureRewardAccount(
+    sign_tx_signingmode_t txSigningMode,
+    uint8_t networkId,
+    const pool_reward_account_t *rewardAccount,
+    warning_bits_t *w);
 
 security_policy_t policyForSignTxTreasury(sign_tx_signingmode_t txSigningMode,
                                           uint64_t treasury,

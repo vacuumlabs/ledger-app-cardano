@@ -484,6 +484,7 @@ security_policy_t policyForSignTxInit(const tx_params_t *txParams, warning_bits_
             // no voting, treasuries, donations for pool registrations
             // we don't need them and we want to avoid overlap in witnesses
             DENY_IF(txParams->num_voters > 0);
+            DENY_IF(txParams->num_proposal_procedures > 0);
             DENY_IF(txParams->includeTreasury);
             DENY_IF(txParams->includeDonation);
             break;
@@ -558,6 +559,7 @@ security_policy_t policyForSignTxSwapInit(const tx_params_t *txParams, warning_b
     DENY_IF(txParams->includeTotalCollateral);
     DENY_IF(txParams->num_reference_inputs != 0);
     DENY_IF(txParams->num_voters != 0);
+    DENY_IF(txParams->num_proposal_procedures != 0);
     DENY_IF(txParams->includeTreasury);
     DENY_IF(txParams->includeDonation);
 
@@ -1745,26 +1747,27 @@ security_policy_t policyForSignTxStakePoolRegistrationVrfKey(sign_tx_signingmode
     DENY();  // should not be reached
 }
 
-security_policy_t policyForSignTxStakePoolRegistrationRewardAccount(
-    sign_tx_signingmode_t txSigningMode,
-    uint8_t networkId,
-    const pool_reward_account_t *poolRewardAccount,
-    warning_bits_t *w) {
+// Shape of a reward account, independent of the signing mode: a raw hash must be a reward
+// address on the given network, a path must be an ordinary staking key path.
+static security_policy_t _policyForRewardAccountShape(uint8_t networkId,
+                                                      const pool_reward_account_t *rewardAccount,
+                                                      warning_bits_t *w) {
     POLICY_INIT();
-    ASSERT(poolRewardAccount != NULL);
-    switch (poolRewardAccount->keyReferenceType) {
+    ASSERT(rewardAccount != NULL);
+    switch (rewardAccount->keyReferenceType) {
         case KEY_REFERENCE_HASH: {
-            ASSERT(poolRewardAccount->hashBuffer != NULL);
+            ASSERT(rewardAccount->hashBuffer != NULL);
             const uint8_t header =
-                getAddressHeader(poolRewardAccount->hashBuffer, REWARD_ACCOUNT_LENGTH);
+                getAddressHeader(rewardAccount->hashBuffer, REWARD_ACCOUNT_LENGTH);
             const address_type_t address_type = getAddressType(header);
             DENY_UNLESS(address_type == REWARD_KEY || address_type == REWARD_SCRIPT);
             DENY_UNLESS(getNetworkId(header) == networkId);
             break;
         }
         case KEY_REFERENCE_PATH:
-            DENY_UNLESS(bip44_isOrdinaryStakingKeyPath(&poolRewardAccount->path));
-            // we do not enforce single account, no benefit for pool registrations
+            DENY_UNLESS(bip44_isOrdinaryStakingKeyPath(&rewardAccount->path));
+            SHOW_IF(mark_unusual_key_derivation(w, &rewardAccount->path));
+            // we do not enforce single account, no benefit for a reward account
             // and it is compatible with previous app versions
             break;
         // LCOV_EXCL_START
@@ -1773,11 +1776,20 @@ security_policy_t policyForSignTxStakePoolRegistrationRewardAccount(
             // LCOV_EXCL_STOP
     }
 
+    SHOW();
+}
+
+security_policy_t policyForSignTxStakePoolRegistrationRewardAccount(
+    sign_tx_signingmode_t txSigningMode,
+    uint8_t networkId,
+    const pool_reward_account_t *poolRewardAccount,
+    warning_bits_t *w) {
+    POLICY_INIT();
+
     switch (txSigningMode) {
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OWNER:
         case SIGN_TX_SIGNINGMODE_POOL_REGISTRATION_OPERATOR:
-            SHOW();
-            break;
+            RETURN(_policyForRewardAccountShape(networkId, poolRewardAccount, w));
 
         // LCOV_EXCL_START
         default:
@@ -2407,6 +2419,67 @@ security_policy_t policyForSignTxVotingProcedure(sign_tx_signingmode_t txSigning
         // LCOV_EXCL_START
         default:
             // this should not be called in POOL_REGISTRATION signing modes
+            ASSERT(false);
+            // LCOV_EXCL_STOP
+    }
+
+    DENY();  // should not be reached
+}
+
+// ======================================= Proposal Procedures
+// =======================================
+
+security_policy_t policyForSignTxProposalProcedure(sign_tx_signingmode_t txSigningMode,
+                                                   uint8_t networkId,
+                                                   const proposal_procedure_t *proposal,
+                                                   warning_bits_t *w) {
+    ASSERT(proposal != NULL);
+    // Single account is not enforced: deposit refunds routinely go to a third-party account.
+    return policyForSignTxProposalProcedureRewardAccount(txSigningMode,
+                                                         networkId,
+                                                         &proposal->rewardAccount,
+                                                         w);
+}
+
+security_policy_t policyForSignTxProposalProcedureCommitteeCredential(
+    const ext_credential_t *credential,
+    warning_bits_t *w) {
+    POLICY_INIT();
+    ASSERT(credential != NULL);
+
+    switch (credential->type) {
+        case EXT_CREDENTIAL_KEY_PATH:
+            DENY_UNLESS(bip44_isCommitteeColdKeyPath(&credential->keyPath));
+            break;
+        case EXT_CREDENTIAL_KEY_HASH:
+        case EXT_CREDENTIAL_SCRIPT_HASH:
+            break;
+        // LCOV_EXCL_START
+        default:
+            ASSERT(false);
+            // LCOV_EXCL_STOP
+    }
+
+    SHOW();
+}
+
+security_policy_t policyForSignTxProposalProcedureRewardAccount(
+    sign_tx_signingmode_t txSigningMode,
+    uint8_t networkId,
+    const pool_reward_account_t *rewardAccount,
+    warning_bits_t *w) {
+    POLICY_INIT();
+
+    switch (txSigningMode) {
+        case SIGN_TX_SIGNINGMODE_ORDINARY:
+        case SIGN_TX_SIGNINGMODE_MULTISIG:
+        case SIGN_TX_SIGNINGMODE_PLUTUS:
+        case SIGN_TX_SIGNINGMODE_UNRESTRICTED:
+            RETURN(_policyForRewardAccountShape(networkId, rewardAccount, w));
+
+        // LCOV_EXCL_START
+        default:
+            // proposal_procedures should not reach here in POOL_REGISTRATION signing modes;
             ASSERT(false);
             // LCOV_EXCL_STOP
     }
