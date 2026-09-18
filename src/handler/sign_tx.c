@@ -282,6 +282,12 @@ static void handle_tx_init_apdu(buffer_t *cdata) {
         return;
     }
 
+    // Field 20 (proposal procedures)
+    if (!buffer_read_u16(cdata, &tx_params->num_proposal_procedures, BE)) {
+        send_swo_and_reset(SWO_WRONG_DATA_LENGTH);
+        return;
+    }
+
     // Field 21 (treasury) - optional
     if (!buffer_read_flag_included(cdata, &tx_params->includeTreasury)) {
         TRACE("TX init: invalid treasury inclusion flag");

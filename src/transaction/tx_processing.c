@@ -17,6 +17,7 @@
 #include "tx_processing.h"
 #include "tx_processing_outputs.h"
 #include "tx_processing_certificates.h"
+#include "tx_processing_proposal_procedures.h"
 #include "tx.h"
 #include "utils.h"
 #include "assert.h"
@@ -1075,6 +1076,9 @@ static bool tx_process_all_fields(buffer_t *buf, tx_processing_state_t *state) {
         return false;
     }
     if (!tx_process_voting_procedures(buf, state)) {
+        return false;
+    }
+    if (!tx_process_proposal_procedures(buf, state)) {
         return false;
     }
     if (!tx_process_treasury(buf, state)) {

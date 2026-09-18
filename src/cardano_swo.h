@@ -48,6 +48,7 @@ typedef enum {
     SWO_TX_PARSING_FAIL_TOTAL_COLLATERAL = 0x6B31,         // key 17
     SWO_TX_PARSING_FAIL_REFERENCE_INPUTS = 0x6B32,         // key 18
     SWO_TX_PARSING_FAIL_VOTING_PROCEDURES = 0x6B33,        // key 19
+    SWO_TX_PARSING_FAIL_PROPOSAL_PROCEDURES = 0x6B34,      // key 20
     SWO_TX_PARSING_FAIL_TREASURY = 0x6B35,                 // key 21
     SWO_TX_PARSING_FAIL_DONATION = 0x6B36,                 // key 22
 
