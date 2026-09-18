@@ -478,6 +478,8 @@ def _generate_fixtures_for_era(
         )
         header_lines.append(
             f"    .num_voters = {len(tx.votingProcedures) if hasattr(tx, 'votingProcedures') and tx.votingProcedures else 0},"
+            f"    .num_proposal_procedures = "
+            f"{len(tx.proposalProcedures) if getattr(tx, 'proposalProcedures', None) else 0},"
         )
         treasury_value = getattr(tx, "treasury", None)
         donation_value = getattr(tx, "donation", None)
@@ -537,6 +539,7 @@ def _load_sign_tx_tests() -> dict[str, Any]:
         testsByron,
         testsCatalystRegistration,
         testsConwayMultisig,
+        testsConwayProposalProcedures,
         testsConwayVotingProcedures,
         testsConwayWithCertificates,
         testsConwayWithoutCertificates,
@@ -561,6 +564,7 @@ def _load_sign_tx_tests() -> dict[str, Any]:
         "conway": testsConwayWithCertificates,
         "conway_without_certificates": testsConwayWithoutCertificates,
         "conway_voting": testsConwayVotingProcedures,
+        "conway_proposals": testsConwayProposalProcedures,
         "multisig": testsMultisig + testsConwayMultisig,
         "alonzo_catalyst": testsCatalystRegistration,
         "alonzo_cip36": testsCVoteRegistrationCIP36,

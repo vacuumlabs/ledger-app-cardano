@@ -35,6 +35,7 @@ from tests.standalone.input_files.signTx import (
     poolRegistrationOperatorTestCases,
     poolRegistrationOwnerDenyTestCases,
     poolRegistrationOwnerTestCases,
+    proposalProceduresDenyTestCases,
     singleAccountDenyTestCases,
     stakePoolRegistrationPoolIdDenyTestCases,
     testsAllegra,
@@ -45,6 +46,7 @@ from tests.standalone.input_files.signTx import (
     testsByron,
     testsCatalystRegistration,
     testsConwayMultisig,
+    testsConwayProposalProcedures,
     testsConwayVotingProcedures,
     testsConwayWithCertificates,
     testsConwayWithoutCertificates,
@@ -461,6 +463,7 @@ all_sign_tx_test_cases = (
     + testsConwayWithCertificates
     + testsConwayWithoutCertificates
     + testsConwayVotingProcedures
+    + testsConwayProposalProcedures
     + testsConwayMultisig
     + testsMultidelegation
     + testsCatalystRegistration
@@ -564,6 +567,7 @@ all_deny_test_cases = (
     + testsInvalidTokenBundleOrdering
     + votingDenyTestCases
     + poolRegistrationOwnerDenyTestCases
+    + proposalProceduresDenyTestCases
     + stakePoolRegistrationPoolIdDenyTestCases
     + invalidCertificates
     + invalidPoolMetadataTestCases

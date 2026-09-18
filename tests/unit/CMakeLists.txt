@@ -164,6 +164,10 @@ set(SIGN_TX_COMMON_SOURCES
     ../../src/transaction/tx_ui_render.c
     ../../src/transaction/tx_ui_render_certificates.c
     ../../src/transaction/tx_ui_render_outputs.c
+    ../../src/transaction/tx_ui_render_shared.c
+    ../../src/transaction/tx_ui_render_proposal_procedures.c
+    ../../src/transaction/tx_parse_proposal_procedures.c
+    ../../src/transaction/tx_processing_proposal_procedures.c
     ../../src/transaction/tx_parse_certificates.c
     ../../src/transaction/tx_parse_outputs.c
     ../../src/transaction/tx_utils.c
@@ -548,6 +552,11 @@ cardano_unit_test(test_sign_tx_conway_without_certificates
 # Conway era voting procedures tests
 cardano_unit_test(test_sign_tx_conway_voting
     SOURCES generated/sign_tx/test_sign_tx_conway_voting.c
+    LIBS cardano_sign_tx_core)
+
+# Conway era proposal procedures tests
+cardano_unit_test(test_sign_tx_conway_proposals
+    SOURCES generated/sign_tx/test_sign_tx_conway_proposals.c
     LIBS cardano_sign_tx_core)
 
 # Multisig tests

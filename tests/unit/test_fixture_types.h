@@ -57,6 +57,7 @@ typedef struct {
     bool include_total_collateral;
     uint16_t num_reference_inputs;
     uint16_t num_voters;
+    uint16_t num_proposal_procedures;
     bool include_treasury;
     // Treasury and donation values are encoded inside raw_tx / tx_body_cbor_hex.
     // These fixture fields are metadata for readability and source parity only.

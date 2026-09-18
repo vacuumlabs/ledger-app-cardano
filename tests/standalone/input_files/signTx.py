@@ -26,6 +26,7 @@ from tests.application_client.command_builder import (
     CIP36VoteDelegation,
     CIP36VoteDelegationType,
     CIP36VoteRegistrationFormat,
+    CommitteeMemberAddition,
     CredentialParams,
     CredentialParamsType,
     Datum,
@@ -36,15 +37,21 @@ from tests.application_client.command_builder import (
     DRepUpdateParams,
     FakeNet,
     GovActionId,
+    GovActionType,
+    HardForkInitiationParams,
     Mainnet,
     Margin,
     MultiHostRelayParams,
     NetworkDesc,
+    NewConstitutionParams,
+    NoConfidenceParams,
+    ParameterChangeParams,
     PoolKey,
     PoolKeyType,
     PoolMetadataParams,
     PoolRegistrationParams,
     PoolRetirementParams,
+    ProposalProcedure,
     Relay,
     RelayType,
     RequiredSigner,
@@ -57,10 +64,13 @@ from tests.application_client.command_builder import (
     StakeRegistrationParams,
     Testnet,
     Testnet_legacy,
+    Testnet_preprod,
     ThirdPartyAddressParams,
     Token,
     Transaction,
     TransactionSigningMode,
+    TreasuryWithdrawalEntry,
+    TreasuryWithdrawalsParams,
     TxAuxiliaryData,
     TxAuxiliaryDataCIP36,
     TxAuxiliaryDataHash,
@@ -73,6 +83,7 @@ from tests.application_client.command_builder import (
     TxOutputDestinationType,
     TxOutputFormat,
     TxRequiredSignerType,
+    UpdateCommitteeParams,
     Vote,
     VoteDelegationParams,
     VoteOption,
@@ -4778,6 +4789,759 @@ testsConwayVotingProcedures: list[SignTxTestCase] = [
         ),
     ),
 ]
+
+# ==========================================
+# testsConwayProposalProcedures
+# Real on-chain transactions (source: doc/proposal_procedures_real_examples.json, fetched
+# via Koios), verifying that raw-buffer parsing and CBOR hash-building reproduce the real
+# tx hash byte for byte. Inputs are third-party, so no witnesses are expected.
+# ==========================================
+testsConwayProposalProcedures: list[SignTxTestCase] = [
+    SignTxTestCase(
+        name="Sign_tx_with_proposal_procedures_info_action_real_onchain",
+        options=True,  # real on-chain tx tags proposal_procedures with CBOR tag 258 (set)
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[
+                TxInput(
+                    txHashHex="2d41957c0b829cb7b7dad2214aeb2286e6b9b74f9eac0007d00a4009336620af",
+                    outputIndex=0,
+                )
+            ],
+            outputs=[
+                TxOutputAlonzo(
+                    destination=TxOutputDestination(
+                        type=TxOutputDestinationType.THIRD_PARTY,
+                        params=ThirdPartyAddressParams(
+                            addressHex="014f4ac1e24970e2f62cb27a6e344ef60e65ea72a09cf8a07781384de7bd8a6ca646f9d7e62d0d64fd424df8afa35892e89f62acecca8cd3fd"
+                        ),
+                    ),
+                    amount=1827811,
+                )
+            ],
+            fee=172189,
+            ttl=193284188,
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e149d2f64bf237b683e3a3e2b543ca6f18bde2b673716514b4d1cd5348",
+                    ),
+                    govAction=GovActionType.INFO,
+                    anchor=AnchorParams(
+                        url="https://str8pool.com/governance/2026-07-23-FabianvBergen.jsonld",
+                        hashHex="95c0bcf2ec42756d6f12f8110d40826021fca29ed82526609efb62d9e79c98ad",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a500d90102818258202d41957c0b829cb7b7dad2214aeb2286e6b9b74f9eac0007d00a4009336620af000181825839014f4ac1e24970e2f62cb27a6e344ef60e65ea72a09cf8a07781384de7bd8a6ca646f9d7e62d0d64fd424df8afa35892e89f62acecca8cd3fd1a001be3e3021a0002a09d031a0b85485c14d9010281841b000000174876e800581de149d2f64bf237b683e3a3e2b543ca6f18bde2b673716514b4d1cd5348810682783f68747470733a2f2f73747238706f6f6c2e636f6d2f676f7665726e616e63652f323032362d30372d32332d46616269616e7642657267656e2e6a736f6e6c64582095c0bcf2ec42756d6f12f8110d40826021fca29ed82526609efb62d9e79c98ad"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="48bab0ca71cc46f2ee421242b14f292b8c8382bda707d03ea662644bed22b893",
+            witnesses=(),
+        ),
+    ),
+    SignTxTestCase(
+        name="Sign_tx_with_proposal_procedures_hard_fork_initiation_action_real_onchain",
+        options=True,
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[
+                TxInput(
+                    txHashHex="41bfdf1ed20d0d8b89de2308dc8136180b70d199625bfb7a76a6a79f3fe9f466",
+                    outputIndex=0,
+                ),
+                TxInput(
+                    txHashHex="fff0df644d328a5367212f45bab59060bde3c4091dc96c723062896fd6197314",
+                    outputIndex=0,
+                ),
+            ],
+            outputs=[
+                TxOutputAlonzo(
+                    destination=TxOutputDestination(
+                        type=TxOutputDestinationType.THIRD_PARTY,
+                        params=ThirdPartyAddressParams(addressHex="619de6194b5f8c5c5547f3735f7d1e53b83c15134abe89de232fd162e7"),
+                    ),
+                    amount=895702,
+                )
+            ],
+            fee=183893,
+            ttl=None,
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e111ce01cd0e4dbba24d7f99d3516ae9229f0199ed4b9315fe4693b64b",
+                    ),
+                    govAction=GovActionType.HARD_FORK_INITIATION,
+                    govActionParams=HardForkInitiationParams(
+                        prevActionId=None,
+                        protocolMajor=10,
+                        protocolMinor=0,
+                    ),
+                    anchor=AnchorParams(
+                        url="https://raw.githubusercontent.com/IntersectMBO/governance-actions/refs/heads/main/mainnet/2024-10-30-hf10/metadata.jsonld",
+                        hashHex="8a1bd37caa6b914a8b569adb63a0f41d8f159c110dc5c8409118a3f087fffb43",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a400d901028282582041bfdf1ed20d0d8b89de2308dc8136180b70d199625bfb7a76a6a79f3fe9f46600825820fff0df644d328a5367212f45bab59060bde3c4091dc96c723062896fd619731400018182581d619de6194b5f8c5c5547f3735f7d1e53b83c15134abe89de232fd162e71a000daad6021a0002ce5514d9010281841b000000174876e800581de111ce01cd0e4dbba24d7f99d3516ae9229f0199ed4b9315fe4693b64b8301f6820a0082787968747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f496e746572736563744d424f2f676f7665726e616e63652d616374696f6e732f726566732f68656164732f6d61696e2f6d61696e6e65742f323032342d31302d33302d686631302f6d657461646174612e6a736f6e6c6458208a1bd37caa6b914a8b569adb63a0f41d8f159c110dc5c8409118a3f087fffb43"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="0b19476e40bbbb5e1e8ce153523762e2b6859e7ecacbaf06eae0ee6a447e79b9",
+            witnesses=(),
+        ),
+    ),
+    SignTxTestCase(
+        name="Sign_tx_with_proposal_procedures_new_constitution_real_onchain",
+        options=True,
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[
+                TxInput(
+                    txHashHex="bacbce38c49df898004b14587d7f9fa92eb2524543472cf47894afdb278eb44e",
+                    outputIndex=0,
+                )
+            ],
+            outputs=[
+                TxOutputAlonzo(
+                    destination=TxOutputDestination(
+                        type=TxOutputDestinationType.THIRD_PARTY,
+                        params=ThirdPartyAddressParams(
+                            addressHex="016878e4c51866756e3bdd49882c6e218a8ea18850ad89ac2a582b35f429b3155178e987f4eb0e8b60bb5ef4498d960145fa23156744c89122"
+                        ),
+                    ),
+                    amount=99816195,
+                )
+            ],
+            fee=183805,
+            ttl=None,
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e129b3155178e987f4eb0e8b60bb5ef4498d960145fa23156744c89122",
+                    ),
+                    govAction=GovActionType.NEW_CONSTITUTION,
+                    govActionParams=NewConstitutionParams(
+                        prevActionId=GovActionId(
+                            txHashHex="8c653ee5c9800e6d31e79b5a7f7d4400c81d44717ad4db633dc18d4c07e4a4fd",
+                            govActionIndex=0,
+                        ),
+                        constitutionAnchor=AnchorParams(
+                            url="ipfs://bafkreieyuknozbtewyurfqoagvplvykadn6a4u6wglupavdz46bbsnnl6e",
+                            hashHex="b368bdad83c727bbfe86425575233fb914eb76d05d89497f7790cf007fd95f52",
+                        ),
+                        guardrailsScriptHashHex="fa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64",
+                    ),
+                    anchor=AnchorParams(
+                        url="ipfs://bafkreigxpweqv2rnh7ajt5hzdq6gikogmaq3nbyof5uvdntc4hkg52ghqy",
+                        hashHex="6c5645b67cca1f39323984f97ea2d5f5a68423c592407e241b0637e26d244591",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a400d9010281825820bacbce38c49df898004b14587d7f9fa92eb2524543472cf47894afdb278eb44e000181825839016878e4c51866756e3bdd49882c6e218a8ea18850ad89ac2a582b35f429b3155178e987f4eb0e8b60bb5ef4498d960145fa23156744c891221a05f31303021a0002cdfd14d9010281841b000000174876e800581de129b3155178e987f4eb0e8b60bb5ef4498d960145fa23156744c8912283058258208c653ee5c9800e6d31e79b5a7f7d4400c81d44717ad4db633dc18d4c07e4a4fd0082827842697066733a2f2f6261666b7265696579756b6e6f7a6274657779757266716f616776706c76796b61646e366134753677676c75706176647a34366262736e6e6c36655820b368bdad83c727bbfe86425575233fb914eb76d05d89497f7790cf007fd95f52581cfa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64827842697066733a2f2f6261666b7265696778707765717632726e6837616a7435687a64713667696b6f676d6171336e62796f66357576646e746334686b6735326768717958206c5645b67cca1f39323984f97ea2d5f5a68423c592407e241b0637e26d244591"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="91a79f5c934b7c91e3027736d565080c2b6611fb8484b1156fdf16121fcfb410",
+            witnesses=(),
+        ),
+    ),
+    SignTxTestCase(
+        name="Sign_tx_with_proposal_procedures_update_committee_real_onchain",
+        options=True,
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[
+                TxInput(
+                    txHashHex="ab474223d40e2e3540555364be27e161a809c33651408f43d84acff10c0ba306",
+                    outputIndex=0,
+                ),
+                TxInput(
+                    txHashHex="e404e5f9afc5091204fb954485a79ae31d22cf3cb9869b2303ba4089a3a85224",
+                    outputIndex=0,
+                ),
+            ],
+            outputs=[
+                TxOutputAlonzo(
+                    destination=TxOutputDestination(
+                        type=TxOutputDestinationType.THIRD_PARTY,
+                        params=ThirdPartyAddressParams(
+                            addressHex="01076ad93c90e7dafc2ad468212fb2e2701559d1d32f25ebdc1facdada611943783e94de22f533778841521e97f77588fe05447f464be192c9"
+                        ),
+                    ),
+                    amount=2720225,
+                )
+            ],
+            fee=194761,
+            ttl=None,
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e1192688a334130db2b51aedea594301010b0d1d2e9a86a460932520ba",
+                    ),
+                    govAction=GovActionType.UPDATE_COMMITTEE,
+                    govActionParams=UpdateCommitteeParams(
+                        prevActionId=GovActionId(
+                            txHashHex="4dab331457b61b824bbc6ba4b9d9be4750e25c0b5dd42207aeb63c7431a6b704",
+                            govActionIndex=0,
+                        ),
+                        membersToRemove=[
+                            CredentialParams(
+                                type=CredentialParamsType.SCRIPT_HASH,
+                                keyValue="349e55f83e9af24813e6cb368df6a80d38951b2a334dfcdf26815558",
+                            ),
+                            CredentialParams(
+                                type=CredentialParamsType.SCRIPT_HASH,
+                                keyValue="9cc3f387623f45dae6a68b7096b0c2e403d8601a82dc40221ead41e2",
+                            ),
+                            CredentialParams(
+                                type=CredentialParamsType.KEY_HASH,
+                                keyValue="dc0d6ef49590eb6880a50a00adde17596e6d76f7159572fa1ff85f2a",
+                            ),
+                        ],
+                        membersToAdd=[
+                            CommitteeMemberAddition(
+                                credential=CredentialParams(
+                                    type=CredentialParamsType.SCRIPT_HASH,
+                                    keyValue="16feefc225e06f75a3c917f4aa50acffde7631ea0355721f2ac12542",
+                                ),
+                                expirationEpoch=799,
+                            ),
+                            CommitteeMemberAddition(
+                                credential=CredentialParams(
+                                    type=CredentialParamsType.SCRIPT_HASH,
+                                    keyValue="7c34e0240b84029e0932f5e8d81af42a63f55de6da31f16e19b1f5b4",
+                                ),
+                                expirationEpoch=799,
+                            ),
+                            CommitteeMemberAddition(
+                                credential=CredentialParams(
+                                    type=CredentialParamsType.KEY_HASH,
+                                    keyValue="0af99047bc90e0d9073467548a19a85089b766e73eb807748a2ad361",
+                                ),
+                                expirationEpoch=799,
+                            ),
+                            CommitteeMemberAddition(
+                                credential=CredentialParams(
+                                    type=CredentialParamsType.KEY_HASH,
+                                    keyValue="13493790d9b03483a1e1e684ea4faf1ee48a58f402574e7f2246f4d4",
+                                ),
+                                expirationEpoch=799,
+                            ),
+                        ],
+                        thresholdNumerator=2,
+                        thresholdDenominator=3,
+                    ),
+                    anchor=AnchorParams(
+                        url="ipfs://bafkreif22553h3reaedrd376hzgkjng6kxnb3o7ycu3j4pzjbcjerv2bce",
+                        hashHex="6014f3e6c052eb1e83ce344bda1ee5262000a83d1d1aa62d63726d91316e6647",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a400d9010282825820ab474223d40e2e3540555364be27e161a809c33651408f43d84acff10c0ba30600825820e404e5f9afc5091204fb954485a79ae31d22cf3cb9869b2303ba4089a3a8522400018182583901076ad93c90e7dafc2ad468212fb2e2701559d1d32f25ebdc1facdada611943783e94de22f533778841521e97f77588fe05447f464be192c91a002981e1021a0002f8c914d9010281841b000000174876e800581de1192688a334130db2b51aedea594301010b0d1d2e9a86a460932520ba85048258204dab331457b61b824bbc6ba4b9d9be4750e25c0b5dd42207aeb63c7431a6b70400d90102838201581c349e55f83e9af24813e6cb368df6a80d38951b2a334dfcdf268155588201581c9cc3f387623f45dae6a68b7096b0c2e403d8601a82dc40221ead41e28200581cdc0d6ef49590eb6880a50a00adde17596e6d76f7159572fa1ff85f2aa48201581c16feefc225e06f75a3c917f4aa50acffde7631ea0355721f2ac1254219031f8201581c7c34e0240b84029e0932f5e8d81af42a63f55de6da31f16e19b1f5b419031f8200581c0af99047bc90e0d9073467548a19a85089b766e73eb807748a2ad36119031f8200581c13493790d9b03483a1e1e684ea4faf1ee48a58f402574e7f2246f4d419031fd81e820203827842697066733a2f2f6261666b726569663232353533683372656165647264333736687a676b6a6e67366b786e62336f37796375336a34707a6a62636a6572763262636558206014f3e6c052eb1e83ce344bda1ee5262000a83d1d1aa62d63726d91316e6647"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="729daaf2f9f89f842a61f6e3ebf7e57d16d6fa4116e29c13114780cb39090850",
+            witnesses=(),
+        ),
+    ),
+    SignTxTestCase(
+        # No mainnet treasury_withdrawals_action example is usable as-is: the only one found
+        # is embedded in a huge, unrelated Plutus/DEX transaction (~40 multi-asset tokens).
+        # This is a real preprod (testnet) transaction instead, fetched directly from Koios'
+        # preprod API and independently hash-verified the same way as the mainnet examples.
+        name="Sign_tx_with_proposal_procedures_treasury_withdrawals_action_real_onchain_preprod",
+        options=True,
+        tx=Transaction(
+            network=Testnet_preprod,
+            inputs=[
+                TxInput(
+                    txHashHex="1668e3cd3a8bb8bebde53cb19ee9fde34262002adac634c0be5f883b4bc11803",
+                    outputIndex=0,
+                )
+            ],
+            outputs=[
+                TxOutputAlonzo(
+                    destination=TxOutputDestination(
+                        type=TxOutputDestinationType.THIRD_PARTY,
+                        params=ThirdPartyAddressParams(
+                            addressHex="00cf46aeaa7a28f19607a6401227d71feb1c8abed11d9ae2cf8eda8ae1cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f91"
+                        ),
+                    ),
+                    amount=799494136963,
+                )
+            ],
+            fee=474653,
+            ttl=None,
+            scriptDataHash="7436e2169b9a857273fddbd84444ed65130f6166c970e4c3e24c95932c799376",
+            collateralInputs=[
+                TxInput(
+                    txHashHex="1668e3cd3a8bb8bebde53cb19ee9fde34262002adac634c0be5f883b4bc11803",
+                    outputIndex=0,
+                )
+            ],
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e0cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f91",
+                    ),
+                    govAction=GovActionType.TREASURY_WITHDRAWALS,
+                    govActionParams=TreasuryWithdrawalsParams(
+                        withdrawals=[
+                            TreasuryWithdrawalEntry(
+                                rewardAccount=PoolKey(
+                                    type=PoolKeyType.THIRD_PARTY,
+                                    key="e0cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f91",
+                                ),
+                                coin=4600000000000,
+                            )
+                        ],
+                        guardrailsScriptHashHex="fa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64",
+                    ),
+                    anchor=AnchorParams(
+                        url="ipfs://QmXm8fjVGiAbKbgHzJURLHsU6ejXcufo3HKhkUaXtuYKko",
+                        hashHex="0ea630cff2cc4aefec1968a65baff3e367024369eb6097f34dcb84b154dee260",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.PLUTUS,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a600d90102818258201668e3cd3a8bb8bebde53cb19ee9fde34262002adac634c0be5f883b4bc1180300018182583900cf46aeaa7a28f19607a6401227d71feb1c8abed11d9ae2cf8eda8ae1cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f911b000000ba25906483021a00073e1d0b58207436e2169b9a857273fddbd84444ed65130f6166c970e4c3e24c95932c7993760dd90102818258201668e3cd3a8bb8bebde53cb19ee9fde34262002adac634c0be5f883b4bc118030014d9010281841b000000174876e800581de0cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f918302a1581de0cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f911b0000042f055db000581cfa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64827835697066733a2f2f516d586d38666a56476941624b6267487a4a55524c48735536656a586375666f33484b686b5561587475594b6b6f58200ea630cff2cc4aefec1968a65baff3e367024369eb6097f34dcb84b154dee260"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="c9a88e24e627f717e2d0c81c09fedc1208d229f633f467c5dd2337ba123b4e41",
+            witnesses=(),
+        ),
+    ),
+    SignTxTestCase(
+        # No mainnet no_confidence example exists (confirmed via Koios query returning 0
+        # results). This is a real preprod (testnet) transaction instead, fetched directly
+        # from Koios' preprod API and independently hash-verified the same way as the other
+        # examples.
+        name="Sign_tx_with_proposal_procedures_no_confidence_real_onchain_preprod",
+        options=True,
+        tx=Transaction(
+            network=Testnet_preprod,
+            inputs=[
+                TxInput(
+                    txHashHex="46ec6fcc62fb354438bc2597807787d2538e62ba021f9835648cf2de06463242",
+                    outputIndex=0,
+                )
+            ],
+            outputs=[
+                TxOutputAlonzo(
+                    destination=TxOutputDestination(
+                        type=TxOutputDestinationType.THIRD_PARTY,
+                        params=ThirdPartyAddressParams(
+                            addressHex="00cf46aeaa7a28f19607a6401227d71feb1c8abed11d9ae2cf8eda8ae1cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f91"
+                        ),
+                    ),
+                    amount=411419776754,
+                )
+            ],
+            fee=183113,
+            ttl=None,
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e0cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f91",
+                    ),
+                    govAction=GovActionType.NO_CONFIDENCE,
+                    govActionParams=NoConfidenceParams(
+                        prevActionId=GovActionId(
+                            txHashHex="6f8b70a482e10ae4077d70730826ef27f72b08e148118a5171c72e7fe3c6d551",
+                            govActionIndex=0,
+                        ),
+                    ),
+                    anchor=AnchorParams(
+                        url="ipfs://QmSZ3vvmaw5M9DZ5NQHX1tBuAu5VBpgQnMmX1pBoJ3kw2R",
+                        hashHex="413abd5de38d3967686d8dd615d3ca0dd7db9fd5c1f2f710b5dfa1b35512c096",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a400d901028182582046ec6fcc62fb354438bc2597807787d2538e62ba021f9835648cf2de0646324200018182583900cf46aeaa7a28f19607a6401227d71feb1c8abed11d9ae2cf8eda8ae1cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f911b0000005fca8796f2021a0002cb4914d9010281841b000000174876e800581de0cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f9182038258206f8b70a482e10ae4077d70730826ef27f72b08e148118a5171c72e7fe3c6d55100827835697066733a2f2f516d535a3376766d6177354d39445a354e5148583174427541753556427067516e4d6d583170426f4a336b7732525820413abd5de38d3967686d8dd615d3ca0dd7db9fd5c1f2f710b5dfa1b35512c096"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="7c6f684a5370636030f83117beda22e34a3c947ce46a0e46589fd41dfaa3a79b",
+            witnesses=(),
+        ),
+    ),
+    SignTxTestCase(
+        # Every mainnet parameter_change_action (all 8, checked via Koios) encodes its tx body
+        # map keys non-canonically, which the app's hash builder cannot reproduce: it always
+        # emits them ascending. This is a real preprod parameter_change whose body IS canonical,
+        # so the device's reconstruction is byte-identical and the hash matches the chain.
+        name="Sign_tx_with_proposal_procedures_parameter_change_action_real_onchain_preprod",
+        options=True,
+        tx=Transaction(
+            network=Testnet_preprod,
+            inputs=[
+                TxInput(
+                    txHashHex="a589b9135438251dfef851692c918f8d0f4df7dba8a380fd39d083019083a143",
+                    outputIndex=0,
+                )
+            ],
+            outputs=[
+                TxOutputAlonzo(
+                    destination=TxOutputDestination(
+                        type=TxOutputDestinationType.THIRD_PARTY,
+                        params=ThirdPartyAddressParams(
+                            addressHex="00cf46aeaa7a28f19607a6401227d71feb1c8abed11d9ae2cf8eda8ae1cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f91"
+                        ),
+                    ),
+                    amount=699492960614,
+                )
+            ],
+            fee=474961,
+            ttl=None,
+            scriptDataHash="7436e2169b9a857273fddbd84444ed65130f6166c970e4c3e24c95932c799376",
+            # Order matters: the app emits collateral inputs exactly as given, and this is the
+            # order they appear in the on-chain CBOR (cbor2 decodes the tag-258 set into a
+            # frozenset, whose iteration order is not the encoded order).
+            collateralInputs=[
+                TxInput(
+                    txHashHex="606d4b5872cf0ff010d535374a3ae0aaf6dd2a5b0d6ae524ccccfabe338a8281",
+                    outputIndex=5,
+                ),
+                TxInput(
+                    txHashHex="5d90d1f09a8a64391e92ff57bde96fcdeac59163012608b903c594536ac99549",
+                    outputIndex=5,
+                ),
+            ],
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e0cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f91",
+                    ),
+                    govAction=GovActionType.PARAMETER_CHANGE,
+                    govActionParams=ParameterChangeParams(
+                        prevActionId=GovActionId(
+                            txHashHex="3e1b4d548e3cb10944aa42168c9e0e6c43636e96d0db7fa630645e713c722451",
+                            govActionIndex=0,
+                        ),
+                        # governance action deposit (key 30)
+                        protocolParamUpdate={30: 10000000000},
+                        guardrailsScriptHashHex="fa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64",
+                    ),
+                    anchor=AnchorParams(
+                        url="ipfs://QmZEvamTsiBtUm1pGxVXGkxHqMRSvTaFgm5nxhexi2EWVh",
+                        hashHex="cded5e1a3284ef5016c132e313fe4c9bc526fe85c8b80a8e1655290196f7fe46",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.PLUTUS,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a600d9010281825820a589b9135438251dfef851692c918f8d0f4df7dba8a380fd39d083019083a14300018182583900cf46aeaa7a28f19607a6401227d71feb1c8abed11d9ae2cf8eda8ae1cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f911b000000a2dd078966021a00073f510b58207436e2169b9a857273fddbd84444ed65130f6166c970e4c3e24c95932c7993760dd9010282825820606d4b5872cf0ff010d535374a3ae0aaf6dd2a5b0d6ae524ccccfabe338a8281058258205d90d1f09a8a64391e92ff57bde96fcdeac59163012608b903c594536ac995490514d9010281841b000000174876e800581de0cf68ca7c215a8d857f17fd146b94267a6512fe2c0eedb49678d75f9184008258203e1b4d548e3cb10944aa42168c9e0e6c43636e96d0db7fa630645e713c72245100a1181e1b00000002540be400581cfa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64827835697066733a2f2f516d5a4576616d5473694274556d317047785658476b7848714d525376546146676d356e786865786932455756685820cded5e1a3284ef5016c132e313fe4c9bc526fe85c8b80a8e1655290196f7fe46"
+        ),
+        expected_warnings=(WarningBit.WARNING_BIT_PLUTUS_UNKNOWN_COLLATERAL,),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="7b8b1d6c22fc2ff8f1a1526a8027ad9df025dc9a7013b81ef51fb869bcc1af44",
+            witnesses=(),
+        ),
+    ),
+    SignTxTestCase(
+        # The transaction you can look up on cardanoscan:
+        #   cardanoscan.io/transaction/ab474223d40e2e3540555364be27e161a809c33651408f43d84acff10c0ba306
+        # Its content is reproduced here exactly (min pool cost, max tx/block execution units,
+        # prior action id, guardrails, anchor). The expected hash below is NOT that tx's id:
+        # its body encodes the top-level map keys as [0, 13, 1, 16, 17, 2, 11, 20], while the
+        # app's hash builder always emits them ascending, so no Ledger can reproduce those
+        # exact bytes. txBodyHex is that same content re-encoded in canonical key order (the
+        # only difference from the chain) and the hash is of that. See the ..._preprod case
+        # above for a parameter_change whose id does match the chain.
+        name="Sign_tx_with_proposal_procedures_parameter_change_action_onchain_content_canonical",
+        options=True,
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[
+                TxInput(
+                    txHashHex="36d07f29c67822b9a75cef6d899ec66843d87922077bdac8a3ee508b7f8b5615",
+                    outputIndex=0,
+                ),
+                TxInput(
+                    txHashHex="b3d452bff7769d7f557ec6b8974760ee6c5e496c276652b654032966621e0ccf",
+                    outputIndex=0,
+                ),
+            ],
+            outputs=[
+                TxOutputAlonzo(
+                    destination=TxOutputDestination(
+                        type=TxOutputDestinationType.THIRD_PARTY,
+                        params=ThirdPartyAddressParams(
+                            addressHex="01076ad93c90e7dafc2ad468212fb2e2701559d1d32f25ebdc1facdada611943783e94de22f533778841521e97f77588fe05447f464be192c9"
+                        ),
+                    ),
+                    amount=2914986,
+                )
+            ],
+            fee=343087,
+            ttl=None,
+            scriptDataHash="8c75478b90ba1457795d9102d92f4a19886f1a8c147fe96a02d1cb8f355d4ca9",
+            collateralInputs=[
+                TxInput(
+                    txHashHex="b3d452bff7769d7f557ec6b8974760ee6c5e496c276652b654032966621e0ccf",
+                    outputIndex=0,
+                )
+            ],
+            collateralOutput=TxOutputAlonzo(
+                destination=TxOutputDestination(
+                    type=TxOutputDestinationType.THIRD_PARTY,
+                    params=ThirdPartyAddressParams(
+                        addressHex="01076ad93c90e7dafc2ad468212fb2e2701559d1d32f25ebdc1facdada611943783e94de22f533778841521e97f77588fe05447f464be192c9"
+                    ),
+                ),
+                amount=2925487,
+            ),
+            totalCollateral=514631,
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e1192688a334130db2b51aedea594301010b0d1d2e9a86a460932520ba",
+                    ),
+                    govAction=GovActionType.PARAMETER_CHANGE,
+                    govActionParams=ParameterChangeParams(
+                        prevActionId=GovActionId(
+                            txHashHex="c75bb221606687aa858ec89c7a15c88e9c17054f2e045ae31ecc8a9687cd206e",
+                            govActionIndex=0,
+                        ),
+                        # min pool cost (16), max tx ex units (20), max block ex units (21)
+                        protocolParamUpdate={
+                            16: 75000000,
+                            20: (17500000, 10000000000),
+                            21: (77500000, 20000000000),
+                        },
+                        guardrailsScriptHashHex="fa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64",
+                    ),
+                    anchor=AnchorParams(
+                        url="ipfs://bafkreifc5ct5fpeu4ygx6k4cqzbyzny7xfmuljywgn7jge3zkf2tidacym",
+                        hashHex="f200d39e39a3db74bdaa4f04865b4da38b5403322984c6fdcaf09bd44cacf868",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.PLUTUS,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a800d901028282582036d07f29c67822b9a75cef6d899ec66843d87922077bdac8a3ee508b7f8b561500825820b3d452bff7769d7f557ec6b8974760ee6c5e496c276652b654032966621e0ccf00018182583901076ad93c90e7dafc2ad468212fb2e2701559d1d32f25ebdc1facdada611943783e94de22f533778841521e97f77588fe05447f464be192c91a002c7aaa021a00053c2f0b58208c75478b90ba1457795d9102d92f4a19886f1a8c147fe96a02d1cb8f355d4ca90dd9010281825820b3d452bff7769d7f557ec6b8974760ee6c5e496c276652b654032966621e0ccf001082583901076ad93c90e7dafc2ad468212fb2e2701559d1d32f25ebdc1facdada611943783e94de22f533778841521e97f77588fe05447f464be192c91a002ca3af111a0007da4714d9010281841b000000174876e800581de1192688a334130db2b51aedea594301010b0d1d2e9a86a460932520ba8400825820c75bb221606687aa858ec89c7a15c88e9c17054f2e045ae31ecc8a9687cd206e00a3101a047868c014821a010b07601b00000002540be40015821a049e8e601b00000004a817c800581cfa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a64827842697066733a2f2f6261666b7265696663356374356670657534796778366b3463717a62797a6e793778666d756c6a7977676e376a6765337a6b66327469646163796d5820f200d39e39a3db74bdaa4f04865b4da38b5403322984c6fdcaf09bd44cacf868"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="807fdea5cfbffee718404603d993ccb44a1d14a70652dd04a79ce4dc1bd0c67e",
+            witnesses=(),
+        ),
+    ),
+]
+
+proposalProceduresDenyTestCases: list[SignTxTestCase] = [
+    SignTxTestCase(
+        name="Deny_proposal_deposit_return_account_is_base_address",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="0149d2f64bf237b683e3a3e2b543ca6f18bde2b673716514b4d1cd5348",
+                    ),
+                    govAction=GovActionType.INFO,
+                    anchor=AnchorParams(
+                        url="https://example.com/proposal.jsonld",
+                        hashHex="95c0bcf2ec42756d6f12f8110d40826021fca29ed82526609efb62d9e79c98ad",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        deny_before_review=True,
+    ),
+    SignTxTestCase(
+        name="Deny_proposal_deposit_return_account_on_foreign_network",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e049d2f64bf237b683e3a3e2b543ca6f18bde2b673716514b4d1cd5348",
+                    ),
+                    govAction=GovActionType.INFO,
+                    anchor=AnchorParams(
+                        url="https://example.com/proposal.jsonld",
+                        hashHex="95c0bcf2ec42756d6f12f8110d40826021fca29ed82526609efb62d9e79c98ad",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        deny_before_review=True,
+    ),
+    SignTxTestCase(
+        name="Deny_proposal_deposit_return_account_is_payment_path",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.DEVICE_OWNED,
+                        key="m/1852'/1815'/0'/0/0",
+                    ),
+                    govAction=GovActionType.INFO,
+                    anchor=AnchorParams(
+                        url="https://example.com/proposal.jsonld",
+                        hashHex="95c0bcf2ec42756d6f12f8110d40826021fca29ed82526609efb62d9e79c98ad",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        deny_before_review=True,
+    ),
+    SignTxTestCase(
+        name="Deny_proposal_committee_member_added_with_staking_path",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e149d2f64bf237b683e3a3e2b543ca6f18bde2b673716514b4d1cd5348",
+                    ),
+                    govAction=GovActionType.UPDATE_COMMITTEE,
+                    govActionParams=UpdateCommitteeParams(
+                        prevActionId=None,
+                        membersToRemove=[],
+                        membersToAdd=[
+                            CommitteeMemberAddition(
+                                credential=CredentialParams(
+                                    CredentialParamsType.KEY_PATH,
+                                    "m/1852'/1815'/0'/2/0",
+                                ),
+                                expirationEpoch=600,
+                            )
+                        ],
+                        thresholdNumerator=1,
+                        thresholdDenominator=2,
+                    ),
+                    anchor=AnchorParams(
+                        url="https://example.com/proposal.jsonld",
+                        hashHex="95c0bcf2ec42756d6f12f8110d40826021fca29ed82526609efb62d9e79c98ad",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        expected_swo=StatusWord.SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        deny_before_review=True,
+    ),
+    SignTxTestCase(
+        name="Deny_proposal_parameter_change_with_cost_models_key",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e149d2f64bf237b683e3a3e2b543ca6f18bde2b673716514b4d1cd5348",
+                    ),
+                    govAction=GovActionType.PARAMETER_CHANGE,
+                    govActionParams=ParameterChangeParams(
+                        prevActionId=None,
+                        protocolParamUpdate={0: 44},
+                        guardrailsScriptHashHex=None,
+                        unsupportedBitmaskBits=1 << 18,
+                    ),
+                    anchor=AnchorParams(
+                        url="https://example.com/proposal.jsonld",
+                        hashHex="95c0bcf2ec42756d6f12f8110d40826021fca29ed82526609efb62d9e79c98ad",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        expected_swo=StatusWord.SWO_TX_PARSING_FAIL_PROPOSAL_PROCEDURES,
+        deny_before_review=True,
+    ),
+    SignTxTestCase(
+        name="Deny_proposal_parameter_change_with_undefined_key",
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[outputs["externalShelleyBaseKeyhashKeyhash"]],
+            proposalProcedures=[
+                ProposalProcedure(
+                    deposit=100000000000,
+                    rewardAccount=PoolKey(
+                        type=PoolKeyType.THIRD_PARTY,
+                        key="e149d2f64bf237b683e3a3e2b543ca6f18bde2b673716514b4d1cd5348",
+                    ),
+                    govAction=GovActionType.PARAMETER_CHANGE,
+                    govActionParams=ParameterChangeParams(
+                        prevActionId=None,
+                        protocolParamUpdate={0: 44},
+                        guardrailsScriptHashHex=None,
+                        unsupportedBitmaskBits=1 << 34,
+                    ),
+                    anchor=AnchorParams(
+                        url="https://example.com/proposal.jsonld",
+                        hashHex="95c0bcf2ec42756d6f12f8110d40826021fca29ed82526609efb62d9e79c98ad",
+                    ),
+                )
+            ],
+        ),
+        signingMode=TransactionSigningMode.ORDINARY,
+        expected_swo=StatusWord.SWO_TX_PARSING_FAIL_PROPOSAL_PROCEDURES,
+        deny_before_review=True,
+    ),
+]
+
 
 # ==========================================
 # testsConwayMultisig

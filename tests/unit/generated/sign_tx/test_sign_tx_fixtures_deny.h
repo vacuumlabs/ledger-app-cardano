@@ -3604,6 +3604,175 @@ static const apdu_segment_t
         },
 };
 
+// Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+// Deny_proposal_deposit_return_account_is_base_address
+static const apdu_segment_t
+    SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_IS_BASE_ADDRESS[] = {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A00"
+                           "0000174876E800000149D2F64BF237B683E3A3E2B543CA6F18BDE2B673716514"
+                           "B4D1CD53480602002368747470733A2F2F6578616D706C652E636F6D2F70726F"
+                           "706F73616C2E6A736F6E6C6495C0BCF2EC42756D6F12F8110D40826021FCA29E"
+                           "D82526609EFB62D9E79C98AD",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
+// Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+// Deny_proposal_deposit_return_account_on_foreign_network
+static const apdu_segment_t
+    SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_ON_FOREIGN_NETWORK[] = {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A00"
+                           "0000174876E80000E049D2F64BF237B683E3A3E2B543CA6F18BDE2B673716514"
+                           "B4D1CD53480602002368747470733A2F2F6578616D706C652E636F6D2F70726F"
+                           "706F73616C2E6A736F6E6C6495C0BCF2EC42756D6F12F8110D40826021FCA29E"
+                           "D82526609EFB62D9E79C98AD",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
+// Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+// Deny_proposal_deposit_return_account_is_payment_path
+static const apdu_segment_t
+    SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_IS_PAYMENT_PATH[] = {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A00"
+                           "0000174876E80002058000073C80000717800000000000000000000000060200"
+                           "2368747470733A2F2F6578616D706C652E636F6D2F70726F706F73616C2E6A73"
+                           "6F6E6C6495C0BCF2EC42756D6F12F8110D40826021FCA29ED82526609EFB62D9"
+                           "E79C98AD",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
+// Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+// Deny_proposal_committee_member_added_with_staking_path
+static const apdu_segment_t
+    SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_COMMITTEE_MEMBER_ADDED_WITH_STAKING_PATH[] = {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A00"
+                           "0000174876E80000E149D2F64BF237B683E3A3E2B543CA6F18BDE2B673716514"
+                           "B4D1CD5348040100000001000000000000000100000000000000020205800007"
+                           "3C80000717800000000000000200000000000000000000025802002368747470"
+                           "733A2F2F6578616D706C652E636F6D2F70726F706F73616C2E6A",
+            .p1 = P1_TX_CHUNK,
+            .p2 = P2_UNUSED,
+            .more = true,
+        },
+        {
+            .hex_payload = "736F6E6C6495C0BCF2EC42756D6F12F8110D40826021FCA29ED82526609EFB62"
+                           "D9E79C98AD",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
+// Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+// Deny_proposal_parameter_change_with_cost_models_key
+static const apdu_segment_t
+    SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_PARAMETER_CHANGE_WITH_COST_MODELS_KEY[] = {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A00"
+                           "0000174876E80000E149D2F64BF237B683E3A3E2B543CA6F18BDE2B673716514"
+                           "B4D1CD53480001000000000004000101000000000000002C0200236874747073"
+                           "3A2F2F6578616D706C652E636F6D2F70726F706F73616C2E6A736F6E6C6495C0"
+                           "BCF2EC42756D6F12F8110D40826021FCA29ED82526609EFB62D9",
+            .p1 = P1_TX_CHUNK,
+            .p2 = P2_UNUSED,
+            .more = true,
+        },
+        {
+            .hex_payload = "E79C98AD",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
+// Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+// Deny_proposal_parameter_change_with_undefined_key
+static const apdu_segment_t
+    SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_PARAMETER_CHANGE_WITH_UNDEFINED_KEY[] = {
+        {
+            .hex_payload = "3B40265111D8BB3C3C608D95B3A0BF83461ACE32D79336579A1939B3AAD1C0B7"
+                           "000000000049010039017CB05FCE110FB999F01ABB4F62BC455E217D4A51FDE9"
+                           "09FA9AEA545443AC53C046CF6A42095E3C60310FA802771D0672F8FE2D186113"
+                           "8B0900000000000000010001010000000000000000002A000000000000000A00"
+                           "0000174876E80000E149D2F64BF237B683E3A3E2B543CA6F18BDE2B673716514"
+                           "B4D1CD53480001000000040000000101000000000000002C0200236874747073"
+                           "3A2F2F6578616D706C652E636F6D2F70726F706F73616C2E6A736F6E6C6495C0"
+                           "BCF2EC42756D6F12F8110D40826021FCA29ED82526609EFB62D9",
+            .p1 = P1_TX_CHUNK,
+            .p2 = P2_UNUSED,
+            .more = true,
+        },
+        {
+            .hex_payload = "E79C98AD",
+            .p1 = P1_TX_CONFIRM,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+        {
+            .hex_payload = "058000073C80000717800000000000000000000000",
+            .p1 = P1_TX_SIGN_WITNESS,
+            .p2 = P2_UNUSED,
+            .more = false,
+        },
+};
+
 // Source: tests/standalone/input_files/signTx.py > outputDenyTestCases >
 // Deny_pool_registration_operator_with_datum_hash
 static const apdu_segment_t
@@ -4207,7 +4376,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Deny_unrestricted_tx_without_expert_mode",
         .init_hex = "0000000000000000012D964A0909000100010200000000010100000100000000"
-                    "0101010000000001010001007F",
+                    "01010100000000000001010001007F",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_DENY_UNRESTRICTED_TX_WITHOUT_EXPERT_MODE,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_DENY_UNRESTRICTED_TX_WITHOUT_EXPERT_MODE),
@@ -4222,7 +4391,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Deny_ordinary_tx_with_collateral_inputs",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100010000"
-                    "010101000000000101000100A3",
+                    "0101010000000000000101000100A3",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_DENY_ORDINARY_TX_WITH_COLLATERAL_INPUTS,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_DENY_ORDINARY_TX_WITH_COLLATERAL_INPUTS),
@@ -4235,7 +4404,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Deny_pool_registration_operator_with_script_data_hash",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000200000000"
-                    "01010100000000010100020162",
+                    "010101000000000000010100020162",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_DENY_POOL_REGISTRATION_OPERATOR_WITH_SCRIPT_DATA_HASH,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_DENY_POOL_REGISTRATION_OPERATOR_WITH_SCRIPT_DATA_HASH),
@@ -4248,7 +4417,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Deny_pool_registration_owner_with_script_data_hash",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000200000000"
-                    "0101010000000001010001012A",
+                    "01010100000000000001010001012A",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_DENY_POOL_REGISTRATION_OWNER_WITH_SCRIPT_DATA_HASH,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_DENY_POOL_REGISTRATION_OWNER_WITH_SCRIPT_DATA_HASH),
@@ -4261,7 +4430,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Non_mainnet_protocol_magic",
         .init_hex = "0000000000000000012D964A0803000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_NON_MAINNET_PROTOCOL_MAGIC,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_NON_MAINNET_PROTOCOL_MAGIC),
         .expected_swo = SWO_INVALID_PROTOCOL_MAGIC,
@@ -4273,7 +4442,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Invalid_network_id",
         .init_hex = "0000000000000000102D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_INVALID_NETWORK_ID,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_INVALID_NETWORK_ID),
         .expected_swo = SWO_INVALID_NETWORK_ID,
@@ -4284,7 +4453,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Zero_inputs",
         .init_hex = "0000000000000000012D964A0903000000010200000000010100000100000000"
-                    "0101010000000001010000004D",
+                    "01010100000000000001010000004D",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_ZERO_INPUTS,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_ZERO_INPUTS),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4296,7 +4465,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_too_few_certificates",
         .init_hex = "0000000000000000012D964A0905000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_TOO_FEW_CERTIFICATES,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_TOO_FEW_CERTIFICATES),
@@ -4309,7 +4478,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_too_few_certificates",
         .init_hex = "0000000000000000012D964A0904000100010200000000010100000100000000"
-                    "01010100000000010100000071",
+                    "010101000000000000010100000071",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_TOO_FEW_CERTIFICATES,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_TOO_FEW_CERTIFICATES),
@@ -4322,7 +4491,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_too_many_certificates",
         .init_hex = "0000000000000000012D964A0905000100010200020000010100000100000000"
-                    "01010100000000010100010169",
+                    "010101000000000000010100010169",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_TOO_MANY_CERTIFICATES,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_TOO_MANY_CERTIFICATES),
@@ -4335,7 +4504,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_too_many_certificates",
         .init_hex = "0000000000000000012D964A0904000100010200020000010100000100000000"
-                    "010101000000000101000101A3",
+                    "0101010000000000000101000101A3",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_TOO_MANY_CERTIFICATES,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_TOO_MANY_CERTIFICATES),
@@ -4348,7 +4517,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_too_many_withdrawals",
         .init_hex = "0000000000000000012D964A0905000100010200010001010100000100000000"
-                    "01010100000000010100010112",
+                    "010101000000000000010100010112",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_TOO_MANY_WITHDRAWALS,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_TOO_MANY_WITHDRAWALS),
@@ -4361,7 +4530,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_too_many_withdrawals",
         .init_hex = "0000000000000000012D964A0904000100010200010001010100000100000000"
-                    "0101010000000001010001012F",
+                    "01010100000000000001010001012F",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_TOO_MANY_WITHDRAWALS,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_TOO_MANY_WITHDRAWALS),
@@ -4374,7 +4543,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_mint_included",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100010100000000"
-                    "0101010000000001010001011C",
+                    "01010100000000000001010001011C",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_MINT_INCLUDED,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_MINT_INCLUDED),
@@ -4387,7 +4556,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_mint_included",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100010100000000"
-                    "01010100000000010100010139",
+                    "010101000000000000010100010139",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_MINT_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_MINT_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4399,7 +4568,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Ordinary_tx_collateral_inputs_included",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100010000"
-                    "01010100000000010100010095",
+                    "010101000000000000010100010095",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_ORDINARY_TX_COLLATERAL_INPUTS_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_ORDINARY_TX_COLLATERAL_INPUTS_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4411,7 +4580,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Multisig_tx_collateral_inputs_included",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100010000"
-                    "01010100000000010100000095",
+                    "010101000000000000010100000095",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_MULTISIG_TX_COLLATERAL_INPUTS_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_MULTISIG_TX_COLLATERAL_INPUTS_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4423,7 +4592,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_collateral_inputs_included",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100010000"
-                    "01010100000000010100010111",
+                    "010101000000000000010100010111",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_COLLATERAL_INPUTS_INCLUDED,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_COLLATERAL_INPUTS_INCLUDED),
@@ -4436,7 +4605,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_collateral_inputs_included",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100010000"
-                    "0101010000000001010002012E",
+                    "01010100000000000001010002012E",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_COLLATERAL_INPUTS_INCLUDED,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_COLLATERAL_INPUTS_INCLUDED),
@@ -4449,7 +4618,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_required_signers_included",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000001"
-                    "01010100000000010100010103",
+                    "010101000000000000010100010103",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_REQUIRED_SIGNERS_INCLUDED,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_REQUIRED_SIGNERS_INCLUDED),
@@ -4462,7 +4631,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_required_signers_included",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000001"
-                    "01010100000000010100020120",
+                    "010101000000000000010100020120",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_REQUIRED_SIGNERS_INCLUDED,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_REQUIRED_SIGNERS_INCLUDED),
@@ -4475,7 +4644,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Ordinary_tx_collateral_output_included",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "010201000000000101000100BC",
+                    "0102010000000000000101000100BC",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_ORDINARY_TX_COLLATERAL_OUTPUT_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_ORDINARY_TX_COLLATERAL_OUTPUT_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4487,7 +4656,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Multisig_tx_collateral_output_included",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "010201000000000101000000BC",
+                    "0102010000000000000101000000BC",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_MULTISIG_TX_COLLATERAL_OUTPUT_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_MULTISIG_TX_COLLATERAL_OUTPUT_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4499,7 +4668,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_collateral_output_included",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "01020100000000010100010138",
+                    "010201000000000000010100010138",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_COLLATERAL_OUTPUT_INCLUDED,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_COLLATERAL_OUTPUT_INCLUDED),
@@ -4512,7 +4681,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_collateral_output_included",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01020100000000010100010155",
+                    "010201000000000000010100010155",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_COLLATERAL_OUTPUT_INCLUDED,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_COLLATERAL_OUTPUT_INCLUDED),
@@ -4525,7 +4694,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Ordinary_tx_total_collateral_included",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010200000000010100010079",
+                    "010102000000000000010100010079",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_ORDINARY_TX_TOTAL_COLLATERAL_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_ORDINARY_TX_TOTAL_COLLATERAL_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4537,7 +4706,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Multisig_tx_total_collateral_included",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010200000000010100000079",
+                    "010102000000000000010100000079",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_MULTISIG_TX_TOTAL_COLLATERAL_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_MULTISIG_TX_TOTAL_COLLATERAL_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4549,7 +4718,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_total_collateral_included",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "010102000000000101000100F5",
+                    "0101020000000000000101000100F5",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_TOTAL_COLLATERAL_INCLUDED,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_TOTAL_COLLATERAL_INCLUDED),
@@ -4562,7 +4731,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_total_collateral_included",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010200000000010100010112",
+                    "010102000000000000010100010112",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_TOTAL_COLLATERAL_INCLUDED,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_TOTAL_COLLATERAL_INCLUDED),
@@ -4575,7 +4744,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Ordinary_tx_reference_inputs_included",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100010000010100010095",
+                    "010101000100000000010100010095",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_ORDINARY_TX_REFERENCE_INPUTS_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_ORDINARY_TX_REFERENCE_INPUTS_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4587,7 +4756,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Multisig_tx_reference_inputs_included",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010100010000010100000095",
+                    "010101000100000000010100000095",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_MULTISIG_TX_REFERENCE_INPUTS_INCLUDED,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_MULTISIG_TX_REFERENCE_INPUTS_INCLUDED),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4599,7 +4768,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_operator_reference_inputs_included",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "01010100010000010100010111",
+                    "010101000100000000010100010111",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_REFERENCE_INPUTS_INCLUDED,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OPERATOR_REFERENCE_INPUTS_INCLUDED),
@@ -4612,7 +4781,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Pool_registration_owner_reference_inputs_included",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010001000001010001012E",
+                    "01010100010000000001010001012E",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_REFERENCE_INPUTS_INCLUDED,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_POOL_REGISTRATION_OWNER_REFERENCE_INPUTS_INCLUDED),
@@ -4625,7 +4794,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_INIT] Auto_mode_ambiguous_no_plutus_indicators",
         .init_hex = "0000000000000000012D964A0908000100010200000000010100000100000000"
-                    "0101010000000001010001007F",
+                    "01010100000000000001010001007F",
         .chunks = SIGN_TX_SEGMENTS_DENY_INIT_AUTO_MODE_AMBIGUOUS_NO_PLUTUS_INDICATORS,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_INIT_AUTO_MODE_AMBIGUOUS_NO_PLUTUS_INDICATORS),
@@ -4638,7 +4807,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_ADDRESS] Reward_address_key",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "0101010000000001010001005C",
+                    "01010100000000000001010001005C",
         .chunks = SIGN_TX_SEGMENTS_DENY_ADDRESS_REWARD_ADDRESS_KEY,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_ADDRESS_REWARD_ADDRESS_KEY),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4650,7 +4819,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_ADDRESS] Reward_address_script",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010063",
+                    "010101000000000000010100010063",
         .chunks = SIGN_TX_SEGMENTS_DENY_ADDRESS_REWARD_ADDRESS_SCRIPT,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_ADDRESS_REWARD_ADDRESS_SCRIPT),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4662,7 +4831,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_ADDRESS] No_spending_path_Ordinary_Tx_1",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "0101010000000001010001007F",
+                    "01010100000000000001010001007F",
         .chunks = SIGN_TX_SEGMENTS_DENY_ADDRESS_NO_SPENDING_PATH_ORDINARY_TX_1,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_ADDRESS_NO_SPENDING_PATH_ORDINARY_TX_1),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4674,7 +4843,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_ADDRESS] No_spending_path_Ordinary_Tx_2",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "0101010000000001010001007F",
+                    "01010100000000000001010001007F",
         .chunks = SIGN_TX_SEGMENTS_DENY_ADDRESS_NO_SPENDING_PATH_ORDINARY_TX_2,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_ADDRESS_NO_SPENDING_PATH_ORDINARY_TX_2),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4686,7 +4855,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_ADDRESS] Pool_operator_spending_choice_not_path",
         .init_hex = "0000000000000000012D964A0905000100010200000000010100000100000000"
-                    "01010100000000010100010078",
+                    "010101000000000000010100010078",
         .chunks = SIGN_TX_SEGMENTS_DENY_ADDRESS_POOL_OPERATOR_SPENDING_CHOICE_NOT_PATH,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_ADDRESS_POOL_OPERATOR_SPENDING_CHOICE_NOT_PATH),
@@ -4699,7 +4868,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_ADDRESS] Multisig_unconditionally",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010100000000010100000071",
+                    "010101000000000000010100000071",
         .chunks = SIGN_TX_SEGMENTS_DENY_ADDRESS_MULTISIG_UNCONDITIONALLY,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_ADDRESS_MULTISIG_UNCONDITIONALLY),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4711,7 +4880,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_ADDRESS] Pool_owner_unconditionally",
         .init_hex = "0000000000000000012D964A0904000100010200000000010100000100000000"
-                    "01010100000000010100000071",
+                    "010101000000000000010100000071",
         .chunks = SIGN_TX_SEGMENTS_DENY_ADDRESS_POOL_OWNER_UNCONDITIONALLY,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_ADDRESS_POOL_OWNER_UNCONDITIONALLY),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4723,7 +4892,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Pool_registration_in_Unrestricted_Tx",
         .init_hex = "0000000000000000012D964A0909000100010200010000010100000100000000"
-                    "010101000000000101000100ED",
+                    "0101010000000000000101000100ED",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_REGISTRATION_IN_UNRESTRICTED_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_POOL_REGISTRATION_IN_UNRESTRICTED_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4737,7 +4906,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Pool_registration_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200010000010100000100000000"
-                    "010101000000000101000100ED",
+                    "0101010000000000000101000100ED",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_REGISTRATION_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_POOL_REGISTRATION_IN_ORDINARY_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4749,7 +4918,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Pool_registration_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200010000010100000100000000"
-                    "010101000000000101000000ED",
+                    "0101010000000000000101000000ED",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_REGISTRATION_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_POOL_REGISTRATION_IN_MULTISIG_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4761,7 +4930,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Pool_registration_in_Plutus_Tx",
         .init_hex = "0000000000000000012D964A0907000100010200010000010100000100000000"
-                    "010101000000000101000100ED",
+                    "0101010000000000000101000100ED",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_REGISTRATION_IN_PLUTUS_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_POOL_REGISTRATION_IN_PLUTUS_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4773,7 +4942,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Pool_retirement_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200010000010100000100000000"
-                    "0101010000000001010000008C",
+                    "01010100000000000001010000008C",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIREMENT_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIREMENT_IN_MULTISIG_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4785,7 +4954,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Stake_registration_in_Pool_Registration_Operator",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "01010100000000010100010088",
+                    "010101000000000000010100010088",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKE_REGISTRATION_IN_POOL_REGISTRATION_OPERATOR,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_STAKE_REGISTRATION_IN_POOL_REGISTRATION_OPERATOR),
@@ -4798,7 +4967,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Stake_registration_in_Pool_Registration_Owner",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100000088",
+                    "010101000000000000010100000088",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKE_REGISTRATION_IN_POOL_REGISTRATION_OWNER,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_STAKE_REGISTRATION_IN_POOL_REGISTRATION_OWNER),
@@ -4811,7 +4980,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Stake_deregistration_in_Pool_Registration_Operator",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "01010100000000010100020088",
+                    "010101000000000000010100020088",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKE_DEREGISTRATION_IN_POOL_REGISTRATION_OPERATOR,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_CERT_STAKE_DEREGISTRATION_IN_POOL_REGISTRATION_OPERATOR),
@@ -4824,7 +4993,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Stake_deregistration_in_Pool_Registration_Owner",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100010088",
+                    "010101000000000000010100010088",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKE_DEREGISTRATION_IN_POOL_REGISTRATION_OWNER,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_STAKE_DEREGISTRATION_IN_POOL_REGISTRATION_OWNER),
@@ -4837,7 +5006,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Stake_delegation_in_Pool_Registration_Operator",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "01010100000000010100020088",
+                    "010101000000000000010100020088",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKE_DELEGATION_IN_POOL_REGISTRATION_OPERATOR,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_STAKE_DELEGATION_IN_POOL_REGISTRATION_OPERATOR),
@@ -4850,7 +5019,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Stake_delegation_in_Pool_Registration_Owner",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100010088",
+                    "010101000000000000010100010088",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKE_DELEGATION_IN_POOL_REGISTRATION_OWNER,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_STAKE_DELEGATION_IN_POOL_REGISTRATION_OWNER),
@@ -4863,7 +5032,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Pool_retirement_in_Pool_Registration_Operator",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "0101010000000001010002008C",
+                    "01010100000000000001010002008C",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIREMENT_IN_POOL_REGISTRATION_OPERATOR,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIREMENT_IN_POOL_REGISTRATION_OPERATOR),
@@ -4876,7 +5045,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT] Pool_retirement_in_Pool_Registration_Owner",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001008C",
+                    "01010100000000000001010001008C",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIREMENT_IN_POOL_REGISTRATION_OWNER,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIREMENT_IN_POOL_REGISTRATION_OWNER),
@@ -4889,7 +5058,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT_STAKING] Script_hash_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200010000010100000100000000"
-                    "0101010000000001010001008F",
+                    "01010100000000000001010001008F",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKING_SCRIPT_HASH_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_STAKING_SCRIPT_HASH_IN_ORDINARY_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4901,7 +5070,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT_STAKING] Non_staking_path_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200010000010100000100000000"
-                    "01010100000000010100010088",
+                    "010101000000000000010100010088",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKING_NON_STAKING_PATH_IN_ORDINARY_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_STAKING_NON_STAKING_PATH_IN_ORDINARY_TX),
@@ -4914,7 +5083,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT_STAKING] Path_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200010000010100000100000000"
-                    "01010100000000010100000088",
+                    "010101000000000000010100000088",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_STAKING_PATH_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_STAKING_PATH_IN_MULTISIG_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -4926,7 +5095,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT_POOL_RETIRE] Non_pool_cold_key_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200010000010100000100000000"
-                    "0101010000000001010002008C",
+                    "01010100000000000001010002008C",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIRE_NON_POOL_COLD_KEY_IN_ORDINARY_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_POOL_RETIRE_NON_POOL_COLD_KEY_IN_ORDINARY_TX),
@@ -4939,7 +5108,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Deny_withdrawal_with_key_hash_in_ordinary_tx",
         .init_hex = "0000000000000000012D964A0903000100010200000001010100000100000000"
-                    "010101000000000101000100A4",
+                    "0101010000000000000101000100A4",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_WITHDRAWAL_WITH_KEY_HASH_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_WITHDRAWAL_WITH_KEY_HASH_IN_ORDINARY_TX),
@@ -4952,7 +5121,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Deny_withdrawal_with_script_hash_in_ordinary_tx",
         .init_hex = "0000000000000000012D964A0903000100010200000001010100000100000000"
-                    "010101000000000101000100A4",
+                    "0101010000000000000101000100A4",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_WITHDRAWAL_WITH_SCRIPT_HASH_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_WITHDRAWAL_WITH_SCRIPT_HASH_IN_ORDINARY_TX),
@@ -4965,7 +5134,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Deny_withdrawal_with_key_path_in_multisig_tx",
         .init_hex = "0000000000000000012D964A0906000100010200000001010100000100000000"
-                    "0101010000000001010000009D",
+                    "01010100000000000001010000009D",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_WITHDRAWAL_WITH_KEY_PATH_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_WITHDRAWAL_WITH_KEY_PATH_IN_MULTISIG_TX),
@@ -4978,7 +5147,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Deny_withdrawal_with_key_hash_in_multisig_tx",
         .init_hex = "0000000000000000012D964A0906000100010200000001010100000100000000"
-                    "010101000000000101000000A4",
+                    "0101010000000000000101000000A4",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_WITHDRAWAL_WITH_KEY_HASH_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_WITHDRAWAL_WITH_KEY_HASH_IN_MULTISIG_TX),
@@ -4991,7 +5160,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Deny_tx_with_invalid_canonical_ordering_of_withdrawals",
         .init_hex = "0000000000000000012D964A0903000100000200000002010100000100000000"
-                    "01010100000000010100030070",
+                    "010101000000000000010100030070",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_DENY_TX_WITH_INVALID_CANONICAL_ORDERING_OF_WITHDRAWALS,
         .chunk_count = ARRAY_LEN(
@@ -5005,7 +5174,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Script_hash_as_stake_credential_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200000001010100000100000000"
-                    "01010100000000010100010096",
+                    "010101000000000000010100010096",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_SCRIPT_HASH_AS_STAKE_CREDENTIAL_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_SCRIPT_HASH_AS_STAKE_CREDENTIAL_IN_ORDINARY_TX),
@@ -5018,7 +5187,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Non_staking_path_as_stake_credential_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200000001010100000100000000"
-                    "0101010000000001010001008F",
+                    "01010100000000000001010001008F",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_NON_STAKING_PATH_AS_STAKE_CREDENTIAL_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(
@@ -5032,7 +5201,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Staking_path_as_stake_credential_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200000001010100000100000000"
-                    "0101010000000001010000008F",
+                    "01010100000000000001010000008F",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_STAKING_PATH_AS_STAKE_CREDENTIAL_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_STAKING_PATH_AS_STAKE_CREDENTIAL_IN_MULTISIG_TX),
@@ -5045,7 +5214,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITHDRAWAL] Non_staking_path_as_stake_credential_in_Plutus_Tx",
         .init_hex = "0000000000000000012D964A0907000100010200000001010100000100000000"
-                    "0101010000000001010001008F",
+                    "01010100000000000001010001008F",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITHDRAWAL_NON_STAKING_PATH_AS_STAKE_CREDENTIAL_IN_PLUTUS_TX,
         .chunk_count = ARRAY_LEN(
@@ -5059,7 +5228,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Ordinary_account_path_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_ACCOUNT_PATH_IN_ORDINARY_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_ACCOUNT_PATH_IN_ORDINARY_TX),
@@ -5072,7 +5241,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_account_path_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_ORDINARY_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_ORDINARY_TX),
@@ -5085,7 +5254,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_spending_path_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_SPENDING_PATH_IN_ORDINARY_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_SPENDING_PATH_IN_ORDINARY_TX),
@@ -5098,7 +5267,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_staking_path_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_STAKING_PATH_IN_ORDINARY_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_STAKING_PATH_IN_ORDINARY_TX),
@@ -5111,7 +5280,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Mint_path_in_Ordinary_Tx",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MINT_PATH_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MINT_PATH_IN_ORDINARY_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -5123,7 +5292,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Ordinary_account_path_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_ACCOUNT_PATH_IN_MULTISIG_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_ACCOUNT_PATH_IN_MULTISIG_TX),
@@ -5136,7 +5305,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_account_path_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_MULTISIG_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_MULTISIG_TX),
@@ -5149,7 +5318,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Ordinary_spending_path_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_SPENDING_PATH_IN_MULTISIG_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_SPENDING_PATH_IN_MULTISIG_TX),
@@ -5162,7 +5331,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Ordinary_staking_path_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_STAKING_PATH_IN_MULTISIG_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_STAKING_PATH_IN_MULTISIG_TX),
@@ -5175,7 +5344,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Mint_path_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MINT_PATH_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MINT_PATH_IN_MULTISIG_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -5187,7 +5356,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Pool_cold_path_in_Multisig_Tx",
         .init_hex = "0000000000000000012D964A0906000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_MULTISIG_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -5199,7 +5368,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Ordinary_account_path_in_Plutus_Tx",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_ACCOUNT_PATH_IN_PLUTUS_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_ACCOUNT_PATH_IN_PLUTUS_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -5211,7 +5380,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_account_path_in_Plutus_Tx",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_PLUTUS_TX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_PLUTUS_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -5223,7 +5392,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_account_path_in_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001010A",
+                    "01010100000000000001010001010A",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_POOL_REGISTRATION_OWNER_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_POOL_REGISTRATION_OWNER_TX),
@@ -5236,7 +5405,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Ordinary_spending_path_in_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001010A",
+                    "01010100000000000001010001010A",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_SPENDING_PATH_IN_POOL_REGISTRATION_OWNER_TX,
         .chunk_count = ARRAY_LEN(
@@ -5250,7 +5419,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_spending_path_in_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001010A",
+                    "01010100000000000001010001010A",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_SPENDING_PATH_IN_POOL_REGISTRATION_OWNER_TX,
         .chunk_count = ARRAY_LEN(
@@ -5264,7 +5433,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_staking_path_in_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001010A",
+                    "01010100000000000001010001010A",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_STAKING_PATH_IN_POOL_REGISTRATION_OWNER_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_STAKING_PATH_IN_POOL_REGISTRATION_OWNER_TX),
@@ -5277,7 +5446,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Mint_path_in_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001010A",
+                    "01010100000000000001010001010A",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MINT_PATH_IN_POOL_REGISTRATION_OWNER_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MINT_PATH_IN_POOL_REGISTRATION_OWNER_TX),
@@ -5290,7 +5459,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Pool_cold_path_in_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001010A",
+                    "01010100000000000001010001010A",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_POOL_REGISTRATION_OWNER_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_POOL_COLD_PATH_IN_POOL_REGISTRATION_OWNER_TX),
@@ -5303,7 +5472,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_account_path_in_Pool_Registration_Operator_Tx",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "010101000000000101000100ED",
+                    "0101010000000000000101000100ED",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_ACCOUNT_PATH_IN_POOL_REGISTRATION_OPERATOR_TX,
         .chunk_count = ARRAY_LEN(
@@ -5317,7 +5486,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_spending_path_in_Pool_Registration_Operator_Tx",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "010101000000000101000100ED",
+                    "0101010000000000000101000100ED",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_SPENDING_PATH_IN_POOL_REGISTRATION_OPERATOR_TX,
         .chunk_count = ARRAY_LEN(
@@ -5331,7 +5500,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Ordinary_staking_path_in_Pool_Registration_Operator_Tx",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "010101000000000101000100ED",
+                    "0101010000000000000101000100ED",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITNESS_ORDINARY_STAKING_PATH_IN_POOL_REGISTRATION_OPERATOR_TX,
         .chunk_count = ARRAY_LEN(
@@ -5345,7 +5514,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Multisig_staking_path_in_Pool_Registration_Operator_Tx",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "010101000000000101000100ED",
+                    "0101010000000000000101000100ED",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_WITNESS_MULTISIG_STAKING_PATH_IN_POOL_REGISTRATION_OPERATOR_TX,
         .chunk_count = ARRAY_LEN(
@@ -5359,7 +5528,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Mint_path_in_Pool_Registration_Operator_Tx",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "010101000000000101000100ED",
+                    "0101010000000000000101000100ED",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_MINT_PATH_IN_POOL_REGISTRATION_OPERATOR_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_MINT_PATH_IN_POOL_REGISTRATION_OPERATOR_TX),
@@ -5372,7 +5541,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_WITNESS] Plutus_tx_with_cvote_key_path_witness",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_WITNESS_PLUTUS_TX_WITH_CVOTE_KEY_PATH_WITNESS,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_WITNESS_PLUTUS_TX_WITH_CVOTE_KEY_PATH_WITNESS),
@@ -5385,7 +5554,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Input_and_change_output_account_mismatch",
         .init_hex = "0000000000000000012D964A0903000100020200000000010100000100000000"
-                    "010101000000000101000100BC",
+                    "0101010000000000000101000100BC",
         .chunks = SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_INPUT_AND_CHANGE_OUTPUT_ACCOUNT_MISMATCH,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_INPUT_AND_CHANGE_OUTPUT_ACCOUNT_MISMATCH),
@@ -5398,7 +5567,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Input_and_stake_deregistration_certificate_account_mismatch",
         .init_hex = "0000000000000000012D964A0903000100010200010000010100000100000000"
-                    "01010100000000010100020096",
+                    "010101000000000000010100020096",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_INPUT_AND_STAKE_DEREGISTRATION_CERTIFICATE_ACCOUNT_MISMATCH,
         .chunk_count = ARRAY_LEN(
@@ -5412,7 +5581,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Input_and_withdrawal_account_mismatch",
         .init_hex = "0000000000000000012D964A0903000100010200000001010100000100000000"
-                    "0101010000000001010002009D",
+                    "01010100000000000001010002009D",
         .chunks = SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_INPUT_AND_WITHDRAWAL_ACCOUNT_MISMATCH,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_INPUT_AND_WITHDRAWAL_ACCOUNT_MISMATCH),
@@ -5425,7 +5594,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Change_output_and_stake_deregistration_account_mismatch",
         .init_hex = "0000000000000000012D964A0903000100020200010000010100000100000000"
-                    "010101000000000101000200D3",
+                    "0101010000000000000101000200D3",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_CHANGE_OUTPUT_AND_STAKE_DEREGISTRATION_ACCOUNT_MISMATCH,
         .chunk_count = ARRAY_LEN(
@@ -5439,7 +5608,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Change_output_and_withdrawal_account_mismatch",
         .init_hex = "0000000000000000012D964A0903000100020200000001010100000100000000"
-                    "010101000000000101000200DA",
+                    "0101010000000000000101000200DA",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_CHANGE_OUTPUT_AND_WITHDRAWAL_ACCOUNT_MISMATCH,
         .chunk_count = ARRAY_LEN(
@@ -5454,7 +5623,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .name = "[DENY_SINGLE_ACCOUNT] "
                 "Stake_deregistration_certificate_and_withdrawal_account_mismatch",
         .init_hex = "0000000000000000012D964A0903000100010200010001010100000100000000"
-                    "010101000000000101000300B4",
+                    "0101010000000000000101000300B4",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_STAKE_DEREGISTRATION_CERTIFICATE_AND_WITHDRAWAL_ACCOUNT_MISMATCH,
         .chunk_count = ARRAY_LEN(
@@ -5468,7 +5637,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Byron_to_Shelley_transfer_input_account_mismatch",
         .init_hex = "0000000000000000012D964A0903000200010200000000010100000100000000"
-                    "010101000000000101000200A3",
+                    "0101010000000000000101000200A3",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_BYRON_TO_SHELLEY_TRANSFER_INPUT_ACCOUNT_MISMATCH,
         .chunk_count = ARRAY_LEN(
@@ -5482,7 +5651,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Byron_to_Shelley_transfer_output_account_mismatch",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010071",
+                    "010101000000000000010100010071",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_BYRON_TO_SHELLEY_TRANSFER_OUTPUT_ACCOUNT_MISMATCH,
         .chunk_count = ARRAY_LEN(
@@ -5496,7 +5665,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Deny_withdrawal_with_key_hash_in_ordinary_tx",
         .init_hex = "0000000000000000012D964A0903000100010200000001010100000100000000"
-                    "010101000000000101000100A4",
+                    "0101010000000000000101000100A4",
         .chunks = SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_DENY_WITHDRAWAL_WITH_KEY_HASH_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_DENY_WITHDRAWAL_WITH_KEY_HASH_IN_ORDINARY_TX),
@@ -5509,7 +5678,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Deny_withdrawal_with_script_hash_in_ordinary_tx",
         .init_hex = "0000000000000000012D964A0903000100010200000001010100000100000000"
-                    "010101000000000101000100A4",
+                    "0101010000000000000101000100A4",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_DENY_WITHDRAWAL_WITH_SCRIPT_HASH_IN_ORDINARY_TX,
         .chunk_count = ARRAY_LEN(
@@ -5523,7 +5692,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Deny_withdrawal_with_key_path_in_multisig_tx",
         .init_hex = "0000000000000000012D964A0906000100010200000001010100000100000000"
-                    "0101010000000001010000009D",
+                    "01010100000000000001010000009D",
         .chunks = SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_DENY_WITHDRAWAL_WITH_KEY_PATH_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_DENY_WITHDRAWAL_WITH_KEY_PATH_IN_MULTISIG_TX),
@@ -5536,7 +5705,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_SINGLE_ACCOUNT] Deny_withdrawal_with_key_hash_in_multisig_tx",
         .init_hex = "0000000000000000012D964A0906000100010200000001010100000100000000"
-                    "010101000000000101000000A4",
+                    "0101010000000000000101000000A4",
         .chunks = SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_DENY_WITHDRAWAL_WITH_KEY_HASH_IN_MULTISIG_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_SINGLE_ACCOUNT_DENY_WITHDRAWAL_WITH_KEY_HASH_IN_MULTISIG_TX),
@@ -5549,7 +5718,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_COLLATERAL_OUTPUT] Deny_collateral_output_with_byron_address",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "010201000000000101000100BC",
+                    "0102010000000000000101000100BC",
         .chunks = SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_DENY_COLLATERAL_OUTPUT_WITH_BYRON_ADDRESS,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_DENY_COLLATERAL_OUTPUT_WITH_BYRON_ADDRESS),
@@ -5562,7 +5731,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_COLLATERAL_OUTPUT] Collateral_output_with_datum_hash",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "010201000000000101000100DD",
+                    "0102010000000000000101000100DD",
         .chunks = SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_COLLATERAL_OUTPUT_WITH_DATUM_HASH,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_COLLATERAL_OUTPUT_WITH_DATUM_HASH),
@@ -5575,7 +5744,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_COLLATERAL_OUTPUT] Collateral_output_with_inline_datum",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "0102010000000001010001029F",
+                    "01020100000000000001010001029F",
         .chunks = SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_COLLATERAL_OUTPUT_WITH_INLINE_DATUM,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_COLLATERAL_OUTPUT_WITH_INLINE_DATUM),
@@ -5588,7 +5757,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_COLLATERAL_OUTPUT] Collateral_output_with_reference_script",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "010201000000000101000100D2",
+                    "0102010000000000000101000100D2",
         .chunks = SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_COLLATERAL_OUTPUT_WITH_REFERENCE_SCRIPT,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_COLLATERAL_OUTPUT_WITH_REFERENCE_SCRIPT),
@@ -5602,7 +5771,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .name =
             "[DENY_COLLATERAL_OUTPUT] Collateral_output_with_device_owned_script_payment_address",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "010201000000000101000100BC",
+                    "0102010000000000000101000100BC",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_COLLATERAL_OUTPUT_WITH_DEVICE_OWNED_SCRIPT_PAYMENT_ADDRESS,
         .chunk_count = ARRAY_LEN(
@@ -5616,7 +5785,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_COLLATERAL_OUTPUT] Deny_pool_registration_operator_with_datum_hash",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "01010100000000010100020147",
+                    "010101000000000000010100020147",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_COLLATERAL_OUTPUT_DENY_POOL_REGISTRATION_OPERATOR_WITH_DATUM_HASH,
         .chunk_count = ARRAY_LEN(
@@ -5630,7 +5799,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_MULTIASSET] Deny_tx_where_asset_groups_are_not_ordered",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "010101000000000101000100DD",
+                    "0101010000000000000101000100DD",
         .chunks = SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WHERE_ASSET_GROUPS_ARE_NOT_ORDERED,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WHERE_ASSET_GROUPS_ARE_NOT_ORDERED),
@@ -5643,7 +5812,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_MULTIASSET] Deny_tx_where_asset_groups_are_not_unique",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "010101000000000101000100DD",
+                    "0101010000000000000101000100DD",
         .chunks = SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WHERE_ASSET_GROUPS_ARE_NOT_UNIQUE,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WHERE_ASSET_GROUPS_ARE_NOT_UNIQUE),
@@ -5657,7 +5826,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .name = "[DENY_MULTIASSET] "
                 "Deny_tx_where_tokens_within_an_asset_group_are_not_ordered_alphabetical",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "010101000000000101000100BF",
+                    "0101010000000000000101000100BF",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WHERE_TOKENS_WITHIN_AN_ASSET_GROUP_ARE_NOT_ORDERED_ALPHABETICAL,
         .chunk_count = ARRAY_LEN(
@@ -5672,7 +5841,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .name =
             "[DENY_MULTIASSET] Deny_tx_where_tokens_within_an_asset_group_are_not_ordered_length",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "010101000000000101000100BD",
+                    "0101010000000000000101000100BD",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WHERE_TOKENS_WITHIN_AN_ASSET_GROUP_ARE_NOT_ORDERED_LENGTH,
         .chunk_count = ARRAY_LEN(
@@ -5686,7 +5855,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_MULTIASSET] Deny_tx_where_tokens_within_an_asset_group_are_not_unique",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "010101000000000101000100BF",
+                    "0101010000000000000101000100BF",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WHERE_TOKENS_WITHIN_AN_ASSET_GROUP_ARE_NOT_UNIQUE,
         .chunk_count = ARRAY_LEN(
@@ -5701,7 +5870,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .name = "[DENY_MULTIASSET] "
                 "Deny_tx_with_mint_fields_with_invalid_canonical_ordering_of_policies",
         .init_hex = "0000000000000000012D964A0903000100000200000000010100020100000000"
-                    "010101000000000101000100A7",
+                    "0101010000000000000101000100A7",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WITH_MINT_FIELDS_WITH_INVALID_CANONICAL_ORDERING_OF_POLICIES,
         .chunk_count = ARRAY_LEN(
@@ -5716,7 +5885,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .name = "[DENY_MULTIASSET] "
                 "Deny_tx_with_mint_fields_with_invalid_canonical_ordering_of_asset_names",
         .init_hex = "0000000000000000012D964A0903000100000200000000010100010100000000"
-                    "01010100000000010100010080",
+                    "010101000000000000010100010080",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WITH_MINT_FIELDS_WITH_INVALID_CANONICAL_ORDERING_OF_ASSET_NAMES,
         .chunk_count = ARRAY_LEN(
@@ -5730,7 +5899,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_MULTIASSET] Deny_tx_with_voter_with_zero_votes",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000001010100020089",
+                    "010101000000010000010100020089",
         .chunks = SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WITH_VOTER_WITH_ZERO_VOTES,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WITH_VOTER_WITH_ZERO_VOTES),
@@ -5743,7 +5912,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_MULTIASSET] Deny_tx_with_mint_token_group_with_zero_tokens",
         .init_hex = "0000000000000000012D964A0903000100000200000000010100010100000000"
-                    "01010100000000010100010052",
+                    "010101000000000000010100010052",
         .chunks = SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WITH_MINT_TOKEN_GROUP_WITH_ZERO_TOKENS,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WITH_MINT_TOKEN_GROUP_WITH_ZERO_TOKENS),
@@ -5756,7 +5925,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_MULTIASSET] Deny_tx_with_output_token_group_with_zero_tokens",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "0101010000000001010001009D",
+                    "01010100000000000001010001009D",
         .chunks = SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WITH_OUTPUT_TOKEN_GROUP_WITH_ZERO_TOKENS,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_MULTIASSET_DENY_TX_WITH_OUTPUT_TOKEN_GROUP_WITH_ZERO_TOKENS),
@@ -5769,7 +5938,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_VOTING] Ordinary_tx_with_committee_hot_key_hash_voter",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "010101000000010101000100EA",
+                    "0101010000000100000101000100EA",
         .chunks = SIGN_TX_SEGMENTS_DENY_VOTING_ORDINARY_TX_WITH_COMMITTEE_HOT_KEY_HASH_VOTER,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_VOTING_ORDINARY_TX_WITH_COMMITTEE_HOT_KEY_HASH_VOTER),
@@ -5782,7 +5951,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_VOTING] Plutus_tx_with_committee_key_path_as_staking_path",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "010101000000010101000200E3",
+                    "0101010000000100000101000200E3",
         .chunks = SIGN_TX_SEGMENTS_DENY_VOTING_PLUTUS_TX_WITH_COMMITTEE_KEY_PATH_AS_STAKING_PATH,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_VOTING_PLUTUS_TX_WITH_COMMITTEE_KEY_PATH_AS_STAKING_PATH),
@@ -5795,7 +5964,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_VOTING] Plutus_tx_with_drep_key_path_as_payment_path",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "010101000000010101000100AF",
+                    "0101010000000100000101000100AF",
         .chunks = SIGN_TX_SEGMENTS_DENY_VOTING_PLUTUS_TX_WITH_DREP_KEY_PATH_AS_PAYMENT_PATH,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_VOTING_PLUTUS_TX_WITH_DREP_KEY_PATH_AS_PAYMENT_PATH),
@@ -5808,7 +5977,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_VOTING] Plutus_tx_with_stake_pool_key_path_as_staking_path",
         .init_hex = "0000000000000000012D964A0907000100010200000000010100000100000000"
-                    "010101000000010101000200AF",
+                    "0101010000000100000101000200AF",
         .chunks = SIGN_TX_SEGMENTS_DENY_VOTING_PLUTUS_TX_WITH_STAKE_POOL_KEY_PATH_AS_STAKING_PATH,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_VOTING_PLUTUS_TX_WITH_STAKE_POOL_KEY_PATH_AS_STAKING_PATH),
@@ -5821,7 +5990,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_VOTING] Unrestricted_tx_with_committee_key_path_as_staking_path",
         .init_hex = "0000000000000000012D964A0909000100010200000000010100000100000000"
-                    "010101000000010101000200E3",
+                    "0101010000000100000101000200E3",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_VOTING_UNRESTRICTED_TX_WITH_COMMITTEE_KEY_PATH_AS_STAKING_PATH,
         .chunk_count = ARRAY_LEN(
@@ -5837,7 +6006,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_VOTING] Unrestricted_tx_with_drep_key_path_as_payment_path",
         .init_hex = "0000000000000000012D964A0909000100010200000000010100000100000000"
-                    "010101000000010101000100AF",
+                    "0101010000000100000101000100AF",
         .chunks = SIGN_TX_SEGMENTS_DENY_VOTING_UNRESTRICTED_TX_WITH_DREP_KEY_PATH_AS_PAYMENT_PATH,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_VOTING_UNRESTRICTED_TX_WITH_DREP_KEY_PATH_AS_PAYMENT_PATH),
@@ -5852,7 +6021,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_VOTING] Unrestricted_tx_with_stake_pool_key_path_as_staking_path",
         .init_hex = "0000000000000000012D964A0909000100010200000000010100000100000000"
-                    "010101000000010101000200AF",
+                    "0101010000000100000101000200AF",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_VOTING_UNRESTRICTED_TX_WITH_STAKE_POOL_KEY_PATH_AS_STAKING_PATH,
         .chunk_count = ARRAY_LEN(
@@ -5868,7 +6037,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_REQUIRED_SIGNER] Required_signer_path_pool_cold_key",
         .init_hex = "0000000000000000012D964A0907000100000200000000010100000100000001"
-                    "02010100000000010100020046",
+                    "020101000000000000010100020046",
         .chunks = SIGN_TX_SEGMENTS_DENY_REQUIRED_SIGNER_REQUIRED_SIGNER_PATH_POOL_COLD_KEY,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_REQUIRED_SIGNER_REQUIRED_SIGNER_PATH_POOL_COLD_KEY),
@@ -5881,7 +6050,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_REQUIRED_SIGNER] Required_signer_path_cvote_account",
         .init_hex = "0000000000000000012D964A0907000100000200000000010100000100000001"
-                    "02010100000000010100020042",
+                    "020101000000000000010100020042",
         .chunks = SIGN_TX_SEGMENTS_DENY_REQUIRED_SIGNER_REQUIRED_SIGNER_PATH_CVOTE_ACCOUNT,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_REQUIRED_SIGNER_REQUIRED_SIGNER_PATH_CVOTE_ACCOUNT),
@@ -5894,7 +6063,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_REQUIRED_SIGNER] Required_signer_path_cvote_key",
         .init_hex = "0000000000000000012D964A0907000100000200000000010100000100000001"
-                    "0201010000000001010002004A",
+                    "02010100000000000001010002004A",
         .chunks = SIGN_TX_SEGMENTS_DENY_REQUIRED_SIGNER_REQUIRED_SIGNER_PATH_CVOTE_KEY,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_REQUIRED_SIGNER_REQUIRED_SIGNER_PATH_CVOTE_KEY),
@@ -5907,7 +6076,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_REQUIRED_SIGNER] Required_signer_path_invalid_multisig_chain_type",
         .init_hex = "0000000000000000012D964A0907000100000200000000010100000100000001"
-                    "0201010000000001010002004A",
+                    "02010100000000000001010002004A",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_REQUIRED_SIGNER_REQUIRED_SIGNER_PATH_INVALID_MULTISIG_CHAIN_TYPE,
         .chunk_count = ARRAY_LEN(
@@ -5921,7 +6090,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_ID] Path_sent_in_for_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100020166",
+                    "010101000000000000010100020166",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_ID_PATH_SENT_IN_FOR_POOL_REGISTRATION_OWNER_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_ID_PATH_SENT_IN_FOR_POOL_REGISTRATION_OWNER_TX),
@@ -5934,7 +6103,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_ID] Hash_sent_in_for_Pool_Registration_Operator_Tx",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "0101010000000001010001016D",
+                    "01010100000000000001010001016D",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_ID_HASH_SENT_IN_FOR_POOL_REGISTRATION_OPERATOR_TX,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_ID_HASH_SENT_IN_FOR_POOL_REGISTRATION_OPERATOR_TX),
@@ -5947,7 +6116,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_OWNER] Device_owned_output_in_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "010101000000000101000201B9",
+                    "0101010000000000000101000201B9",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_POOL_OWNER_DEVICE_OWNED_OUTPUT_IN_POOL_REGISTRATION_OWNER_TX,
         .chunk_count = ARRAY_LEN(
@@ -5961,7 +6130,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_OWNER] Different_index",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "010101000000000101000201C7",
+                    "0101010000000000000101000201C7",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_OWNER_DIFFERENT_INDEX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_OWNER_DIFFERENT_INDEX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -5973,7 +6142,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_OWNER] Different_prefix",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "010101000000000101000201C7",
+                    "0101010000000000000101000201C7",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_OWNER_DIFFERENT_PREFIX,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_OWNER_DIFFERENT_PREFIX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -5985,7 +6154,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_OWNER] No_path_given",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "010101000000000101000201B1",
+                    "0101010000000000000101000201B1",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_OWNER_NO_PATH_GIVEN,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_OWNER_NO_PATH_GIVEN),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
@@ -5998,7 +6167,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
         .name = "[DENY_POOL_OWNER] "
                 "Pool_registration_owner_by_hash_staking_key_witness_denied_by_null_owner_path",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "010101000000000101000101B1",
+                    "0101010000000000000101000101B1",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_POOL_OWNER_POOL_REGISTRATION_OWNER_BY_HASH_STAKING_KEY_WITNESS_DENIED_BY_NULL_OWNER_PATH,
         .chunk_count = ARRAY_LEN(
@@ -6012,7 +6181,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_OWNER] Invalid_numerator_denominator_relationship",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010002016D",
+                    "01010100000000000001010002016D",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_OWNER_INVALID_NUMERATOR_DENOMINATOR_RELATIONSHIP,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_OWNER_INVALID_NUMERATOR_DENOMINATOR_RELATIONSHIP),
@@ -6025,7 +6194,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_OWNER] Pool_registration_owner_by_hash_staking_key_witness_denied",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100010174",
+                    "010101000000000000010100010174",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_POOL_OWNER_POOL_REGISTRATION_OWNER_BY_HASH_STAKING_KEY_WITNESS_DENIED,
         .chunk_count = ARRAY_LEN(
@@ -6039,11 +6208,94 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_OWNER] Non_staking_path_for_Pool_Registration_Owner_Tx",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001016D",
+                    "01010100000000000001010001016D",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_OWNER_NON_STAKING_PATH_FOR_POOL_REGISTRATION_OWNER_TX,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_POOL_OWNER_NON_STAKING_PATH_FOR_POOL_REGISTRATION_OWNER_TX),
         .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+    // Deny_proposal_deposit_return_account_is_base_address
+    {
+        .name = "[DENY_PROPOSAL] Deny_proposal_deposit_return_account_is_base_address",
+        .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
+                    "0101010000000000010101000100EC",
+        .chunks =
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_IS_BASE_ADDRESS,
+        .chunk_count = ARRAY_LEN(
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_IS_BASE_ADDRESS),
+        .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+    // Deny_proposal_deposit_return_account_on_foreign_network
+    {
+        .name = "[DENY_PROPOSAL] Deny_proposal_deposit_return_account_on_foreign_network",
+        .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
+                    "0101010000000000010101000100EC",
+        .chunks =
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_ON_FOREIGN_NETWORK,
+        .chunk_count = ARRAY_LEN(
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_ON_FOREIGN_NETWORK),
+        .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+    // Deny_proposal_deposit_return_account_is_payment_path
+    {
+        .name = "[DENY_PROPOSAL] Deny_proposal_deposit_return_account_is_payment_path",
+        .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
+                    "0101010000000000010101000100E4",
+        .chunks =
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_IS_PAYMENT_PATH,
+        .chunk_count = ARRAY_LEN(
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_DEPOSIT_RETURN_ACCOUNT_IS_PAYMENT_PATH),
+        .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+    // Deny_proposal_committee_member_added_with_staking_path
+    {
+        .name = "[DENY_PROPOSAL] Deny_proposal_committee_member_added_with_staking_path",
+        .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
+                    "01010100000000000101010001011F",
+        .chunks =
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_COMMITTEE_MEMBER_ADDED_WITH_STAKING_PATH,
+        .chunk_count = ARRAY_LEN(
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_COMMITTEE_MEMBER_ADDED_WITH_STAKING_PATH),
+        .expected_swo = SWO_SECURITY_CONDITION_NOT_SATISFIED,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+    // Deny_proposal_parameter_change_with_cost_models_key
+    {
+        .name = "[DENY_PROPOSAL] Deny_proposal_parameter_change_with_cost_models_key",
+        .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
+                    "0101010000000000010101000100FE",
+        .chunks =
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_PARAMETER_CHANGE_WITH_COST_MODELS_KEY,
+        .chunk_count = ARRAY_LEN(
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_PARAMETER_CHANGE_WITH_COST_MODELS_KEY),
+        .expected_swo = SWO_TX_PARSING_FAIL_PROPOSAL_PROCEDURES,
+        .expect_init_failure = false,
+        .skip_reason = NULL,
+    },
+    // Source: tests/standalone/input_files/signTx.py > proposalProceduresDenyTestCases >
+    // Deny_proposal_parameter_change_with_undefined_key
+    {
+        .name = "[DENY_PROPOSAL] Deny_proposal_parameter_change_with_undefined_key",
+        .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
+                    "0101010000000000010101000100FE",
+        .chunks = SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_PARAMETER_CHANGE_WITH_UNDEFINED_KEY,
+        .chunk_count = ARRAY_LEN(
+            SIGN_TX_SEGMENTS_DENY_PROPOSAL_DENY_PROPOSAL_PARAMETER_CHANGE_WITH_UNDEFINED_KEY),
+        .expected_swo = SWO_TX_PARSING_FAIL_PROPOSAL_PROCEDURES,
         .expect_init_failure = false,
         .skip_reason = NULL,
     },
@@ -6052,7 +6304,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_OUTPUT] Deny_pool_registration_operator_with_datum_hash",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "01010100000000010100020147",
+                    "010101000000000000010100020147",
         .chunks = SIGN_TX_SEGMENTS_DENY_OUTPUT_DENY_POOL_REGISTRATION_OPERATOR_WITH_DATUM_HASH,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_OUTPUT_DENY_POOL_REGISTRATION_OPERATOR_WITH_DATUM_HASH),
@@ -6065,7 +6317,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_OUTPUT] Deny_pool_registration_operator_with_forbidden_ref_script_denied",
         .init_hex = "0000000000000000012D964A0905000100010200010000010100000100000000"
-                    "01010100000000010100020158",
+                    "010101000000000000010100020158",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_OUTPUT_DENY_POOL_REGISTRATION_OPERATOR_WITH_FORBIDDEN_REF_SCRIPT_DENIED,
         .chunk_count = ARRAY_LEN(
@@ -6079,7 +6331,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_OUTPUT] Reward_address_key_third_party_output",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010063",
+                    "010101000000000000010100010063",
         .chunks = SIGN_TX_SEGMENTS_DENY_OUTPUT_REWARD_ADDRESS_KEY_THIRD_PARTY_OUTPUT,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_OUTPUT_REWARD_ADDRESS_KEY_THIRD_PARTY_OUTPUT),
@@ -6092,7 +6344,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_OUTPUT] Reward_address_script_third_party_output",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010063",
+                    "010101000000000000010100010063",
         .chunks = SIGN_TX_SEGMENTS_DENY_OUTPUT_REWARD_ADDRESS_SCRIPT_THIRD_PARTY_OUTPUT,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_OUTPUT_REWARD_ADDRESS_SCRIPT_THIRD_PARTY_OUTPUT),
@@ -6105,7 +6357,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_OUTPUT] Legacy_output_with_inline_datum",
         .init_hex = "0000000000000000012D964A0903000100010200000000010100000100000000"
-                    "01010100000000010100010086",
+                    "010101000000000000010100010086",
         .chunks = SIGN_TX_SEGMENTS_DENY_OUTPUT_LEGACY_OUTPUT_WITH_INLINE_DATUM,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_OUTPUT_LEGACY_OUTPUT_WITH_INLINE_DATUM),
         .expected_swo = SWO_TX_PARSING_FAIL_OUTPUTS,
@@ -6117,7 +6369,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CVOTE] CIP15_registration_with_delegations_rejected",
         .init_hex = "0000000000000000012D964A0903000100010200000000020101000001000000"
-                    "0001010100000000010100010071",
+                    "00010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_CVOTE_CIP15_REGISTRATION_WITH_DELEGATIONS_REJECTED,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CVOTE_CIP15_REGISTRATION_WITH_DELEGATIONS_REJECTED),
@@ -6130,7 +6382,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CVOTE] CIP36_registration_with_staking_key_as_raw_pubkey",
         .init_hex = "0000000000000000012D964A0903000100010200000000020101000001000000"
-                    "0001010100000000010100010071",
+                    "00010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_STAKING_KEY_AS_RAW_PUBKEY,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_STAKING_KEY_AS_RAW_PUBKEY),
@@ -6143,7 +6395,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CVOTE] CIP36_registration_with_invalid_format_byte",
         .init_hex = "0000000000000000012D964A0903000100010200000000020101000001000000"
-                    "0001010100000000010100010071",
+                    "00010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_INVALID_FORMAT_BYTE,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_INVALID_FORMAT_BYTE),
@@ -6156,7 +6408,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CVOTE] CIP36_registration_with_bad_staking_key_path",
         .init_hex = "0000000000000000012D964A0903000100010200000000020101000001000000"
-                    "0001010100000000010100010071",
+                    "00010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_BAD_STAKING_KEY_PATH,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_BAD_STAKING_KEY_PATH),
@@ -6169,7 +6421,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CVOTE] CIP36_registration_with_payment_destination_network_mismatch",
         .init_hex = "0000000000000000012D964A0903000100010200000000020101000001000000"
-                    "0001010100000000010100010071",
+                    "00010101000000000000010100010071",
         .chunks =
             SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_PAYMENT_DESTINATION_NETWORK_MISMATCH,
         .chunk_count = ARRAY_LEN(
@@ -6183,7 +6435,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CVOTE] CIP36_registration_with_vote_key_path_wrong_purpose",
         .init_hex = "0000000000000000012D964A0903000100010200000000020101000001000000"
-                    "0001010100000000010100010071",
+                    "00010101000000000000010100010071",
         .chunks = SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_VOTE_KEY_PATH_WRONG_PURPOSE,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_CVOTE_CIP36_REGISTRATION_WITH_VOTE_KEY_PATH_WRONG_PURPOSE),
@@ -6196,7 +6448,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT_INVALID] pool_registration_with_multiple_path_owners",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100020183",
+                    "010101000000000000010100020183",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_INVALID_POOL_REGISTRATION_WITH_MULTIPLE_PATH_OWNERS,
         .chunk_count = ARRAY_LEN(
             SIGN_TX_SEGMENTS_DENY_CERT_INVALID_POOL_REGISTRATION_WITH_MULTIPLE_PATH_OWNERS),
@@ -6209,7 +6461,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_CERT_INVALID] pool_registration_with_no_owners",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100000157",
+                    "010101000000000000010100000157",
         .chunks = SIGN_TX_SEGMENTS_DENY_CERT_INVALID_POOL_REGISTRATION_WITH_NO_OWNERS,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_CERT_INVALID_POOL_REGISTRATION_WITH_NO_OWNERS),
@@ -6222,7 +6474,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_METADATA] pool_metadata_url_too_long",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "010101000000000101000101C5",
+                    "0101010000000000000101000101C5",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_METADATA_POOL_METADATA_URL_TOO_LONG,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_METADATA_POOL_METADATA_URL_TOO_LONG),
         .expected_swo = SWO_TX_PARSING_FAIL_CERTIFICATES,
@@ -6234,7 +6486,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_METADATA] pool_metadata_invalid_url",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100010144",
+                    "010101000000000000010100010144",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_METADATA_POOL_METADATA_INVALID_URL,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_METADATA_POOL_METADATA_INVALID_URL),
         .expected_swo = SWO_TX_PARSING_FAIL_CERTIFICATES,
@@ -6246,7 +6498,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_METADATA] pool_metadata_invalid_hash_length",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001016C",
+                    "01010100000000000001010001016C",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_METADATA_POOL_METADATA_INVALID_HASH_LENGTH,
         .chunk_count =
             ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_METADATA_POOL_METADATA_INVALID_HASH_LENGTH),
@@ -6259,7 +6511,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_POOL_METADATA] pool_metadata_missing_hash",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "0101010000000001010001014D",
+                    "01010100000000000001010001014D",
         .chunks = SIGN_TX_SEGMENTS_DENY_POOL_METADATA_POOL_METADATA_MISSING_HASH,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_POOL_METADATA_POOL_METADATA_MISSING_HASH),
         .expected_swo = SWO_TX_PARSING_FAIL_CERTIFICATES,
@@ -6271,7 +6523,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_RELAY] SingleHostHostname_missing_dns",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100010168",
+                    "010101000000000000010100010168",
         .chunks = SIGN_TX_SEGMENTS_DENY_RELAY_SINGLEHOSTHOSTNAME_MISSING_DNS,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_RELAY_SINGLEHOSTHOSTNAME_MISSING_DNS),
         .expected_swo = SWO_TX_PARSING_FAIL_CERTIFICATES,
@@ -6283,7 +6535,7 @@ static const sign_tx_deny_fixture_t SIGN_TX_DENY_FIXTURES[] = {
     {
         .name = "[DENY_RELAY] MultiHost_missing_dns",
         .init_hex = "0000000000000000012D964A0904000100010200010000010100000100000000"
-                    "01010100000000010100010165",
+                    "010101000000000000010100010165",
         .chunks = SIGN_TX_SEGMENTS_DENY_RELAY_MULTIHOST_MISSING_DNS,
         .chunk_count = ARRAY_LEN(SIGN_TX_SEGMENTS_DENY_RELAY_MULTIHOST_MISSING_DNS),
         .expected_swo = SWO_TX_PARSING_FAIL_CERTIFICATES,

@@ -16,6 +16,7 @@ import ipaddress
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import IntEnum
+from typing import cast
 
 from ragger.bip import pack_derivation_path
 
@@ -101,6 +102,7 @@ class AddressParams:
 Mainnet = NetworkDesc(NetworkIds.MAINNET, ProtocolMagics.MAINNET)
 Testnet = NetworkDesc(NetworkIds.TESTNET, ProtocolMagics.TESTNET)
 Testnet_legacy = NetworkDesc(NetworkIds.TESTNET, ProtocolMagics.TESTNET_LEGACY)
+Testnet_preprod = NetworkDesc(NetworkIds.TESTNET, ProtocolMagics.TESTNET_PREPROD)
 FakeNet = NetworkDesc(NetworkIds.FAKE, ProtocolMagics.FAKE)
 
 
@@ -365,6 +367,131 @@ class VoterVotes:
     votes: list[Vote]
 
 
+class GovActionType(IntEnum):
+    PARAMETER_CHANGE = 0
+    HARD_FORK_INITIATION = 1
+    TREASURY_WITHDRAWALS = 2
+    NO_CONFIDENCE = 3
+    UPDATE_COMMITTEE = 4
+    NEW_CONSTITUTION = 5
+    INFO = 6
+
+
+@dataclass
+class NoConfidenceParams:
+    prevActionId: GovActionId | None
+
+
+@dataclass
+class HardForkInitiationParams:
+    prevActionId: GovActionId | None
+    protocolMajor: int
+    protocolMinor: int
+
+
+@dataclass
+class NewConstitutionParams:
+    prevActionId: GovActionId | None
+    constitutionAnchor: AnchorParams
+    guardrailsScriptHashHex: str | None
+
+
+@dataclass
+class CommitteeMemberAddition:
+    credential: CredentialParams
+    expirationEpoch: int
+
+
+@dataclass
+class UpdateCommitteeParams:
+    prevActionId: GovActionId | None
+    membersToRemove: list[CredentialParams]
+    membersToAdd: list[CommitteeMemberAddition]
+    thresholdNumerator: int
+    thresholdDenominator: int
+
+
+@dataclass
+class TreasuryWithdrawalEntry:
+    rewardAccount: PoolKey
+    coin: int
+
+
+@dataclass
+class TreasuryWithdrawalsParams:
+    withdrawals: list[TreasuryWithdrawalEntry]
+    guardrailsScriptHashHex: str | None
+
+
+# protocol_param_update: the wire shape of each CDDL key. Mirrors PARAM_FIELD_DESCRIPTORS in
+# src/transaction/tx_processing_proposal_procedures.c. cost_models (key 18) is deliberately
+# absent: the app rejects a proposal that includes it.
+PROTOCOL_PARAM_UPDATE_KINDS: dict[int, str] = {
+    0: "coin",  # minfeeA
+    1: "coin",  # minfeeB
+    2: "uint",  # max block body size
+    3: "uint",  # max transaction size
+    4: "uint",  # max block header size
+    5: "coin",  # key deposit
+    6: "coin",  # pool deposit
+    7: "uint",  # maximum epoch
+    8: "uint",  # n_opt
+    9: "ratio",  # pool pledge influence
+    10: "ratio",  # expansion rate
+    11: "ratio",  # treasury growth rate
+    16: "coin",  # min pool cost
+    17: "coin",  # ada per utxo byte
+    19: "ratio_list",  # ex_unit_prices: [mem_price, step_price]
+    20: "ex_units",  # max tx ex units
+    21: "ex_units",  # max block ex units
+    22: "uint",  # max value size
+    23: "uint",  # collateral percentage
+    24: "uint",  # max collateral inputs
+    25: "ratio_list",  # pool_voting_thresholds (5)
+    26: "ratio_list",  # drep_voting_thresholds (10)
+    27: "uint",  # min committee size
+    28: "uint",  # committee term limit
+    29: "uint",  # governance action validity period
+    30: "coin",  # governance action deposit
+    31: "coin",  # drep deposit
+    32: "uint",  # drep inactivity period
+    33: "ratio",  # minfee refscriptcoinsperbyte
+}
+
+
+@dataclass
+class ParameterChangeParams:
+    prevActionId: GovActionId | None
+    # CDDL key -> value, shaped per PROTOCOL_PARAM_UPDATE_KINDS:
+    #   coin/uint  -> int
+    #   ratio      -> (numerator, denominator)
+    #   ex_units   -> (memory, steps)
+    #   ratio_list -> [(numerator, denominator), ...]
+    protocolParamUpdate: dict[int, object]
+    guardrailsScriptHashHex: str | None
+    # Bits to set in the presence bitmask without serializing a matching value, so that a
+    # negative test can send a key the app must reject. The device validates the bitmask
+    # before it reads any value, so the absent values are never reached.
+    unsupportedBitmaskBits: int = 0
+
+
+@dataclass
+class ProposalProcedure:
+    deposit: int
+    rewardAccount: PoolKey
+    govAction: GovActionType
+    anchor: AnchorParams
+    govActionParams: (
+        NoConfidenceParams
+        | HardForkInitiationParams
+        | NewConstitutionParams
+        | UpdateCommitteeParams
+        | TreasuryWithdrawalsParams
+        | ParameterChangeParams
+        | None
+    ) = None
+
+
 @dataclass
 class StakeRegistrationParams:
     stakeCredential: CredentialParams
@@ -538,6 +665,7 @@ class Transaction:
     requiredSigners: list[RequiredSigner] = field(default_factory=list)
     referenceInputs: list[TxInput] = field(default_factory=list)
     votingProcedures: list[VoterVotes] = field(default_factory=list)
+    proposalProcedures: list[ProposalProcedure] = field(default_factory=list)
     auxiliaryData: TxAuxiliaryData | None = None
     validityIntervalStart: int | None = None
     scriptDataHash: str | None = None
@@ -884,6 +1012,7 @@ class TxInitParams:
     include_total_collateral: bool
     num_reference_inputs: int
     num_voters: int
+    num_proposal_procedures: int
     include_treasury: bool
     include_donation: bool
     num_witnesses: int
@@ -1098,6 +1227,7 @@ class CommandBuilder:
         data.append(FLAG_INCLUDED_YES if params.include_total_collateral else FLAG_INCLUDED_NO)
         data.extend(params.num_reference_inputs.to_bytes(2, "big"))
         data.extend(params.num_voters.to_bytes(2, "big"))
+        data.extend(params.num_proposal_procedures.to_bytes(2, "big"))
         data.append(FLAG_INCLUDED_YES if params.include_treasury else FLAG_INCLUDED_NO)
         data.append(FLAG_INCLUDED_YES if params.include_donation else FLAG_INCLUDED_NO)
         data.extend(params.num_witnesses.to_bytes(2, "big"))
@@ -1215,6 +1345,7 @@ class CommandBuilder:
             include_total_collateral=tx.totalCollateral is not None,
             num_reference_inputs=len(tx.referenceInputs),
             num_voters=len(tx.votingProcedures),
+            num_proposal_procedures=len(tx.proposalProcedures),
             include_treasury=tx.treasury is not None,
             include_donation=tx.donation is not None,
             num_witnesses=len(witness_paths),
@@ -1382,6 +1513,103 @@ class CommandBuilder:
                 # anchor inclusion flag
                 data.extend(self._serialize_anchor(vote.votingProcedure.anchor))
 
+        for proposal in tx.proposalProcedures:
+            data.extend(proposal.deposit.to_bytes(8, "big"))
+            data.extend(self._serialize_pool_key_reference(proposal.rewardAccount))
+            data.append(int(proposal.govAction))
+            if proposal.govAction == GovActionType.INFO:
+                pass  # no payload
+            elif proposal.govAction == GovActionType.NO_CONFIDENCE:
+                assert isinstance(proposal.govActionParams, NoConfidenceParams)
+                no_confidence = proposal.govActionParams
+                if no_confidence.prevActionId is None:
+                    data.append(FLAG_INCLUDED_NO)
+                else:
+                    data.append(FLAG_INCLUDED_YES)
+                    data.extend(bytes.fromhex(no_confidence.prevActionId.txHashHex))
+                    data.extend(no_confidence.prevActionId.govActionIndex.to_bytes(4, "big"))
+            elif proposal.govAction == GovActionType.HARD_FORK_INITIATION:
+                assert isinstance(proposal.govActionParams, HardForkInitiationParams)
+                hard_fork = proposal.govActionParams
+                if hard_fork.prevActionId is None:
+                    data.append(FLAG_INCLUDED_NO)
+                else:
+                    data.append(FLAG_INCLUDED_YES)
+                    data.extend(bytes.fromhex(hard_fork.prevActionId.txHashHex))
+                    data.extend(hard_fork.prevActionId.govActionIndex.to_bytes(4, "big"))
+                data.append(hard_fork.protocolMajor)
+                data.extend(hard_fork.protocolMinor.to_bytes(4, "big"))
+            elif proposal.govAction == GovActionType.NEW_CONSTITUTION:
+                assert isinstance(proposal.govActionParams, NewConstitutionParams)
+                new_constitution = proposal.govActionParams
+                if new_constitution.prevActionId is None:
+                    data.append(FLAG_INCLUDED_NO)
+                else:
+                    data.append(FLAG_INCLUDED_YES)
+                    data.extend(bytes.fromhex(new_constitution.prevActionId.txHashHex))
+                    data.extend(new_constitution.prevActionId.govActionIndex.to_bytes(4, "big"))
+                data.extend(self._serialize_anchor(new_constitution.constitutionAnchor))
+                if new_constitution.guardrailsScriptHashHex is None:
+                    data.append(FLAG_INCLUDED_NO)
+                else:
+                    data.append(FLAG_INCLUDED_YES)
+                    data.extend(bytes.fromhex(new_constitution.guardrailsScriptHashHex))
+            elif proposal.govAction == GovActionType.UPDATE_COMMITTEE:
+                assert isinstance(proposal.govActionParams, UpdateCommitteeParams)
+                update_committee = proposal.govActionParams
+                if update_committee.prevActionId is None:
+                    data.append(FLAG_INCLUDED_NO)
+                else:
+                    data.append(FLAG_INCLUDED_YES)
+                    data.extend(bytes.fromhex(update_committee.prevActionId.txHashHex))
+                    data.extend(update_committee.prevActionId.govActionIndex.to_bytes(4, "big"))
+                data.extend(len(update_committee.membersToRemove).to_bytes(2, "big"))
+                data.extend(len(update_committee.membersToAdd).to_bytes(2, "big"))
+                data.extend(update_committee.thresholdNumerator.to_bytes(8, "big"))
+                data.extend(update_committee.thresholdDenominator.to_bytes(8, "big"))
+                for removed_credential in update_committee.membersToRemove:
+                    data.extend(self._serialize_credential_inline(removed_credential))
+                for addition in update_committee.membersToAdd:
+                    data.extend(self._serialize_credential_inline(addition.credential))
+                    data.extend(addition.expirationEpoch.to_bytes(8, "big"))
+            elif proposal.govAction == GovActionType.TREASURY_WITHDRAWALS:
+                assert isinstance(proposal.govActionParams, TreasuryWithdrawalsParams)
+                treasury = proposal.govActionParams
+                if treasury.guardrailsScriptHashHex is None:
+                    data.append(FLAG_INCLUDED_NO)
+                else:
+                    data.append(FLAG_INCLUDED_YES)
+                    data.extend(bytes.fromhex(treasury.guardrailsScriptHashHex))
+                data.extend(len(treasury.withdrawals).to_bytes(2, "big"))
+                for treasury_withdrawal in treasury.withdrawals:
+                    data.extend(self._serialize_pool_key_reference(treasury_withdrawal.rewardAccount))
+                    data.extend(treasury_withdrawal.coin.to_bytes(8, "big"))
+            elif proposal.govAction == GovActionType.PARAMETER_CHANGE:
+                assert isinstance(proposal.govActionParams, ParameterChangeParams)
+                param_change = proposal.govActionParams
+                if param_change.prevActionId is None:
+                    data.append(FLAG_INCLUDED_NO)
+                else:
+                    data.append(FLAG_INCLUDED_YES)
+                    data.extend(bytes.fromhex(param_change.prevActionId.txHashHex))
+                    data.extend(param_change.prevActionId.govActionIndex.to_bytes(4, "big"))
+                # Bitmask of present protocol_param_update keys (bit N == CDDL key N),
+                # then the values themselves in ascending key order.
+                bitmask = 0
+                for cddl_key in param_change.protocolParamUpdate:
+                    bitmask |= 1 << cddl_key
+                bitmask |= param_change.unsupportedBitmaskBits
+                data.extend(bitmask.to_bytes(8, "big"))
+                if param_change.guardrailsScriptHashHex is None:
+                    data.append(FLAG_INCLUDED_NO)
+                else:
+                    data.append(FLAG_INCLUDED_YES)
+                    data.extend(bytes.fromhex(param_change.guardrailsScriptHashHex))
+                data.extend(self._serialize_protocol_param_update(param_change.protocolParamUpdate))
+            else:
+                raise ValueError(f"Unsupported gov action type for serialization: {proposal.govAction}")
+            data.extend(self._serialize_anchor(proposal.anchor))
+
         if tx.treasury is not None:
             data.extend(tx.treasury.to_bytes(8, "big"))
 
@@ -1483,6 +1711,32 @@ class CommandBuilder:
                 result.extend(pack_derivation_path(drep.keyValue))
             else:
                 result.extend(bytes.fromhex(drep.keyValue))
+        return bytes(result)
+
+    def _serialize_protocol_param_update(self, update: dict[int, object]) -> bytes:
+        """Serialize present protocol_param_update values in ascending CDDL key order.
+
+        Every value is a sequence of 8-byte big-endian words; how many depends on the key's
+        kind (see PROTOCOL_PARAM_UPDATE_KINDS). The device knows which keys are present from
+        the preceding bitmask, so no per-field key/length markers are needed.
+        """
+        result = bytearray()
+        for cddl_key in sorted(update):
+            kind = PROTOCOL_PARAM_UPDATE_KINDS[cddl_key]
+            value = update[cddl_key]
+            if kind in ("coin", "uint"):
+                words: list[int] = [int(cast(int, value))]
+            elif kind in ("ratio", "ex_units"):
+                first, second = cast("tuple[int, int]", value)
+                words = [int(first), int(second)]
+            elif kind == "ratio_list":
+                words = []
+                for numerator, denominator in cast("list[tuple[int, int]]", value):
+                    words.extend((int(numerator), int(denominator)))
+            else:
+                raise ValueError(f"Unknown protocol param kind: {kind}")
+            for word in words:
+                result.extend(word.to_bytes(8, "big"))
         return bytes(result)
 
     def _serialize_anchor(self, anchor: AnchorParams | None) -> bytes:

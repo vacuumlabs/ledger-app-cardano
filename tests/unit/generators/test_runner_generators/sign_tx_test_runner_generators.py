@@ -60,6 +60,11 @@ ERA_TEST_FILE_MAP: dict[str, tuple[str, str, str]] = {
         "test_sign_tx_conway_voting.c",
         "CONWAY_VOTING",
     ),
+    "conway_proposals": (
+        "test_sign_tx_fixtures_conway_proposals.h",
+        "test_sign_tx_conway_proposals.c",
+        "CONWAY_PROPOSALS",
+    ),
     "conway_without_certificates": (
         "test_sign_tx_fixtures_conway_without_certificates.h",
         "test_sign_tx_conway_without_certificates.c",
