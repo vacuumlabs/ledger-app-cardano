@@ -147,6 +147,10 @@ typedef struct {
             uint8_t *raw_tx;
             size_t raw_tx_current_length;  /// Actual received length so far
             warning_bits_t warning_bits;   /// Transaction warnings
+            /// Scratch copy of warning_bits used by the render pass so it cannot mutate
+            /// the canonical warnings; request-scoped so no stack address escapes into
+            /// processing_state (see tx_render_ui_chunk).
+            warning_bits_t render_run_warnings;
             uint16_t total_ui_pairs;
             uint16_t rendered_ui_pairs;  /// Number of pairs rendered so far (start of next chunk)
             bool streaming_mode;         /// True when using streaming NBGL API

@@ -1,0 +1,148 @@
+# libFuzzer dictionary for the Cardano Ledger app fuzzers.
+#
+# Tokens are byte sequences libFuzzer splices into inputs while mutating, so it
+# spends less time brute-forcing valid APDU framing / CBOR structure and more time
+# exercising the parsers. Format: optional `name=` then a C-quoted string with
+# \xHH escapes. Values come from src/apdu/dispatcher.h, src/cardano_constants.h
+# and src/addressUtils/bip44.h.
+
+# ---------------------------------------------------------------------------
+# APDU header
+# ---------------------------------------------------------------------------
+apdu_cla="\xd7"
+
+# INS codes (src/apdu/dispatcher.h)
+ins_get_version="\x00"
+ins_get_serial="\x01"
+ins_get_app_name="\x04"
+ins_get_public_key="\x10"
+ins_derive_address="\x11"
+ins_derive_native_script_hash="\x12"
+ins_sign_tx="\x21"
+ins_sign_opcert="\x22"
+ins_sign_cvote="\x23"
+ins_sign_msg="\x24"
+
+# P1 stage codes (per handler)
+p1_derive_address_return="\x01"
+p1_derive_address_display="\x02"
+p1_tx_sign_witness="\x0f"
+p1_tx_init="\x10"
+p1_tx_chunk="\x11"
+p1_tx_confirm="\x12"
+p1_tx_aux_data="\x13"
+p1_native_script_init="\x00"
+p1_native_script_start_complex="\x01"
+p1_native_script_add_simple="\x02"
+p1_native_script_finish="\x03"
+p1_sign_msg_init="\x01"
+p1_sign_msg_chunk="\x02"
+p1_sign_msg_confirm="\x03"
+p1_cvote_init="\x50"
+p1_cvote_chunk="\x51"
+p1_cvote_confirm="\x52"
+
+# P2 sub-stage codes
+p2_aux_data_init="\x36"
+p2_aux_data_delegation="\x37"
+
+# ---------------------------------------------------------------------------
+# BIP44 path elements (packed wire format: 1-byte count, then N * 4-byte BE)
+# ---------------------------------------------------------------------------
+path_len_2="\x02"
+path_len_3="\x03"
+path_len_4="\x04"
+path_len_5="\x05"
+
+# purposes (hardened, 4-byte big-endian) — src/addressUtils/bip44.h
+# 44'
+bip44_purpose_byron="\x80\x00\x00\x2c"
+# 1852'
+bip44_purpose_shelley="\x80\x00\x07\x3c"
+# 1853'
+bip44_purpose_pool_cold="\x80\x00\x07\x3d"
+# 1854'
+bip44_purpose_multisig="\x80\x00\x07\x3e"
+# 1855'
+bip44_purpose_mint="\x80\x00\x07\x3f"
+# 1694'
+bip44_purpose_cvote="\x80\x00\x06\x9e"
+
+# 1815'
+bip44_coin_type_ada="\x80\x00\x07\x17"
+# 0'
+bip44_account_0="\x80\x00\x00\x00"
+# 1'
+bip44_account_1="\x80\x00\x00\x01"
+# staking chain (non-hardened)
+bip44_chain_2="\x00\x00\x00\x02"
+bip44_index_0="\x00\x00\x00\x00"
+
+# ---------------------------------------------------------------------------
+# CBOR structural bytes (major types + length prefixes)
+# ---------------------------------------------------------------------------
+cbor_uint_0="\x00"
+cbor_uint_1="\x01"
+cbor_uint_23="\x17"
+cbor_uint8="\x18"
+cbor_uint16="\x19"
+cbor_uint32="\x1a"
+cbor_uint64="\x1b"
+cbor_negint="\x20"
+
+cbor_bytes_empty="\x40"
+cbor_bytes_len8="\x58"
+cbor_bytes_len16="\x59"
+cbor_bytes_len32="\x5a"
+
+cbor_text_empty="\x60"
+cbor_text_len8="\x78"
+cbor_text_len16="\x79"
+
+cbor_array_0="\x80"
+cbor_array_1="\x81"
+cbor_array_2="\x82"
+cbor_array_3="\x83"
+cbor_array_4="\x84"
+cbor_array_5="\x85"
+cbor_array_len8="\x98"
+cbor_array_len16="\x99"
+cbor_array_indef="\x9f"
+
+cbor_map_0="\xa0"
+cbor_map_1="\xa1"
+cbor_map_2="\xa2"
+cbor_map_3="\xa3"
+cbor_map_5="\xa5"
+cbor_map_len8="\xb8"
+cbor_map_indef="\xbf"
+
+cbor_tag="\xc0"
+cbor_tag_len8="\xd8"
+cbor_tag_258="\xd9\x01\x02"
+
+cbor_false="\xf4"
+cbor_true="\xf5"
+cbor_null="\xf6"
+cbor_break="\xff"
+
+# ---------------------------------------------------------------------------
+# Common Cardano byte-string length prefixes (0x58 + length)
+# ---------------------------------------------------------------------------
+# 28-byte key/script/pool hash
+cbor_hash28="\x58\x1c"
+# 29-byte reward account (1 header + 28 hash)
+cbor_reward_addr="\x58\x1d"
+# 32-byte tx hash / datum hash / VRF
+cbor_hash32="\x58\x20"
+# 57-byte base address (1 + 28 + 28)
+cbor_base_addr="\x58\x39"
+# 64-byte ed25519 signature
+cbor_signature="\x58\x40"
+
+# ---------------------------------------------------------------------------
+# Cardano constants
+# ---------------------------------------------------------------------------
+network_testnet="\x00"
+network_mainnet="\x01"
+protocol_magic_testnet_legacy="\x41\x70\x6a\xd7"

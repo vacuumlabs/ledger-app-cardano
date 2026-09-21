@@ -168,9 +168,9 @@ static const native_script_t SCRIPT_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0_C1 = {
                  .apdu_payload_length = sizeof(APDU_PAYLOAD_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0_C1),
              }}};
 
-static const native_script_t *CHILDREN_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0[] = {
-    (const native_script_t *) &SCRIPT_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0_C0,
-    (const native_script_t *) &SCRIPT_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0_C1,
+static const native_script_t* CHILDREN_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0[] = {
+    (const native_script_t*) &SCRIPT_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0_C0,
+    (const native_script_t*) &SCRIPT_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0_C1,
 };
 
 static const native_script_t SCRIPT_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0 = {
@@ -198,7 +198,7 @@ static const uint8_t EXPECTED_HASH_TC4_NATIVE_SCRIPT_ALL_SCRIPT_NO_SUBSCRIPTS[SC
 };
 
 // ALL (internal node): 0 children
-static const native_script_t *CHILDREN_TC4_NATIVE_SCRIPT_ALL_SCRIPT_NO_SUBSCRIPTS_C0[] = {NULL};
+static const native_script_t* CHILDREN_TC4_NATIVE_SCRIPT_ALL_SCRIPT_NO_SUBSCRIPTS_C0[] = {NULL};
 
 static const native_script_t SCRIPT_TC4_NATIVE_SCRIPT_ALL_SCRIPT_NO_SUBSCRIPTS_C0 = {
     .type = NATIVE_SCRIPT_TYPE_ALL,
@@ -253,9 +253,9 @@ static const native_script_t SCRIPT_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0_C1 = {
                  .apdu_payload_length = sizeof(APDU_PAYLOAD_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0_C1),
              }}};
 
-static const native_script_t *CHILDREN_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0[] = {
-    (const native_script_t *) &SCRIPT_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0_C0,
-    (const native_script_t *) &SCRIPT_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0_C1,
+static const native_script_t* CHILDREN_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0[] = {
+    (const native_script_t*) &SCRIPT_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0_C0,
+    (const native_script_t*) &SCRIPT_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0_C1,
 };
 
 static const native_script_t SCRIPT_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0 = {
@@ -283,7 +283,7 @@ static const uint8_t EXPECTED_HASH_TC6_NATIVE_SCRIPT_ANY_SCRIPT_NO_SUBSCRIPTS[SC
 };
 
 // ANY (internal node): 0 children
-static const native_script_t *CHILDREN_TC6_NATIVE_SCRIPT_ANY_SCRIPT_NO_SUBSCRIPTS_C0[] = {NULL};
+static const native_script_t* CHILDREN_TC6_NATIVE_SCRIPT_ANY_SCRIPT_NO_SUBSCRIPTS_C0[] = {NULL};
 
 static const native_script_t SCRIPT_TC6_NATIVE_SCRIPT_ANY_SCRIPT_NO_SUBSCRIPTS_C0 = {
     .type = NATIVE_SCRIPT_TYPE_ANY,
@@ -338,9 +338,9 @@ static const native_script_t SCRIPT_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0_C1 = {
                  .apdu_payload_length = sizeof(APDU_PAYLOAD_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0_C1),
              }}};
 
-static const native_script_t *CHILDREN_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0[] = {
-    (const native_script_t *) &SCRIPT_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0_C0,
-    (const native_script_t *) &SCRIPT_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0_C1,
+static const native_script_t* CHILDREN_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0[] = {
+    (const native_script_t*) &SCRIPT_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0_C0,
+    (const native_script_t*) &SCRIPT_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0_C1,
 };
 
 static const native_script_t SCRIPT_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0 = {
@@ -369,7 +369,7 @@ static const uint8_t
 };
 
 // N_OF_K (internal node): 0 of 0 children required
-static const native_script_t *CHILDREN_TC8_NATIVE_SCRIPT_N_OF_K_SCRIPT_NO_SUBSCRIPTS_C0[] = {NULL};
+static const native_script_t* CHILDREN_TC8_NATIVE_SCRIPT_N_OF_K_SCRIPT_NO_SUBSCRIPTS_C0[] = {NULL};
 
 static const native_script_t SCRIPT_TC8_NATIVE_SCRIPT_N_OF_K_SCRIPT_NO_SUBSCRIPTS_C0 = {
     .type = NATIVE_SCRIPT_TYPE_N_OF_K,
@@ -609,9 +609,9 @@ static const native_script_t SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_
                      sizeof(APDU_PAYLOAD_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1_C1),
              }}};
 
-static const native_script_t *CHILDREN_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1[] = {
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1_C0,
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1_C1,
+static const native_script_t* CHILDREN_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1[] = {
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1_C0,
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1_C1,
 };
 
 static const native_script_t SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1 = {
@@ -668,10 +668,10 @@ static const native_script_t SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_
                      sizeof(APDU_PAYLOAD_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2_C2),
              }}};
 
-static const native_script_t *CHILDREN_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2[] = {
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2_C0,
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2_C1,
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2_C2,
+static const native_script_t* CHILDREN_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2[] = {
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2_C0,
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2_C1,
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2_C2,
 };
 
 static const native_script_t SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2 = {
@@ -727,12 +727,12 @@ static const native_script_t SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_
                      sizeof(APDU_PAYLOAD_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C4),
              }}};
 
-static const native_script_t *CHILDREN_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0[] = {
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C0,
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1,
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2,
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C3,
-    (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C4,
+static const native_script_t* CHILDREN_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0[] = {
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C0,
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C1,
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C2,
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C3,
+    (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0_C4,
 };
 
 static const native_script_t SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0 = {
@@ -792,9 +792,9 @@ static const native_script_t SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C
                      sizeof(APDU_PAYLOAD_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0_C1),
              }}};
 
-static const native_script_t *CHILDREN_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0[] = {
-    (const native_script_t *) &SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0_C0,
-    (const native_script_t *) &SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0_C1,
+static const native_script_t* CHILDREN_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0[] = {
+    (const native_script_t*) &SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0_C0,
+    (const native_script_t*) &SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0_C1,
 };
 
 static const native_script_t SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0 = {
@@ -806,8 +806,8 @@ static const native_script_t SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C
                            .scripts_count = 2,
                        }}}}};
 
-static const native_script_t *CHILDREN_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0[] = {
-    (const native_script_t *) &SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0,
+static const native_script_t* CHILDREN_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0[] = {
+    (const native_script_t*) &SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0_C0,
 };
 
 static const native_script_t SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0 = {
@@ -839,7 +839,7 @@ static const uint8_t EXPECTED_HASH_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3[SC
 // ALL (internal node): 1 children
 // ANY (internal node): 1 children
 // N_OF_K (internal node): 0 of 0 children required
-static const native_script_t *CHILDREN_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0_C0[] = {
+static const native_script_t* CHILDREN_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0_C0[] = {
     NULL};
 
 static const native_script_t SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0_C0 = {
@@ -852,8 +852,8 @@ static const native_script_t SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C
                          .scripts_count = 0,
                      }}}}};
 
-static const native_script_t *CHILDREN_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0[] = {
-    (const native_script_t *) &SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0_C0,
+static const native_script_t* CHILDREN_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0[] = {
+    (const native_script_t*) &SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0_C0,
 };
 
 static const native_script_t SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0 = {
@@ -865,8 +865,8 @@ static const native_script_t SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C
                            .scripts_count = 1,
                        }}}}};
 
-static const native_script_t *CHILDREN_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0[] = {
-    (const native_script_t *) &SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0,
+static const native_script_t* CHILDREN_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0[] = {
+    (const native_script_t*) &SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0_C0,
 };
 
 static const native_script_t SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0 = {
@@ -878,8 +878,8 @@ static const native_script_t SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C
                            .scripts_count = 1,
                        }}}}};
 
-static const native_script_t *CHILDREN_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0[] = {
-    (const native_script_t *) &SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0,
+static const native_script_t* CHILDREN_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0[] = {
+    (const native_script_t*) &SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0_C0,
 };
 
 static const native_script_t SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0 = {
@@ -925,10 +925,8 @@ static const native_script_t SCRIPT_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OW
                      APDU_PAYLOAD_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY_C0_C0),
              }}};
 
-static const native_script_t *CHILDREN_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY_C0[] =
-    {
-        (const native_script_t
-             *) &SCRIPT_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY_C0_C0,
+static const native_script_t* CHILDREN_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY_C0[] = {
+    (const native_script_t*) &SCRIPT_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY_C0_C0,
 };
 
 static const native_script_t SCRIPT_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY_C0 = {
@@ -956,7 +954,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     // Source: tests/standalone/input_files/native_script.py > Native_script_PUBKEY_device_owned
     {
         .name = "Native_script_PUBKEY_device_owned",
-        .root_script = (const native_script_t *) &SCRIPT_TC0_NATIVE_SCRIPT_PUBKEY_DEVICE_OWNED_C0,
+        .root_script = (const native_script_t*) &SCRIPT_TC0_NATIVE_SCRIPT_PUBKEY_DEVICE_OWNED_C0,
         .expected_hash = EXPECTED_HASH_TC0_NATIVE_SCRIPT_PUBKEY_DEVICE_OWNED,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC0_NATIVE_SCRIPT_PUBKEY_DEVICE_OWNED,
         .finish_apdu_payload_length =
@@ -965,7 +963,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     // Source: tests/standalone/input_files/native_script.py > Native_script_PUBKEY_third_party
     {
         .name = "Native_script_PUBKEY_third_party",
-        .root_script = (const native_script_t *) &SCRIPT_TC1_NATIVE_SCRIPT_PUBKEY_THIRD_PARTY_C0,
+        .root_script = (const native_script_t*) &SCRIPT_TC1_NATIVE_SCRIPT_PUBKEY_THIRD_PARTY_C0,
         .expected_hash = EXPECTED_HASH_TC1_NATIVE_SCRIPT_PUBKEY_THIRD_PARTY,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC1_NATIVE_SCRIPT_PUBKEY_THIRD_PARTY,
         .finish_apdu_payload_length =
@@ -976,8 +974,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_PUBKEY_third_party_script_hash_displayed_as_policy_id",
         .root_script =
-            (const native_script_t
-                 *) &SCRIPT_TC2_NATIVE_SCRIPT_PUBKEY_THIRD_PARTY_SCRIPT_HASH_DISPLAYED_AS_POLICY_ID_C0,
+            (const native_script_t*) &SCRIPT_TC2_NATIVE_SCRIPT_PUBKEY_THIRD_PARTY_SCRIPT_HASH_DISPLAYED_AS_POLICY_ID_C0,
         .expected_hash =
             EXPECTED_HASH_TC2_NATIVE_SCRIPT_PUBKEY_THIRD_PARTY_SCRIPT_HASH_DISPLAYED_AS_POLICY_ID,
         .finish_apdu_payload =
@@ -988,7 +985,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     // Source: tests/standalone/input_files/native_script.py > Native_script_ALL_script
     {
         .name = "Native_script_ALL_script",
-        .root_script = (const native_script_t *) &SCRIPT_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0,
+        .root_script = (const native_script_t*) &SCRIPT_TC3_NATIVE_SCRIPT_ALL_SCRIPT_C0,
         .expected_hash = EXPECTED_HASH_TC3_NATIVE_SCRIPT_ALL_SCRIPT,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC3_NATIVE_SCRIPT_ALL_SCRIPT,
         .finish_apdu_payload_length = sizeof(FINISH_APDU_PAYLOAD_TC3_NATIVE_SCRIPT_ALL_SCRIPT),
@@ -998,7 +995,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_ALL_script_no_subscripts",
         .root_script =
-            (const native_script_t *) &SCRIPT_TC4_NATIVE_SCRIPT_ALL_SCRIPT_NO_SUBSCRIPTS_C0,
+            (const native_script_t*) &SCRIPT_TC4_NATIVE_SCRIPT_ALL_SCRIPT_NO_SUBSCRIPTS_C0,
         .expected_hash = EXPECTED_HASH_TC4_NATIVE_SCRIPT_ALL_SCRIPT_NO_SUBSCRIPTS,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC4_NATIVE_SCRIPT_ALL_SCRIPT_NO_SUBSCRIPTS,
         .finish_apdu_payload_length =
@@ -1007,7 +1004,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     // Source: tests/standalone/input_files/native_script.py > Native_script_ANY_script
     {
         .name = "Native_script_ANY_script",
-        .root_script = (const native_script_t *) &SCRIPT_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0,
+        .root_script = (const native_script_t*) &SCRIPT_TC5_NATIVE_SCRIPT_ANY_SCRIPT_C0,
         .expected_hash = EXPECTED_HASH_TC5_NATIVE_SCRIPT_ANY_SCRIPT,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC5_NATIVE_SCRIPT_ANY_SCRIPT,
         .finish_apdu_payload_length = sizeof(FINISH_APDU_PAYLOAD_TC5_NATIVE_SCRIPT_ANY_SCRIPT),
@@ -1017,7 +1014,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_ANY_script_no_subscripts",
         .root_script =
-            (const native_script_t *) &SCRIPT_TC6_NATIVE_SCRIPT_ANY_SCRIPT_NO_SUBSCRIPTS_C0,
+            (const native_script_t*) &SCRIPT_TC6_NATIVE_SCRIPT_ANY_SCRIPT_NO_SUBSCRIPTS_C0,
         .expected_hash = EXPECTED_HASH_TC6_NATIVE_SCRIPT_ANY_SCRIPT_NO_SUBSCRIPTS,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC6_NATIVE_SCRIPT_ANY_SCRIPT_NO_SUBSCRIPTS,
         .finish_apdu_payload_length =
@@ -1026,7 +1023,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     // Source: tests/standalone/input_files/native_script.py > Native_script_N_OF_K_script
     {
         .name = "Native_script_N_OF_K_script",
-        .root_script = (const native_script_t *) &SCRIPT_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0,
+        .root_script = (const native_script_t*) &SCRIPT_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT_C0,
         .expected_hash = EXPECTED_HASH_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT,
         .finish_apdu_payload_length = sizeof(FINISH_APDU_PAYLOAD_TC7_NATIVE_SCRIPT_N_OF_K_SCRIPT),
@@ -1036,7 +1033,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_N_OF_K_script_no_subscripts",
         .root_script =
-            (const native_script_t *) &SCRIPT_TC8_NATIVE_SCRIPT_N_OF_K_SCRIPT_NO_SUBSCRIPTS_C0,
+            (const native_script_t*) &SCRIPT_TC8_NATIVE_SCRIPT_N_OF_K_SCRIPT_NO_SUBSCRIPTS_C0,
         .expected_hash = EXPECTED_HASH_TC8_NATIVE_SCRIPT_N_OF_K_SCRIPT_NO_SUBSCRIPTS,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC8_NATIVE_SCRIPT_N_OF_K_SCRIPT_NO_SUBSCRIPTS,
         .finish_apdu_payload_length =
@@ -1045,7 +1042,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     // Source: tests/standalone/input_files/native_script.py > Native_script_INVALID_BEFORE_script
     {
         .name = "Native_script_INVALID_BEFORE_script",
-        .root_script = (const native_script_t *) &SCRIPT_TC9_NATIVE_SCRIPT_INVALID_BEFORE_SCRIPT_C0,
+        .root_script = (const native_script_t*) &SCRIPT_TC9_NATIVE_SCRIPT_INVALID_BEFORE_SCRIPT_C0,
         .expected_hash = EXPECTED_HASH_TC9_NATIVE_SCRIPT_INVALID_BEFORE_SCRIPT,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC9_NATIVE_SCRIPT_INVALID_BEFORE_SCRIPT,
         .finish_apdu_payload_length =
@@ -1056,8 +1053,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_INVALID_BEFORE_script_slot_is_a_big_number",
         .root_script =
-            (const native_script_t
-                 *) &SCRIPT_TC10_NATIVE_SCRIPT_INVALID_BEFORE_SCRIPT_SLOT_IS_A_BIG_NUMBER_C0,
+            (const native_script_t*) &SCRIPT_TC10_NATIVE_SCRIPT_INVALID_BEFORE_SCRIPT_SLOT_IS_A_BIG_NUMBER_C0,
         .expected_hash =
             EXPECTED_HASH_TC10_NATIVE_SCRIPT_INVALID_BEFORE_SCRIPT_SLOT_IS_A_BIG_NUMBER,
         .finish_apdu_payload =
@@ -1070,7 +1066,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_INVALID_HEREAFTER_script",
         .root_script =
-            (const native_script_t *) &SCRIPT_TC11_NATIVE_SCRIPT_INVALID_HEREAFTER_SCRIPT_C0,
+            (const native_script_t*) &SCRIPT_TC11_NATIVE_SCRIPT_INVALID_HEREAFTER_SCRIPT_C0,
         .expected_hash = EXPECTED_HASH_TC11_NATIVE_SCRIPT_INVALID_HEREAFTER_SCRIPT,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC11_NATIVE_SCRIPT_INVALID_HEREAFTER_SCRIPT,
         .finish_apdu_payload_length =
@@ -1081,8 +1077,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_INVALID_HEREAFTER_script_slot_is_a_big_number",
         .root_script =
-            (const native_script_t
-                 *) &SCRIPT_TC12_NATIVE_SCRIPT_INVALID_HEREAFTER_SCRIPT_SLOT_IS_A_BIG_NUMBER_C0,
+            (const native_script_t*) &SCRIPT_TC12_NATIVE_SCRIPT_INVALID_HEREAFTER_SCRIPT_SLOT_IS_A_BIG_NUMBER_C0,
         .expected_hash =
             EXPECTED_HASH_TC12_NATIVE_SCRIPT_INVALID_HEREAFTER_SCRIPT_SLOT_IS_A_BIG_NUMBER,
         .finish_apdu_payload =
@@ -1093,8 +1088,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     // Source: tests/standalone/input_files/native_script.py > Native_script_Nested_native_scripts
     {
         .name = "Native_script_Nested_native_scripts",
-        .root_script =
-            (const native_script_t *) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0,
+        .root_script = (const native_script_t*) &SCRIPT_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_C0,
         .expected_hash = EXPECTED_HASH_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC13_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS,
         .finish_apdu_payload_length =
@@ -1105,7 +1099,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_Nested native scripts #2",
         .root_script =
-            (const native_script_t *) &SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0,
+            (const native_script_t*) &SCRIPT_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2_C0,
         .expected_hash = EXPECTED_HASH_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC14_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_2,
         .finish_apdu_payload_length =
@@ -1116,7 +1110,7 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     {
         .name = "Native_script_Nested native scripts #3",
         .root_script =
-            (const native_script_t *) &SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0,
+            (const native_script_t*) &SCRIPT_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3_C0,
         .expected_hash = EXPECTED_HASH_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3,
         .finish_apdu_payload = FINISH_APDU_PAYLOAD_TC15_NATIVE_SCRIPT_NESTED_NATIVE_SCRIPTS_3,
         .finish_apdu_payload_length =
@@ -1126,8 +1120,8 @@ static const native_script_test_case_t NATIVE_SCRIPT_FIXTURES[] = {
     // Native_script_ALL_script_with_device_owned_pubkey
     {
         .name = "Native_script_ALL_script_with_device_owned_pubkey",
-        .root_script = (const native_script_t
-                            *) &SCRIPT_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY_C0,
+        .root_script =
+            (const native_script_t*) &SCRIPT_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY_C0,
         .expected_hash = EXPECTED_HASH_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY,
         .finish_apdu_payload =
             FINISH_APDU_PAYLOAD_TC16_NATIVE_SCRIPT_ALL_SCRIPT_WITH_DEVICE_OWNED_PUBKEY,
