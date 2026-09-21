@@ -162,7 +162,7 @@ inputs: dict[str, TxInput] = {
         "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
         "m/1852'/1815'/0'/0/0",
     ),
-    # Real CIP-113 registration + first-mint tx on Preview:
+    # CIP-113 registration + first-mint tx on Preview
     # b0d4869018467a262b3df341f07350a86a38f08431041747f735d8712badf873
     "utxoCip113PayerInput": TxInput(
         "5aad0a889a6368408f53da7045e3fdb2a7f33c608a8a18ba5f46ad2a269be946",
@@ -180,7 +180,7 @@ inputs: dict[str, TxInput] = {
         "61fae36e28a62a65496907c9660da9cf5d27fa0e9054a04581e1d8a087fbd93e",
         outputIndex=2,
     ),
-    # Real CIP-113 transfer tx on Preview (spends the smart wallet output above):
+    # CIP-113 transfer tx on Preview (spends the smart wallet output above)
     # b2969bfcafbfe8ee2f9731d8fca765e1b3c94d8911d5774ae4a94bc38945f4f5
     "utxoCip113PayerInput2": TxInput(
         "59c71072f41419214dafbf2ed9dc29ee2525bbe4e798241c989cd5ef423631ed",
@@ -203,6 +203,8 @@ inputs: dict[str, TxInput] = {
         "b0d4869018467a262b3df341f07350a86a38f08431041747f735d8712badf873",
         outputIndex=2,
     ),
+    # CIP-113 freeze-test wipe tx on Preview
+    # 47dc49961f8eb20324ae4f35a47baf33b7cdb485616cc4d481d4f71df637c4a4
     "utxoCip113FreezeTestSmartWalletInput": TxInput(
         "684f12a8643b476eb41191fcf1958d927be5dbbd47e77f1a1d2e19b862a694a1",
         outputIndex=0,
@@ -481,8 +483,8 @@ destinations: dict[str, TxOutputDestination] = {
     ),
     "cip113FreezeTestPayerWallet": TxOutputDestination(
         TxOutputDestinationType.THIRD_PARTY,
-        # plain wallet address of the wallet that both holds the freeze-test smart
-        # wallet (same staking key) and pays fees/collateral/signs this tx
+        # plain wallet address; same staking key as the freeze-test smart wallet,
+        # pays fees/collateral and signs
         ThirdPartyAddressParams(
             "002f7e08ff7f07192c54a25c0fe963eaab5b1e8f98df5926bab5b6446af905b52a6feec0e079e94266d415c4eeb26a7d53092385896c446574"
         ),
@@ -490,7 +492,7 @@ destinations: dict[str, TxOutputDestination] = {
     "cip113FreezeTestSmartWallet": TxOutputDestination(
         TxOutputDestinationType.THIRD_PARTY,
         # programmableLogicBase payment script + the same wallet's staking key;
-        # this is the UTxO that gets wiped (seized + burned) by ThirdPartyAct below
+        # wiped (seized + burned) by ThirdPartyAct
         ThirdPartyAddressParams(
             "10f2182b00a37bd746e20575c9af01ab31312213514cd31e872e0a2a3ef905b52a6feec0e079e94266d415c4eeb26a7d53092385896c446574"
         ),
@@ -6732,19 +6734,18 @@ testsBabbage: list[SignTxTestCase] = [
     ),
 ]
 
-# Real-world transactions from the CIP-113 (programmable tokens) reference flow on
-# Preview testnet, see CIPs/CIP-0113/example-registration-and-mint-tx.md. These are
-# grouped separately from testsBabbage/testsConwayWithoutCertificates because the tx
-# bodies only use Babbage-era CDDL fields, but the real on-chain transactions require
-# Conway (their witness sets carry PlutusV3 scripts, unrepresented in the tx body the
-# device parses).
+# ==========================================
+# testsProgrammableTokens
+# Real CIP-113 (programmable tokens) transactions from Preview, kept apart from
+# testsBabbage/testsConwayWithoutCertificates: the tx bodies use Babbage-era fields
+# only, while the on-chain txs need Conway (PlutusV3 scripts live in the witness
+# set, which the device never parses)
+# ==========================================
 testsProgrammableTokens: list[SignTxTestCase] = [
     SignTxTestCase(
         name="Plutus_tx_cip113_style_registration_and_first_mint",
-        # Mirrors a real CIP-113 registration + first-mint transaction on Preview
-        # (tx b0d4869018467a262b3df341f07350a86a38f08431041747f735d8712badf873)
-        # that registers a new programmable token in the registry and mints it
-        # straight into the token's smart wallet.
+        # CIP-113 registration + first mint: registers a new programmable token in
+        # the registry and mints it into the token's smart wallet
         tx=Transaction(
             network=Testnet,
             inputs=[
@@ -6763,6 +6764,8 @@ testsProgrammableTokens: list[SignTxTestCase] = [
                         )
                     ],
                 ),
+                # registry directory linked list: predecessor node (head sentinel),
+                # "next" repointed to the registered token
                 TxOutputBabbage(
                     destinations["cip113Registry"],
                     1236970,
@@ -6777,6 +6780,7 @@ testsProgrammableTokens: list[SignTxTestCase] = [
                         )
                     ],
                 ),
+                # registry directory linked list: new node, keyed by the token's policy id
                 TxOutputBabbage(
                     destinations["cip113Registry"],
                     1736930,
@@ -6848,10 +6852,8 @@ testsProgrammableTokens: list[SignTxTestCase] = [
     ),
     SignTxTestCase(
         name="Plutus_tx_cip113_style_transfer_between_smart_wallets",
-        # Mirrors a real CIP-113 TransferAct transaction on Preview
-        # (tx b2969bfcafbfe8ee2f9731d8fca765e1b3c94d8911d5774ae4a94bc38945f4f5)
-        # that transfers a programmable token between two different smart
-        # wallets, splitting change and payment.
+        # CIP-113 TransferAct: moves a programmable token between two smart wallets,
+        # splitting change and payment
         tx=Transaction(
             network=Testnet,
             inputs=[
@@ -6935,10 +6937,8 @@ testsProgrammableTokens: list[SignTxTestCase] = [
     ),
     SignTxTestCase(
         name="Plutus_tx_cip113_style_thirdpartyact_wipe",
-        # Mirrors a real CIP-113 "freeze-test" transaction on Preview
-        # (tx 47dc49961f8eb20324ae4f35a47baf33b7cdb485616cc4d481d4f71df637c4a4)
-        # that invokes ThirdPartyAct to wipe (seize + burn) all of a smart wallet's
-        # holdings of a "freeze-test" token.
+        # CIP-113 ThirdPartyAct: wipes (seizes + burns) a smart wallet's whole
+        # freeze-test token balance
         tx=Transaction(
             network=Testnet,
             inputs=[
