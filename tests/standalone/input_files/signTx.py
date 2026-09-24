@@ -222,6 +222,22 @@ inputs: dict[str, TxInput] = {
         "684f12a8643b476eb41191fcf1958d927be5dbbd47e77f1a1d2e19b862a694a1",
         outputIndex=2,
     ),
+    # Synthetic (non-chain) CIP-113 inputs. They reuse the dummy transaction id
+    # already used by utxoShelley/utxoNoPath but pick distinct output indices, so
+    # that a synthetic transaction can spend several different UTxOs and reference
+    # further ones without ever repeating the same outpoint.
+    "utxoCip113SyntheticSmartWalletInput": TxInput(
+        "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+        outputIndex=1,
+    ),
+    "utxoCip113SyntheticRefInput2": TxInput(
+        "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+        outputIndex=2,
+    ),
+    "utxoCip113SyntheticRefInput3": TxInput(
+        "3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+        outputIndex=3,
+    ),
 }
 
 destinations: dict[str, TxOutputDestination] = {
@@ -496,6 +512,24 @@ destinations: dict[str, TxOutputDestination] = {
         ThirdPartyAddressParams(
             "10f2182b00a37bd746e20575c9af01ab31312213514cd31e872e0a2a3ef905b52a6feec0e079e94266d415c4eeb26a7d53092385896c446574"
         ),
+    ),
+    # Synthetic (non-chain) counterparts of the CIP-113 address shapes above, built
+    # from script/key hashes already used elsewhere in this file. The first smart
+    # wallet is the existing externalShelleyBaseScripthashKeyhashMainnet entry.
+    "cip113SyntheticRecipientSmartWallet": TxOutputDestination(
+        TxOutputDestinationType.THIRD_PARTY,
+        # Same synthetic programmable-logic payment script as
+        # externalShelleyBaseScripthashKeyhashMainnet, but with the staking key hash
+        # of internalBaseWithStakingKeyHash, i.e. a second, different smart wallet.
+        ThirdPartyAddressParams(
+            "115e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277"
+        ),
+    ),
+    "cip113SyntheticRegistry": TxOutputDestination(
+        TxOutputDestinationType.THIRD_PARTY,
+        # Enterprise script address (Mainnet) standing in for the CIP-113 registry;
+        # reuses the withdrawal script hash from the Babbage unrestricted tests.
+        ThirdPartyAddressParams("7129fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd"),
     ),
 }
 
@@ -7003,6 +7037,271 @@ testsProgrammableTokens: list[SignTxTestCase] = [
                 Witness(
                     path="m/1852'/1815'/0'/0/0",
                     witnessSignatureHex="c3f8cccfe793744f4cfb56309a304d0e661ad8456a6637daee9be51ddade8d6f2ff3a09cbceed21b71ba3a3ab415ad43c3074c056a3516b5c6bbdf63ec93ee03",
+                ),
+            ),
+        ),
+    ),
+    # ---------------------------------------------------------------------------
+    # Synthetic counterparts of the three real Preview transactions above. They keep
+    # the CIP-113 tx shapes (script-payment/key-staking smart wallets, inline datums,
+    # registry NFT, mint/burn, script-hash withdrawals, reference inputs, collateral
+    # return + total collateral) but are built entirely from the dummy inputs,
+    # addresses, policy IDs and hashes already used elsewhere in this file. They run
+    # on Mainnet so no network warning screen is involved, and each one keeps
+    # collateral inputs, total collateral and a script data hash so that no Plutus
+    # warning bit is raised either.
+    # ---------------------------------------------------------------------------
+    SignTxTestCase(
+        name="Sign_tx_cip113_synthetic_mint_to_smart_wallet",
+        # Registration/first-mint shape: mint a programmable token straight into its
+        # smart wallet, with change back to the device.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[
+                TxOutputBabbage(
+                    destinations["externalShelleyBaseScripthashKeyhashMainnet"],
+                    1206800,
+                    datum=Datum(DatumType.INLINE, "d87980"),
+                    tokenBundle=[
+                        AssetGroup(
+                            "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+                            [Token("74657374436f696e", 1000000)],
+                        )
+                    ],
+                ),
+                outputs["internalBaseWithStakingPathMap"],
+            ],
+            fee=463085,
+            ttl=None,
+            mint=[
+                AssetGroup(
+                    "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+                    [Token("74657374436f696e", 1000000)],
+                )
+            ],
+            collateralInputs=[inputs["utxoShelley"]],
+            requiredSigners=[
+                RequiredSigner(
+                    TxRequiredSignerType.HASH,
+                    "fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a",
+                )
+            ],
+            referenceInputs=[inputs["utxoCip113SyntheticRefInput2"]],
+            scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            collateralOutput=TxOutputAlonzo(destinations["externalShelleyBaseKeyhashKeyhash"], 492017403),
+            totalCollateral=694628,
+        ),
+        signingMode=TransactionSigningMode.PLUTUS,
+        options=True,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="aa00d90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182a3005839115e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e01821a00126a10a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e1a000f4240028201d81843d87980a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca793021a000710ed09a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e1a000f42400b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000ed9010281581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a10825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b091a1d5396fb111a000a996412d90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="49e79d9da13c7f8fb78fea0b504d7257089595decf547e22943a1be11492c542",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="92c571cbcd9217075e3fbc3d4d089358e83ba9fd466882e125717bc2f85641435ae4839fa3cf1c1e3f0b8bd0d200edafebda64588957a6865a9d7a59b44aba0f",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Sign_tx_cip113_synthetic_transfer_between_smart_wallets",
+        # TransferAct shape: a script-controlled smart wallet input is split between
+        # the sender's own smart wallet and a second one, with two script-hash
+        # withdrawals of zero standing in for the programmable-logic scripts.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"], inputs["utxoCip113SyntheticSmartWalletInput"]],
+            outputs=[
+                TxOutputBabbage(
+                    destinations["externalShelleyBaseScripthashKeyhashMainnet"],
+                    1206800,
+                    datum=Datum(DatumType.INLINE, "d87980"),
+                    tokenBundle=[
+                        AssetGroup(
+                            "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+                            [Token("74657374436f696e", 990000)],
+                        )
+                    ],
+                ),
+                TxOutputBabbage(
+                    destinations["cip113SyntheticRecipientSmartWallet"],
+                    1198180,
+                    datum=Datum(DatumType.INLINE, "d87980"),
+                    tokenBundle=[
+                        AssetGroup(
+                            "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+                            [Token("74657374436f696e", 10000)],
+                        )
+                    ],
+                ),
+                outputs["internalBaseWithStakingPathMap"],
+            ],
+            fee=482972,
+            ttl=None,
+            withdrawals=[
+                Withdrawal(
+                    CredentialParams(
+                        CredentialParamsType.SCRIPT_HASH,
+                        "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                    ),
+                    0,
+                ),
+                Withdrawal(
+                    CredentialParams(
+                        CredentialParamsType.SCRIPT_HASH,
+                        "5e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d",
+                    ),
+                    0,
+                ),
+            ],
+            collateralInputs=[inputs["utxoShelley"]],
+            requiredSigners=[
+                RequiredSigner(
+                    TxRequiredSignerType.HASH,
+                    "2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e",
+                )
+            ],
+            referenceInputs=[
+                inputs["utxoCip113SyntheticRefInput2"],
+                inputs["utxoCip113SyntheticRefInput3"],
+            ],
+            scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            collateralOutput=TxOutputAlonzo(destinations["externalShelleyBaseKeyhashKeyhash"], 486731566),
+            totalCollateral=724458,
+        ),
+        signingMode=TransactionSigningMode.PLUTUS,
+        options=True,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="aa00d90102828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7008258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7010183a3005839115e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e01821a00126a10a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e1a000f1b30028201d81843d87980a3005839115e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b427701821a00124864a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e192710028201d81843d87980a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca793021a00075e9c05a2581df129fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd00581df15e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d000b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000ed9010281581c2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e10825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b091a1d02ef2e111a000b0dea12d90102828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7028258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b703"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="df5d2553a1dfca9f9376132a03a2909851efbd6ce87fe6e4a7cf0c86b29ff8b3",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="db40fec174a6c236c0a42bc87b50511ca78844351761b61705382b8f630b8db6cac0ba63370b93f67a86e8f823c27be4c91ccacf7ac2eef3b57ba93df505e103",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Sign_tx_cip113_synthetic_registry_node_output",
+        # Registry-node shape: an enterprise script output carrying the registry node
+        # NFT (asset name = the registered policy ID) and a constructor inline datum.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"]],
+            outputs=[
+                TxOutputBabbage(
+                    destinations["cip113SyntheticRegistry"],
+                    1736930,
+                    datum=Datum(
+                        DatumType.INLINE,
+                        "d8799f581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425"
+                        "581c29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd40ff",
+                    ),
+                    tokenBundle=[
+                        AssetGroup(
+                            "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                            [Token("0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425", 1)],
+                        )
+                    ],
+                ),
+                outputs["internalBaseWithStakingPathMap"],
+            ],
+            fee=463085,
+            ttl=None,
+            mint=[
+                AssetGroup(
+                    "95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39",
+                    [Token("0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425", 1)],
+                )
+            ],
+            collateralInputs=[inputs["utxoShelley"]],
+            referenceInputs=[inputs["utxoCip113SyntheticRefInput2"]],
+            scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            collateralOutput=TxOutputAlonzo(destinations["externalShelleyBaseKeyhashKeyhash"], 492017403),
+            totalCollateral=694628,
+        ),
+        signingMode=TransactionSigningMode.PLUTUS,
+        options=True,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="a900d90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000182a300581d7129fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd01821a001a80e2a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c42501028201d8185841d8799f581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425581c29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd40ffa20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca793021a000710ed09a1581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425010b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70010825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b091a1d5396fb111a000a996412d90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="3a20c5ab653c79c3f95c6dc8c9522ac1e25eecf63f387dbe7c1c7039e73e2865",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="f8eb2f5a800f0d0335f79cdb159feec2e52f870005bd3f26725086e541c0d9e556c645e3b6f856f57860d08585407110403a9bc191b6e12a449fdb4880856c04",
+                ),
+            ),
+        ),
+    ),
+    SignTxTestCase(
+        name="Sign_tx_cip113_synthetic_thirdpartyact_wipe",
+        # ThirdPartyAct shape: a seized smart wallet input whose whole token balance
+        # is burned (negative mint), leaving only lovelace to be paid out.
+        tx=Transaction(
+            network=Mainnet,
+            inputs=[inputs["utxoShelley"], inputs["utxoCip113SyntheticSmartWalletInput"]],
+            outputs=[
+                TxOutputAlonzo(destinations["externalShelleyBaseKeyhashKeyhash"], 1000000),
+                # The seized smart wallet keeps its inline datum but holds no tokens
+                # any more, because the whole balance is burned by the negative mint.
+                TxOutputBabbage(
+                    destinations["externalShelleyBaseScripthashKeyhashMainnet"],
+                    1224040,
+                    datum=Datum(DatumType.INLINE, "d87980"),
+                ),
+                outputs["internalBaseWithStakingPathMap"],
+            ],
+            fee=694637,
+            ttl=None,
+            withdrawals=[
+                Withdrawal(
+                    CredentialParams(
+                        CredentialParamsType.SCRIPT_HASH,
+                        "29fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd",
+                    ),
+                    0,
+                )
+            ],
+            mint=[
+                AssetGroup(
+                    "0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425",
+                    [Token("74657374436f696e", -1000000)],
+                )
+            ],
+            collateralInputs=[inputs["utxoShelley"]],
+            requiredSigners=[
+                RequiredSigner(
+                    TxRequiredSignerType.HASH,
+                    "fea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a",
+                )
+            ],
+            referenceInputs=[inputs["utxoCip113SyntheticRefInput2"]],
+            scriptDataHash="3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7",
+            collateralOutput=TxOutputAlonzo(destinations["externalShelleyBaseKeyhashKeyhash"], 4352988),
+            # 150 % of the fee, matching the collateral ratio used by the real
+            # CIP-113 transactions above.
+            totalCollateral=1041956,
+        ),
+        signingMode=TransactionSigningMode.PLUTUS,
+        options=True,
+        unit_test_expect=SignTxUnitTestExpect(
+            txBodyHex="ab00d90102828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7008258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7010183825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b091a000f4240a3005839115e2f080eb93bad86d401545e0ce5f2221096d6477e11e6643922fa8d2ed495234dc0d667c1316ff84e572310e265edb31330448b36b7179e011a0012ad68028201d81843d87980a20058390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c011a006ca793021a000a996d05a1581df129fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fd0009a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e3a000f423f0b58203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70dd90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000ed9010281581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a10825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b091a00426bdc111a000fe62412d90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702"
+        ),
+        ragger_expect=SignTxRaggerExpect(
+            txHashHex="34cf226e0c4ec4a5d22c0a9873d6b375645f83252d07f255c1d898b7affd9204",
+            witnesses=(
+                Witness(
+                    path="m/1852'/1815'/0'/0/0",
+                    witnessSignatureHex="201382131125aeca9c5fc3312d0c66e2f6972d03a938db63d9cbba838818e7b9984f8b0fe2538bf9b12532fa395fcc0cb66a77c5abec59b935a6cf56b267ac02",
                 ),
             ),
         ),
